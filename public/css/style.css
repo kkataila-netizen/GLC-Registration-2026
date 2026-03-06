@@ -783,6 +783,10 @@ tr:hover td {
   min-height: calc(100vh - 56px);
 }
 
+.admin-gate[hidden] {
+  display: none;
+}
+
 .admin-gate__card {
   max-width: 380px;
   margin: 0 auto;
