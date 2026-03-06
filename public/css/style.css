@@ -625,21 +625,46 @@ tr:hover td {
 .session-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1rem;
 }
 
 .session-card {
-  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   cursor: pointer;
-  padding: 1rem 0;
-  transition: background 0.1s;
+  padding: 1.25rem 1.5rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
 }
 
 .session-card:hover {
-  background: var(--primary-light);
-  margin: 0 -1rem;
-  padding: 1rem;
-  border-radius: var(--radius);
+  border-color: #b0b0b0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.session-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.session-card__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-card__chevron {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  margin-left: 1rem;
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+.session-card--open .session-card__chevron {
+  transform: rotate(180deg);
 }
 
 .session-card__meta {
@@ -703,8 +728,8 @@ tr:hover td {
 
 .session-card__detail {
   display: none;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border);
   font-size: 0.9375rem;
   line-height: 1.7;
@@ -719,10 +744,35 @@ tr:hover td {
   margin-bottom: 0.75rem;
 }
 
+.session-card__speaker-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
 .session-card__bio {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
   font-size: 0.875rem;
   color: var(--text-muted);
-  font-style: italic;
+  font-style: normal;
+}
+
+.session-card__bio strong {
+  color: var(--text);
+  font-style: normal;
+}
+
+.session-card__bio p {
+  margin-bottom: 0.25rem;
 }
 
 /* ========== People Grid ========== */
@@ -879,10 +929,13 @@ tr:hover td {
     min-width: 0;
   }
 
-  .session-card:hover {
-    margin: 0;
-    padding: 1rem 0;
-    border-radius: 0;
+  .session-card {
+    padding: 1rem;
+  }
+
+  .session-card__bio {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
