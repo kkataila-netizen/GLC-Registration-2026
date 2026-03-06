@@ -22,7 +22,25 @@
     </ul>
   </nav>
 
-  <div class="container container--wide">
+  <!-- Password Gate -->
+  <div id="adminGate" class="admin-gate">
+    <div class="container">
+      <div class="card admin-gate__card">
+        <h2>Admin Access</h2>
+        <p>Enter the admin password to continue.</p>
+        <form id="gateForm" class="admin-gate__form">
+          <div class="form-group">
+            <input type="password" id="gatePassword" placeholder="Password" autocomplete="off">
+          </div>
+          <div id="gateError" class="message message--error" hidden>Incorrect password.</div>
+          <button type="submit" class="btn btn-primary btn-block">Log In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Content (hidden until authenticated) -->
+  <div id="adminContent" class="container container--wide" hidden>
     <header class="page-header">
       <h1>Admin Dashboard</h1>
       <p>Manage conference registrations</p>
