@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>People - GLC Conference</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="top-nav__brand">
+      <div class="top-nav__logo">G</div>
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/schedule.html">Schedule</a></li>
+      <li><a href="/info.html">Info</a></li>
+      <li><a href="/sessions.html">Sessions</a></li>
+      <li><a href="/people.html" class="active">People</a></li>
+      <li><a href="/">Register</a></li>
+      <li><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1>People</h1>
+      <p>Registered attendees <span id="attendeeCount" class="badge badge--count"></span></p>
+    </header>
+
+    <div class="people-toolbar">
+      <input type="text" id="peopleSearch" placeholder="Search by name or email...">
+    </div>
+
+    <div id="peopleGrid" class="people-grid"></div>
+    <p id="peopleEmpty" class="empty-state" hidden>No registered attendees yet.</p>
+  </div>
+
+  <script src="/js/people.js"></script>
+</body>
+</html>
