@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLC Conference Registration</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="top-nav__brand">
+      <div class="top-nav__logo">G</div>
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/" class="active">Register</a></li>
+      <li><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1>Registration</h1>
+      <p>Global Leadership Conference 2026</p>
+    </header>
+
+    <div class="card">
+      <form id="registrationForm" novalidate>
+        <div class="form-group">
+          <label><span class="required">Full Name</span></label>
+          <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label><span class="required">Email Address</span></label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label>Arrival Date</label>
+          <input type="date" id="arrivalDate" name="arrivalDate">
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <label>Organization / Company</label>
+          <input type="text" id="organization" name="organization" placeholder="Acme Corp" autocomplete="organization">
+        </div>
+
+        <div class="form-group">
+          <label>Dietary Preferences</label>
+          <select id="dietary" name="dietary">
+            <option value="None">None</option>
+            <option value="Vegetarian">Vegetarian</option>
+            <option value="Vegan">Vegan</option>
+            <option value="Gluten-free">Gluten-free</option>
+            <option value="Halal">Halal</option>
+            <option value="Kosher">Kosher</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Sessions / Workshops</label>
+          <div class="checkbox-group">
+            <label>
+              <input type="checkbox" name="sessions" value="Opening Keynote: Future of Technology">
+              <span>Opening Keynote: Future of Technology</span>
+            </label>
+            <label>
+              <input type="checkbox" name="sessions" value="Workshop: Cloud Architecture Patterns">
+              <span>Workshop: Cloud Architecture Patterns</span>
+            </label>
+            <label>
+              <input type="checkbox" name="sessions" value="Workshop: AI/ML in Practice">
+              <span>Workshop: AI/ML in Practice</span>
+            </label>
+            <label>
+              <input type="checkbox" name="sessions" value="Panel: Leadership in Tech">
+              <span>Panel: Leadership in Tech</span>
+            </label>
+            <label>
+              <input type="checkbox" name="sessions" value="Workshop: DevOps & CI/CD">
+              <span>Workshop: DevOps &amp; CI/CD</span>
+            </label>
+            <label>
+              <input type="checkbox" name="sessions" value="Closing Ceremony & Networking">
+              <span>Closing Ceremony &amp; Networking</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>T-Shirt Size</label>
+          <select id="tshirt" name="tshirt">
+            <option value="">-- Select size --</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Register</button>
+      </form>
+
+      <div id="formMessage" class="message" hidden></div>
+    </div>
+  </div>
+
+  <script src="/js/register.js"></script>
+</body>
+</html>
