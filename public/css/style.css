@@ -452,6 +452,10 @@ tr:hover td {
   gap: 0;
 }
 
+.schedule-list[hidden] {
+  display: none;
+}
+
 .schedule-item {
   display: flex;
   gap: 1.25rem;
