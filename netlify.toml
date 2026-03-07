@@ -9,6 +9,11 @@
 
 # Redirect API calls to the serverless function
 [[redirects]]
+  from = "/chat-api/*"
+  to = "/.netlify/functions/chat/:splat"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200

@@ -54,12 +54,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const card = document.createElement('div');
       card.className = 'person-card';
+      card.style.cursor = 'pointer';
+      card.title = `Click to message ${person.name}`;
       card.innerHTML = `
         <div class="person-avatar" style="background:${color}">${initials}</div>
         <div class="person-card__name">${escapeHtml(person.name)}</div>
         <div class="person-card__org">${person.organization ? escapeHtml(person.organization) : '—'}</div>
         ${person.arrivalDate ? `<div class="person-card__arrival">Arrives ${formatDate(person.arrivalDate)}</div>` : ''}
+        <div class="person-card__chat">💬 Message</div>
       `;
+      card.addEventListener('click', () => {
+        window.open('/chat.html?dm=' + encodeURIComponent(person.email), 'glc-chat', 'width=960,height=700');
+      });
       grid.appendChild(card);
     });
   }

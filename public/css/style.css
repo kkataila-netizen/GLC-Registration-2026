@@ -903,6 +903,24 @@ tr:hover td {
   margin-top: 0.375rem;
 }
 
+.person-card__chat {
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.person-card:hover .person-card__chat {
+  opacity: 1;
+}
+
+.person-card:hover {
+  border-color: var(--primary);
+  cursor: pointer;
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 640px) {
   .container {

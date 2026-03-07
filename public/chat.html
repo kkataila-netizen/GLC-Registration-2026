@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLC Chat</title>
+  <link rel="stylesheet" href="/css/chat.css">
+</head>
+<body>
+
+  <!-- Identity Modal -->
+  <div id="identityModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal__logo">G</div>
+      <h2>Welcome to GLC Chat</h2>
+      <p class="modal__sub">Select your name to get started</p>
+      <input type="text" id="identitySearch" class="modal__search" placeholder="Search attendees...">
+      <div id="identityList" class="modal__list"></div>
+    </div>
+  </div>
+
+  <!-- Group Creation Modal -->
+  <div id="groupModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <h2>Create Group</h2>
+      <input type="text" id="groupName" class="modal__search" placeholder="Group name">
+      <p class="modal__sub">Select members</p>
+      <input type="text" id="groupMemberSearch" class="modal__search" placeholder="Search people...">
+      <div id="groupMemberList" class="modal__list modal__list--check"></div>
+      <div class="modal__actions">
+        <button id="groupCancel" class="btn btn--secondary">Cancel</button>
+        <button id="groupCreate" class="btn btn--primary">Create Group</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div id="app" class="app" hidden>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <div class="sidebar__brand">
+          <div class="sidebar__logo">G</div>
+          <span class="sidebar__title">GLC Chat</span>
+        </div>
+        <button id="newGroupBtn" class="sidebar__action" title="New Group">+</button>
+      </div>
+      <div class="sidebar__search">
+        <input type="text" id="convSearch" placeholder="Search conversations...">
+      </div>
+      <div id="convList" class="sidebar__convs"></div>
+      <div class="sidebar__footer">
+        <div class="sidebar__user">
+          <div id="myAvatar" class="avatar avatar--sm"></div>
+          <div>
+            <div id="myName" class="sidebar__user-name"></div>
+            <div class="sidebar__status">Online</div>
+          </div>
+        </div>
+        <div id="onlineCount" class="sidebar__online"></div>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="chat">
+      <!-- Empty state -->
+      <div id="chatEmpty" class="chat__empty">
+        <div class="chat__empty-icon">💬</div>
+        <h3>Select a conversation</h3>
+        <p>Choose from the sidebar or start a new chat</p>
+      </div>
+
+      <!-- Active conversation -->
+      <div id="chatActive" class="chat__active" hidden>
+        <div class="chat__header">
+          <button class="chat__back" aria-label="Back">&#8249;</button>
+          <div class="chat__header-info">
+            <h3 id="chatTitle"></h3>
+            <span id="chatSubtitle" class="chat__subtitle"></span>
+          </div>
+          <button id="chatSettingsBtn" class="chat__settings-btn" hidden title="Group settings">⚙</button>
+        </div>
+
+        <div id="chatMessages" class="chat__messages"></div>
+
+        <div id="typingIndicator" class="chat__typing" hidden>
+          <span class="typing-dots"><span></span><span></span><span></span></span>
+          <span id="typingText"></span>
+        </div>
+
+        <div class="chat__input-area">
+          <label class="chat__attach" title="Attach file">
+            <input type="file" id="fileInput" hidden>
+            📎
+          </label>
+          <input type="text" id="msgInput" class="chat__input" placeholder="Type a message...">
+          <div class="chat__emoji-trigger" id="emojiTrigger" title="Emoji">😀</div>
+          <button id="sendBtn" class="btn btn--primary btn--send">Send</button>
+        </div>
+        <div id="emojiPicker" class="emoji-picker" hidden>
+          <span data-emoji="👍">👍</span><span data-emoji="❤️">❤️</span><span data-emoji="😂">😂</span>
+          <span data-emoji="🎉">🎉</span><span data-emoji="🔥">🔥</span><span data-emoji="👏">👏</span>
+          <span data-emoji="💯">💯</span><span data-emoji="✅">✅</span><span data-emoji="👀">👀</span>
+          <span data-emoji="🙌">🙌</span><span data-emoji="💬">💬</span><span data-emoji="🤔">🤔</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Group Settings Modal -->
+  <div id="groupSettingsModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <h2>Group Settings</h2>
+      <label class="modal__label">Group Name</label>
+      <input type="text" id="gsName" class="modal__search">
+      <label class="modal__label">Members</label>
+      <input type="text" id="gsMemberSearch" class="modal__search" placeholder="Search people to add...">
+      <div id="gsMemberList" class="modal__list modal__list--check"></div>
+      <div class="modal__actions">
+        <button id="gsCancel" class="btn btn--secondary">Cancel</button>
+        <button id="gsSave" class="btn btn--primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reaction Picker (positioned dynamically) -->
+  <div id="reactionPicker" class="reaction-picker" hidden>
+    <span data-r="👍">👍</span><span data-r="❤️">❤️</span><span data-r="😂">😂</span>
+    <span data-r="🎉">🎉</span><span data-r="🔥">🔥</span><span data-r="😮">😮</span>
+  </div>
+
+  <script src="/js/chat.js"></script>
+</body>
+</html>
