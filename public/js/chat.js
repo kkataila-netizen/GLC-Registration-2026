@@ -109,8 +109,18 @@
 
   /* ── identity ────────────────────────────────────── */
   async function init() {
-    const { users: u } = await api("/users");
-    users = u;
+    try {
+      const data = await api("/users");
+      users = data.users || [];
+    } catch (e) {
+      console.error("Failed to load users:", e);
+      users = [];
+    }
+
+    if (users.length === 0) {
+      identityList.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted)">No registered attendees found. <a href=\"/\" target=\"_blank\">Register first</a>.</div>';
+      return;
+    }
 
     // Check persisted login (from registration/login page)
     const loggedIn = localStorage.getItem("glc-user");
@@ -118,6 +128,7 @@
       const parsed = JSON.parse(loggedIn);
       if (users.some(u => u.email === parsed.email)) {
         me = parsed;
+        identityModal.hidden = true;
         startApp();
         return;
       }
@@ -129,6 +140,7 @@
       const parsed = JSON.parse(saved);
       if (users.some(u => u.email === parsed.email)) {
         me = parsed;
+        identityModal.hidden = true;
         startApp();
         return;
       }
