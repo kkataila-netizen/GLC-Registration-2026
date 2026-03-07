@@ -3,6 +3,12 @@ import { getStore } from "@netlify/blobs";
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
+async function hashPassword(password) {
+  const encoded = new TextEncoder().encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 function validateRegistration(body) {
   const errors = [];
   if (!body.name || typeof body.name !== 'string' || body.name.trim().length < 2) {
@@ -11,6 +17,9 @@ function validateRegistration(body) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!body.email || typeof body.email !== 'string' || !emailRegex.test(body.email.trim())) {
     errors.push('A valid email address is required.');
+  }
+  if (!body.password || typeof body.password !== 'string' || body.password.length < 4) {
+    errors.push('Password is required (at least 4 characters).');
   }
   if (body.phone && !/^[0-9\s\-\(\)\+]{7,20}$/.test(body.phone.trim())) {
     errors.push('Phone number format is invalid.');
@@ -89,6 +98,7 @@ export default async (req, context) => {
       id: crypto.randomUUID(),
       name: body.name.trim(),
       email,
+      passwordHash: await hashPassword(body.password),
       arrivalDate: body.arrivalDate || '',
       departureDate: body.departureDate || '',
       phone: body.phone ? body.phone.trim() : '',
@@ -152,7 +162,37 @@ export default async (req, context) => {
       );
     }
 
-    return json({ registrations, total: registrations.length });
+    // Strip passwordHash from response
+    const safe = registrations.map(({ passwordHash, ...rest }) => rest);
+    return json({ registrations: safe, total: safe.length });
+  }
+
+  // POST /api/login
+  if (method === "POST" && (path === "/login" || path === "/login/")) {
+    let body;
+    try { body = await req.json(); }
+    catch { return json({ error: "Invalid JSON body." }, 400); }
+
+    const email = (body.email || "").trim().toLowerCase();
+    const password = body.password || "";
+
+    if (!email || !password) {
+      return json({ error: "Email and password are required." }, 400);
+    }
+
+    const registrations = await getRegistrations();
+    const user = registrations.find(r => r.email.toLowerCase() === email);
+
+    if (!user) {
+      return json({ error: "Invalid email or password." }, 401);
+    }
+
+    const hash = await hashPassword(password);
+    if (user.passwordHash !== hash) {
+      return json({ error: "Invalid email or password." }, 401);
+    }
+
+    return json({ success: true, user: { name: user.name, email: user.email } });
   }
 
   return json({ error: "Not found" }, 404);

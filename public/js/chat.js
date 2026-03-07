@@ -112,6 +112,18 @@
     const { users: u } = await api("/users");
     users = u;
 
+    // Check persisted login (from registration/login page)
+    const loggedIn = localStorage.getItem("glc-user");
+    if (loggedIn) {
+      const parsed = JSON.parse(loggedIn);
+      if (users.some(u => u.email === parsed.email)) {
+        me = parsed;
+        startApp();
+        return;
+      }
+    }
+
+    // Fallback: check old chat-only identity
     const saved = localStorage.getItem("glc-chat-user");
     if (saved) {
       const parsed = JSON.parse(saved);

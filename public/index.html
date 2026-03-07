@@ -41,6 +41,11 @@
         </div>
 
         <div class="form-group">
+          <label><span class="required">Password</span></label>
+          <input type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
           <label>Arrival Date</label>
           <input type="date" id="arrivalDate" name="arrivalDate">
         </div>
@@ -132,6 +137,36 @@
       </form>
 
       <div id="formMessage" class="message" hidden></div>
+    </div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="card" style="margin-top:1.5rem">
+      <h3 style="font-family:'Libre Franklin',Arial,sans-serif;font-size:1.125rem;font-weight:600;margin-bottom:.25rem">Already registered?</h3>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem">Log in with your email and password.</p>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label><span class="required">Email Address</span></label>
+          <input type="email" id="loginEmail" placeholder="john@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Password</span></label>
+          <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-secondary btn-block" id="loginBtn">Log In</button>
+      </form>
+      <div id="loginMessage" class="message" hidden></div>
+    </div>
+
+    <!-- Logged-in state -->
+    <div id="loggedInSection" class="card" style="margin-top:1.5rem" hidden>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <p style="font-size:.875rem;color:var(--text-muted)">Logged in as</p>
+          <p id="loggedInName" style="font-weight:600;font-size:1.0625rem"></p>
+          <p id="loggedInEmail" style="font-size:.8125rem;color:var(--text-muted)"></p>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary">Log Out</button>
+      </div>
     </div>
   </div>
 
