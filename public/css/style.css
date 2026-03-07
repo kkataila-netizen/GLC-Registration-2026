@@ -828,6 +828,49 @@ tr:hover td {
   font-size: 1rem;
 }
 
+/* Admin Modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.admin-modal-overlay[hidden] {
+  display: none;
+}
+.admin-modal {
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Admin table action buttons */
+.btn-action {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--card-bg);
+  color: var(--text);
+}
+.btn-action:hover {
+  background: var(--bg);
+}
+.btn-action--danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+.btn-action--danger:hover {
+  background: #fef2f2;
+}
+
 /* ========== People Grid ========== */
 .people-toolbar {
   display: flex;

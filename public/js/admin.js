@@ -61,6 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Edit modal elements
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const editCancel = document.getElementById('editCancel');
+    const editError = document.getElementById('editError');
+
     function renderTable(registrations) {
       regTableBody.innerHTML = '';
 
@@ -87,10 +93,106 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>${Array.isArray(r.sessions) && r.sessions.length ? esc(r.sessions.join(', ')) : '—'}</td>
           <td>${esc(r.tshirt) || '—'}</td>
           <td>${formatDate(r.registeredAt)}</td>
+          <td style="white-space:nowrap">
+            <button class="btn-action" data-edit="${esc(r.id)}">Edit</button>
+            <button class="btn-action btn-action--danger" data-delete="${esc(r.id)}" data-name="${esc(r.name)}">Delete</button>
+          </td>
         `;
         regTableBody.appendChild(tr);
       });
+
+      // Bind edit buttons
+      regTableBody.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const reg = registrations.find(r => r.id === btn.dataset.edit);
+          if (reg) openEditModal(reg);
+        });
+      });
+
+      // Bind delete buttons
+      regTableBody.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          deleteRegistration(btn.dataset.delete, btn.dataset.name);
+        });
+      });
     }
+
+    async function deleteRegistration(id, name) {
+      if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
+
+      try {
+        const res = await fetch(`/api/registrations/${id}`, { method: 'DELETE' });
+        if (!res.ok) {
+          const data = await res.json();
+          alert(data.error || 'Failed to delete.');
+          return;
+        }
+        loadRegistrations(searchInput.value.trim());
+      } catch {
+        alert('Network error. Please try again.');
+      }
+    }
+
+    function openEditModal(reg) {
+      document.getElementById('editId').value = reg.id;
+      document.getElementById('editName').value = reg.name || '';
+      document.getElementById('editEmail').value = reg.email || '';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editArrival').value = reg.arrivalDate || '';
+      document.getElementById('editDeparture').value = reg.departureDate || '';
+      document.getElementById('editPhone').value = reg.phone || '';
+      document.getElementById('editOrg').value = reg.organization || '';
+      document.getElementById('editDietary').value = reg.dietary || 'None';
+      document.getElementById('editTshirt').value = reg.tshirt || '';
+      editError.hidden = true;
+      editModal.hidden = false;
+    }
+
+    editCancel.addEventListener('click', () => { editModal.hidden = true; });
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) editModal.hidden = true;
+    });
+
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      editError.hidden = true;
+
+      const id = document.getElementById('editId').value;
+      const body = {
+        name: document.getElementById('editName').value,
+        email: document.getElementById('editEmail').value,
+        arrivalDate: document.getElementById('editArrival').value,
+        departureDate: document.getElementById('editDeparture').value,
+        phone: document.getElementById('editPhone').value,
+        organization: document.getElementById('editOrg').value,
+        dietary: document.getElementById('editDietary').value,
+        tshirt: document.getElementById('editTshirt').value,
+      };
+
+      const pw = document.getElementById('editPassword').value;
+      if (pw) body.password = pw;
+
+      try {
+        const res = await fetch(`/api/registrations/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          editError.textContent = data.error || 'Failed to save.';
+          editError.hidden = false;
+          return;
+        }
+
+        editModal.hidden = true;
+        loadRegistrations(searchInput.value.trim());
+      } catch {
+        editError.textContent = 'Network error. Please try again.';
+        editError.hidden = false;
+      }
+    });
 
     function esc(str) {
       if (!str) return '';

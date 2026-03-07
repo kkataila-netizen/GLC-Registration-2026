@@ -68,6 +68,7 @@
               <th>Sessions</th>
               <th>T-Shirt</th>
               <th>Registered</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="regTableBody"></tbody>
@@ -75,6 +76,73 @@
       </div>
 
       <p id="emptyState" class="empty-state" hidden>No registrations found.</p>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="admin-modal-overlay" hidden>
+    <div class="card admin-modal">
+      <h2 style="margin-bottom:1rem">Edit Registration</h2>
+      <form id="editForm">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="editName">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="editEmail">
+        </div>
+        <div class="form-group">
+          <label>New Password <small style="color:var(--text-muted)">(leave blank to keep current)</small></label>
+          <input type="password" id="editPassword" placeholder="Enter new password">
+        </div>
+        <div class="form-group">
+          <label>Arrival Date</label>
+          <input type="date" id="editArrival">
+        </div>
+        <div class="form-group">
+          <label>Departure Date</label>
+          <input type="date" id="editDeparture">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="editPhone">
+        </div>
+        <div class="form-group">
+          <label>Organization</label>
+          <input type="text" id="editOrg">
+        </div>
+        <div class="form-group">
+          <label>Dietary Preferences</label>
+          <select id="editDietary">
+            <option value="None">None</option>
+            <option value="Vegetarian">Vegetarian</option>
+            <option value="Vegan">Vegan</option>
+            <option value="Gluten-free">Gluten-free</option>
+            <option value="Halal">Halal</option>
+            <option value="Kosher">Kosher</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>T-Shirt Size</label>
+          <select id="editTshirt">
+            <option value="">-- Select size --</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+        </div>
+        <div id="editError" class="message message--error" hidden></div>
+        <div style="display:flex;gap:.75rem;margin-top:1rem">
+          <button type="button" id="editCancel" class="btn btn-secondary" style="flex:1">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 

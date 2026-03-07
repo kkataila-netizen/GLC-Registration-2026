@@ -167,6 +167,97 @@ export default async (req, context) => {
     return json({ registrations: safe, total: safe.length });
   }
 
+  // DELETE /api/registrations/:id
+  const deleteMatch = path.match(/^\/registrations\/([^/]+)\/?$/);
+  if (method === "DELETE" && deleteMatch) {
+    const id = deleteMatch[1];
+    const registrations = await getRegistrations();
+    const index = registrations.findIndex(r => r.id === id);
+
+    if (index === -1) {
+      return json({ error: "Registration not found." }, 404);
+    }
+
+    registrations.splice(index, 1);
+    await saveRegistrations(registrations);
+    return json({ success: true });
+  }
+
+  // PUT /api/registrations/:id
+  const putMatch = path.match(/^\/registrations\/([^/]+)\/?$/);
+  if (method === "PUT" && putMatch) {
+    const id = putMatch[1];
+    let body;
+    try { body = await req.json(); }
+    catch { return json({ error: "Invalid JSON body." }, 400); }
+
+    const registrations = await getRegistrations();
+    const index = registrations.findIndex(r => r.id === id);
+
+    if (index === -1) {
+      return json({ error: "Registration not found." }, 404);
+    }
+
+    const reg = registrations[index];
+
+    if (body.name !== undefined) {
+      if (typeof body.name !== 'string' || body.name.trim().length < 2) {
+        return json({ error: "Name must be at least 2 characters." }, 400);
+      }
+      reg.name = body.name.trim();
+    }
+    if (body.email !== undefined) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const newEmail = body.email.trim().toLowerCase();
+      if (!emailRegex.test(newEmail)) {
+        return json({ error: "Invalid email address." }, 400);
+      }
+      if (newEmail !== reg.email.toLowerCase() && registrations.some(r => r.email.toLowerCase() === newEmail)) {
+        return json({ error: "This email is already registered." }, 409);
+      }
+      reg.email = newEmail;
+    }
+    if (body.phone !== undefined) {
+      if (body.phone && !/^[0-9\s\-\(\)\+]{7,20}$/.test(body.phone.trim())) {
+        return json({ error: "Phone number format is invalid." }, 400);
+      }
+      reg.phone = body.phone ? body.phone.trim() : '';
+    }
+    if (body.organization !== undefined) reg.organization = (body.organization || '').trim();
+    if (body.dietary !== undefined) {
+      if (body.dietary && !VALID_DIETARY.includes(body.dietary)) {
+        return json({ error: "Invalid dietary preference." }, 400);
+      }
+      reg.dietary = body.dietary || 'None';
+    }
+    if (body.tshirt !== undefined) {
+      if (body.tshirt && !VALID_TSHIRT.includes(body.tshirt)) {
+        return json({ error: "Invalid t-shirt size." }, 400);
+      }
+      reg.tshirt = body.tshirt || '';
+    }
+    if (body.sessions !== undefined) {
+      if (!Array.isArray(body.sessions)) {
+        return json({ error: "Sessions must be an array." }, 400);
+      }
+      reg.sessions = body.sessions;
+    }
+    if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
+    if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
+    if (body.password) {
+      if (body.password.length < 4) {
+        return json({ error: "Password must be at least 4 characters." }, 400);
+      }
+      reg.passwordHash = await hashPassword(body.password);
+    }
+
+    registrations[index] = reg;
+    await saveRegistrations(registrations);
+
+    const { passwordHash, ...safe } = reg;
+    return json({ success: true, registration: safe });
+  }
+
   // POST /api/login
   if (method === "POST" && (path === "/login" || path === "/login/")) {
     let body;
