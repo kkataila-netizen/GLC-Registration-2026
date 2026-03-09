@@ -10,6 +10,7 @@
   /* ── state ─────────────────────────────────────── */
   let me = null;
   let users = [];
+  let groups = [];  // group conversations the user belongs to
   let activeConvId = null;
   let activeConvType = "dm"; // "dm" or "group"
   let messages = [];
@@ -100,39 +101,81 @@
       return;
     }
 
-    app.hidden = false;
-    renderUserList("");
+    // Load group conversations
+    try {
+      const convData = await api(`/conversations?user=${encodeURIComponent(me.email)}`);
+      groups = (convData.conversations || []).filter(c => c.type === "group");
+    } catch {
+      groups = [];
+    }
 
-    userSearch.addEventListener("input", () => renderUserList(userSearch.value));
+    app.hidden = false;
+    renderSidebar("");
+
+    userSearch.addEventListener("input", () => renderSidebar(userSearch.value));
 
     // If opened with ?dm= param, auto-open that conversation
     const dmTarget = new URLSearchParams(window.location.search).get("dm");
     if (dmTarget) openDM(dmTarget);
   }
 
-  /* ── user list (sidebar) ───────────────────────── */
-  function renderUserList(q) {
+  /* ── sidebar (groups + users) ────────────────────── */
+  function renderSidebar(q) {
     const term = q.toLowerCase();
+    let html = "";
+
+    // Groups section
+    const matchingGroups = groups.filter(g =>
+      g.name.toLowerCase().includes(term)
+    );
+    if (matchingGroups.length) {
+      html += `<div class="sidebar__section-label">Groups</div>`;
+      html += matchingGroups.map(g => {
+        const active = activeConvId === g.id ? "user-item--active" : "";
+        const memberCount = g.members.length;
+        return `
+          <div class="user-item ${active}" data-group-id="${esc(g.id)}" data-group-name="${esc(g.name)}">
+            <div class="user-item__avatar" style="background:${colorFor(g.name)}">${initials(g.name)}</div>
+            <div class="user-item__info">
+              <div class="user-item__name">${esc(g.name)}</div>
+              <div class="user-item__org">${memberCount} member${memberCount !== 1 ? "s" : ""}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // People section
     const others = users.filter(u =>
       u.email !== me.email &&
       (u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term))
     );
-
-    userList.innerHTML = others.map(u => {
-      const active = activeConvId && activeConvId === dmIdFor(u.email) ? "user-item--active" : "";
-      return `
-        <div class="user-item ${active}" data-email="${esc(u.email)}">
-          <div class="user-item__avatar" style="background:${colorFor(u.name)}">${initials(u.name)}</div>
-          <div class="user-item__info">
-            <div class="user-item__name">${esc(u.name)}</div>
-            ${u.organization ? `<div class="user-item__org">${esc(u.organization)}</div>` : ""}
+    if (others.length) {
+      if (matchingGroups.length) {
+        html += `<div class="sidebar__section-label">People</div>`;
+      }
+      html += others.map(u => {
+        const active = activeConvId && activeConvId === dmIdFor(u.email) ? "user-item--active" : "";
+        return `
+          <div class="user-item ${active}" data-email="${esc(u.email)}">
+            <div class="user-item__avatar" style="background:${colorFor(u.name)}">${initials(u.name)}</div>
+            <div class="user-item__info">
+              <div class="user-item__name">${esc(u.name)}</div>
+              ${u.organization ? `<div class="user-item__org">${esc(u.organization)}</div>` : ""}
+            </div>
           </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      }).join("");
+    }
 
-    userList.querySelectorAll(".user-item").forEach(el => {
+    userList.innerHTML = html;
+
+    // Wire up click handlers
+    userList.querySelectorAll("[data-email]").forEach(el => {
       el.addEventListener("click", () => openDM(el.dataset.email));
+    });
+    userList.querySelectorAll("[data-group-id]").forEach(el => {
+      el.addEventListener("click", () => openGroup(el.dataset.groupId, el.dataset.groupName));
     });
   }
 
@@ -152,7 +195,7 @@
     chatEmpty.style.display = "none";
     chatActive.hidden = false;
     app.classList.add("app--chat-open");
-    renderUserList(userSearch.value);
+    renderSidebar(userSearch.value);
 
     await loadMessages();
     await markRead();
@@ -333,6 +376,11 @@
       method: "POST",
       body: { type: "group", name, members: checked }
     });
+
+    // Add to local groups list so it appears in sidebar
+    if (!groups.some(g => g.id === conversation.id)) {
+      groups.push(conversation);
+    }
 
     hideAddPeopleModal();
 

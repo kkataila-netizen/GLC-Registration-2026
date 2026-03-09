@@ -59,6 +59,11 @@ body {
 .sidebar__search input:focus { outline: none; border-color: var(--primary); }
 
 .sidebar__list { flex: 1; overflow-y: auto; padding: .375rem 0; }
+.sidebar__section-label {
+  font-size: .6875rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--text-muted);
+  padding: .625rem .75rem .25rem;
+}
 
 /* User list item */
 .user-item {
