@@ -284,26 +284,16 @@ export default async (req) => {
   if (method === "GET" && /^\/unread\/?$/.test(path)) {
     const user = url.searchParams.get("user");
     if (!user) return json({ error: "user param required" }, 400);
-    const debug = url.searchParams.get("debug") === "1";
     const convs = await getConversations();
     const userConvs = convs.filter(c => c.members.includes(user));
     let total = 0;
-    const debugInfo = [];
     for (const conv of userConvs) {
       const msgs = await getMessages(conv.id);
-      let convUnread = 0;
       for (const m of msgs) {
         if (m.sender !== user && (!m.readBy || !m.readBy.some(r => r.email === user))) {
-          convUnread++;
+          total++;
         }
       }
-      total += convUnread;
-      if (debug) {
-        debugInfo.push({ convId: conv.id, totalMsgs: msgs.length, unread: convUnread });
-      }
-    }
-    if (debug) {
-      return json({ unread: total, user, convCount: userConvs.length, conversations: debugInfo });
     }
     return json({ unread: total });
   }

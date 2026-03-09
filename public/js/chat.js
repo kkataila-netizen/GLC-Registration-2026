@@ -182,7 +182,8 @@
       lastMsgTs = messages[messages.length - 1].timestamp;
       renderMessages();
       scrollToBottom();
-      await markRead();
+      // Don't auto-mark as read on poll — only mark read when
+      // the receiver explicitly opens/clicks the conversation (openDM)
     }
   }
 
