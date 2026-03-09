@@ -298,5 +298,28 @@ export default async (req) => {
     return json({ unread: total });
   }
 
+  /* ── POST /mark-all-read?user=email ──────────────── */
+  if (method === "POST" && /^\/mark-all-read\/?$/.test(path)) {
+    const body = await req.json();
+    const user = body.user;
+    if (!user) return json({ error: "user required" }, 400);
+    const convs = await getConversations();
+    const userConvs = convs.filter(c => c.members.includes(user));
+    const now = new Date().toISOString();
+    for (const conv of userConvs) {
+      const msgs = await getMessages(conv.id);
+      let updated = false;
+      for (const m of msgs) {
+        if (!m.readBy) m.readBy = [];
+        if (!m.readBy.some(r => r.email === user)) {
+          m.readBy.push({ email: user, at: now });
+          updated = true;
+        }
+      }
+      if (updated) await saveMessages(conv.id, msgs);
+    }
+    return json({ success: true });
+  }
+
   return json({ error: "Not found" }, 404);
 };

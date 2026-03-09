@@ -1,15 +1,21 @@
 /* ============================================================
    Nav notification – polls for unread chat messages.
    Shows a toast banner + nav badge + browser notification.
+
+   Toast stays visible as long as unread > 0.
+   Only resets when user clicks "Open Chat" (marks all read).
+   The × button hides the toast temporarily until new messages.
    ============================================================ */
 (() => {
   "use strict";
 
   const POLL_INTERVAL = 8000;
   const API = "/chat-api";
-  let lastUnread = -1; // -1 = first check
+  let lastUnread = 0;
+  let toastDismissed = false;   // true after user clicks ×
   let notificationsGranted = false;
   let toast = null;
+  let currentUser = null;
 
   function getUser() {
     try {
@@ -43,12 +49,26 @@
     toast.hidden = true;
     document.body.appendChild(toast);
 
+    // × button: hide temporarily (reappears if new messages arrive)
     toast.querySelector(".chat-toast__close").addEventListener("click", () => {
       toast.hidden = true;
+      toastDismissed = true;
     });
-    toast.querySelector(".chat-toast__open").addEventListener("click", () => {
-      window.open("/chat.html", "glc-chat", "width=960,height=700");
+
+    // Open Chat: mark ALL messages as read, then open chat window
+    toast.querySelector(".chat-toast__open").addEventListener("click", async () => {
       toast.hidden = true;
+      window.open("/chat.html", "glc-chat", "width=960,height=700");
+      // Mark all conversations as read so unread resets to 0
+      if (currentUser) {
+        try {
+          await fetch(`${API}/mark-all-read`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user: currentUser.email })
+          });
+        } catch { /* ignore */ }
+      }
     });
     return toast;
   }
@@ -58,6 +78,10 @@
     t.querySelector(".chat-toast__text").textContent =
       `You have ${count} unread message${count !== 1 ? "s" : ""}`;
     t.hidden = false;
+  }
+
+  function hideToast() {
+    if (toast) toast.hidden = true;
   }
 
   /* ── Nav badge ─────────────────────────────────── */
@@ -77,7 +101,6 @@
       document.title = `(${count > 99 ? "99+" : count}) ${baseTitle}`;
     } else {
       if (badge) badge.hidden = true;
-      if (toast) toast.hidden = true;
       document.title = document.title.replace(/^\(\d+\+?\)\s*/, "");
     }
   }
@@ -101,13 +124,26 @@
       if (!res.ok) return;
       const { unread } = await res.json();
 
-      // New messages arrived
-      if (unread > 0 && unread > lastUnread && lastUnread >= 0) {
-        showToast(unread);
-        sendBrowserNotification(unread);
+      // Update badge + title (always reflects true count)
+      updateBadge(link, unread);
+
+      if (unread > 0) {
+        // New messages arrived (count went up) → reset dismiss, show toast
+        if (unread > lastUnread) {
+          toastDismissed = false;
+          showToast(unread);
+          sendBrowserNotification(unread);
+        }
+        // Still have unread and user hasn't dismissed → keep toast visible
+        else if (!toastDismissed) {
+          showToast(unread);
+        }
+      } else {
+        // All read → hide everything, reset dismiss state
+        hideToast();
+        toastDismissed = false;
       }
 
-      updateBadge(link, unread);
       lastUnread = unread;
     } catch { /* network error – skip */ }
   }
@@ -115,6 +151,7 @@
   function init() {
     const user = getUser();
     if (!user) return;
+    currentUser = user;
 
     const link = getPeopleLink();
     if (!link) return;
