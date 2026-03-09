@@ -30,7 +30,8 @@
   function getPeopleLink() {
     const links = document.querySelectorAll(".top-nav__links a");
     for (const a of links) {
-      if (a.getAttribute("href") === "/people.html") return a;
+      const href = a.getAttribute("href") || "";
+      if (href === "/people.html" || href === "/people") return a;
     }
     return null;
   }
