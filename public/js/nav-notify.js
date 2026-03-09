@@ -16,6 +16,7 @@
   let notificationsGranted = false;
   let toast = null;
   let currentUser = null;
+  let latestConvId = null;      // conversation ID with most recent unread
 
   function getUser() {
     try {
@@ -56,10 +57,13 @@
       toastDismissed = true;
     });
 
-    // Open Chat: mark ALL messages as read, then open chat window
+    // Open Chat: mark ALL messages as read, then open chat window at the right conversation
     toast.querySelector(".chat-toast__open").addEventListener("click", async () => {
       toast.hidden = true;
-      window.open("/chat.html", "glc-chat", "width=960,height=700");
+      const chatUrl = latestConvId
+        ? `/chat.html?conv=${encodeURIComponent(latestConvId)}`
+        : "/chat.html";
+      window.open(chatUrl, "glc-chat", "width=960,height=700");
       // Mark all conversations as read so unread resets to 0
       if (currentUser) {
         try {
@@ -123,7 +127,11 @@
     try {
       const res = await fetch(`${API}/unread?user=${encodeURIComponent(user.email)}`);
       if (!res.ok) return;
-      const { unread } = await res.json();
+      const data = await res.json();
+      const unread = data.unread;
+
+      // Track which conversation has the most recent unread message
+      if (data.convId) latestConvId = data.convId;
 
       // Update badge + title (always reflects true count)
       updateBadge(link, unread);

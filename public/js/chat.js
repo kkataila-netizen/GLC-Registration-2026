@@ -114,9 +114,27 @@
 
     userSearch.addEventListener("input", () => renderSidebar(userSearch.value));
 
-    // If opened with ?dm= param, auto-open that conversation
-    const dmTarget = new URLSearchParams(window.location.search).get("dm");
-    if (dmTarget) openDM(dmTarget);
+    // If opened with ?conv= param, auto-open that conversation (DM or group)
+    const params = new URLSearchParams(window.location.search);
+    const convParam = params.get("conv");
+    const dmTarget = params.get("dm");
+
+    if (convParam) {
+      if (convParam.startsWith("dm:")) {
+        // Extract the other person's email from dm:email1:email2
+        const parts = convParam.split(":");
+        const otherEmail = parts[1] === me.email ? parts[2] : parts[1];
+        openDM(otherEmail);
+      } else if (convParam.startsWith("group:")) {
+        // Find the group in our loaded groups list
+        const group = groups.find(g => g.id === convParam);
+        if (group) {
+          openGroup(group.id, group.name);
+        }
+      }
+    } else if (dmTarget) {
+      openDM(dmTarget);
+    }
   }
 
   /* ── sidebar (groups + users) ────────────────────── */

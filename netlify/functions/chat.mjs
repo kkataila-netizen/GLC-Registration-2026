@@ -287,15 +287,27 @@ export default async (req) => {
     const convs = await getConversations();
     const userConvs = convs.filter(c => c.members.includes(user));
     let total = 0;
+    let latestConv = null;   // conversation with the most recent unread message
+    let latestTs = null;
     for (const conv of userConvs) {
       const msgs = await getMessages(conv.id);
       for (const m of msgs) {
         if (m.sender !== user && (!m.readBy || !m.readBy.some(r => r.email === user))) {
           total++;
+          if (!latestTs || new Date(m.timestamp) > new Date(latestTs)) {
+            latestTs = m.timestamp;
+            latestConv = conv;
+          }
         }
       }
     }
-    return json({ unread: total });
+    const result = { unread: total };
+    if (latestConv) {
+      result.convId = latestConv.id;
+      result.convType = latestConv.type;
+      result.convName = latestConv.name || "";
+    }
+    return json(result);
   }
 
   /* ── POST /mark-all-read?user=email ──────────────── */
