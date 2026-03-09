@@ -310,6 +310,26 @@ export default async (req) => {
     return json(result);
   }
 
+  /* ── GET /unread-per-conv?user=email ────────────── */
+  if (method === "GET" && /^\/unread-per-conv\/?$/.test(path)) {
+    const user = url.searchParams.get("user");
+    if (!user) return json({ error: "user param required" }, 400);
+    const convs = await getConversations();
+    const userConvs = convs.filter(c => c.members.includes(user));
+    const counts = {};
+    for (const conv of userConvs) {
+      const msgs = await getMessages(conv.id);
+      let count = 0;
+      for (const m of msgs) {
+        if (m.sender !== user && (!m.readBy || !m.readBy.some(r => r.email === user))) {
+          count++;
+        }
+      }
+      if (count > 0) counts[conv.id] = count;
+    }
+    return json({ counts });
+  }
+
   /* ── POST /mark-all-read?user=email ──────────────── */
   if (method === "POST" && /^\/mark-all-read\/?$/.test(path)) {
     const body = await req.json();

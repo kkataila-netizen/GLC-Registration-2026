@@ -86,6 +86,13 @@ body {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--online); flex-shrink: 0;
 }
+.user-item__badge {
+  background: #dc2626; color: #fff;
+  font-size: .625rem; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px; flex-shrink: 0;
+}
 
 /* ========== Chat Area ========== */
 .chat { flex: 1; display: flex; flex-direction: column; min-width: 0; }

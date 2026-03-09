@@ -11,11 +11,13 @@
   let me = null;
   let users = [];
   let groups = [];  // group conversations the user belongs to
+  let unreadCounts = {};  // convId → unread count
   let activeConvId = null;
   let activeConvType = "dm"; // "dm" or "group"
   let messages = [];
   let lastMsgTs = null;
   let pollTimer = null;
+  let unreadTimer = null;
 
   const COLORS = ["#2563eb","#7c3aed","#059669","#dc2626","#d97706",
                   "#0891b2","#be185d","#4f46e5","#16a34a","#ea580c"];
@@ -80,6 +82,17 @@
     return res.json();
   }
 
+  /* ── unread counts ────────────────────────────────── */
+  async function loadUnreadCounts() {
+    try {
+      const data = await api(`/unread-per-conv?user=${encodeURIComponent(me.email)}`);
+      unreadCounts = data.counts || {};
+    } catch {
+      unreadCounts = {};
+    }
+    renderSidebar(userSearch ? userSearch.value : "");
+  }
+
   /* ── init ──────────────────────────────────────── */
   async function init() {
     const stored = localStorage.getItem("glc-user") || localStorage.getItem("glc-chat-user");
@@ -101,18 +114,22 @@
       return;
     }
 
-    // Load group conversations
+    // Load group conversations + unread counts
     try {
       const convData = await api(`/conversations?user=${encodeURIComponent(me.email)}`);
       groups = (convData.conversations || []).filter(c => c.type === "group");
     } catch {
       groups = [];
     }
+    await loadUnreadCounts();
 
     app.hidden = false;
     renderSidebar("");
 
     userSearch.addEventListener("input", () => renderSidebar(userSearch.value));
+
+    // Poll unread counts every 10 seconds to keep sidebar badges fresh
+    unreadTimer = setInterval(loadUnreadCounts, 10000);
 
     // If opened with ?conv= param, auto-open that conversation (DM or group)
     const params = new URLSearchParams(window.location.search);
@@ -151,6 +168,8 @@
       html += matchingGroups.map(g => {
         const active = activeConvId === g.id ? "user-item--active" : "";
         const memberCount = g.members.length;
+        const unread = unreadCounts[g.id] || 0;
+        const badgeHtml = unread > 0 ? `<span class="user-item__badge">${unread > 99 ? "99+" : unread}</span>` : "";
         return `
           <div class="user-item ${active}" data-group-id="${esc(g.id)}" data-group-name="${esc(g.name)}">
             <div class="user-item__avatar" style="background:${colorFor(g.name)}">${initials(g.name)}</div>
@@ -158,6 +177,7 @@
               <div class="user-item__name">${esc(g.name)}</div>
               <div class="user-item__org">${memberCount} member${memberCount !== 1 ? "s" : ""}</div>
             </div>
+            ${badgeHtml}
           </div>
         `;
       }).join("");
@@ -173,7 +193,10 @@
         html += `<div class="sidebar__section-label">People</div>`;
       }
       html += others.map(u => {
-        const active = activeConvId && activeConvId === dmIdFor(u.email) ? "user-item--active" : "";
+        const convId = dmIdFor(u.email);
+        const active = activeConvId && activeConvId === convId ? "user-item--active" : "";
+        const unread = unreadCounts[convId] || 0;
+        const badgeHtml = unread > 0 ? `<span class="user-item__badge">${unread > 99 ? "99+" : unread}</span>` : "";
         return `
           <div class="user-item ${active}" data-email="${esc(u.email)}">
             <div class="user-item__avatar" style="background:${colorFor(u.name)}">${initials(u.name)}</div>
@@ -181,6 +204,7 @@
               <div class="user-item__name">${esc(u.name)}</div>
               ${u.organization ? `<div class="user-item__org">${esc(u.organization)}</div>` : ""}
             </div>
+            ${badgeHtml}
           </div>
         `;
       }).join("");
@@ -217,6 +241,10 @@
 
     await loadMessages();
     await markRead();
+
+    // Clear unread badge for this conversation immediately
+    delete unreadCounts[convId];
+    renderSidebar(userSearch.value);
 
     clearInterval(pollTimer);
     pollTimer = setInterval(pollMessages, POLL_MS);

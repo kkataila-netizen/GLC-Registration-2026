@@ -17,6 +17,7 @@
   let toast = null;
   let currentUser = null;
   let latestConvId = null;      // conversation ID with most recent unread
+  let chatWindow = null;        // reference to chat popup window
 
   function getUser() {
     try {
@@ -63,7 +64,15 @@
       const chatUrl = latestConvId
         ? `/chat.html?conv=${encodeURIComponent(latestConvId)}`
         : "/chat.html";
-      window.open(chatUrl, "glc-chat", "width=960,height=700");
+
+      // If the chat window is already open, navigate it to the correct conversation
+      if (chatWindow && !chatWindow.closed) {
+        chatWindow.location.href = chatUrl;
+        chatWindow.focus();
+      } else {
+        chatWindow = window.open(chatUrl, "glc-chat", "width=960,height=700");
+      }
+
       // Mark all conversations as read so unread resets to 0
       if (currentUser) {
         try {
