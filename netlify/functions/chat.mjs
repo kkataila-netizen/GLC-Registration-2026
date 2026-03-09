@@ -280,5 +280,23 @@ export default async (req) => {
     return json({ typing: active });
   }
 
+  /* ── GET /unread?user=email ─────────────────────── */
+  if (method === "GET" && /^\/unread\/?$/.test(path)) {
+    const user = url.searchParams.get("user");
+    if (!user) return json({ error: "user param required" }, 400);
+    const convs = await getConversations();
+    const userConvs = convs.filter(c => c.members.includes(user));
+    let total = 0;
+    for (const conv of userConvs) {
+      const msgs = await getMessages(conv.id);
+      for (const m of msgs) {
+        if (m.sender !== user && (!m.readBy || !m.readBy.some(r => r.email === user))) {
+          total++;
+        }
+      }
+    }
+    return json({ unread: total });
+  }
+
   return json({ error: "Not found" }, 404);
 };
