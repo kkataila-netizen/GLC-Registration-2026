@@ -132,6 +132,15 @@ body {
   100% { transform: scale(1); }
 }
 
+/* Nav link pulse when new message arrives */
+.nav-link--notify {
+  animation: navPulse 0.4s ease 3;
+}
+@keyframes navPulse {
+  0%, 100% { color: var(--primary); }
+  50% { color: #dc2626; }
+}
+
 /* ========== Layout ========== */
 .container {
   max-width: 720px;
