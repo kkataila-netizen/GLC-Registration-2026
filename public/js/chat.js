@@ -1,5 +1,5 @@
 /* ============================================================
-   GLC Chat – simplified client
+   GLC Chat – simplified client with group support
    ============================================================ */
 (() => {
   "use strict";
@@ -11,6 +11,7 @@
   let me = null;
   let users = [];
   let activeConvId = null;
+  let activeConvType = "dm"; // "dm" or "group"
   let messages = [];
   let lastMsgTs = null;
   let pollTimer = null;
@@ -20,16 +21,25 @@
 
   /* ── DOM refs ──────────────────────────────────── */
   const $ = id => document.getElementById(id);
-  const loginPrompt = $("loginPrompt");
-  const app         = $("app");
-  const userSearch  = $("userSearch");
-  const userList    = $("userList");
-  const chatEmpty   = $("chatEmpty");
-  const chatActive  = $("chatActive");
-  const chatTitle   = $("chatTitle");
+  const loginPrompt  = $("loginPrompt");
+  const app          = $("app");
+  const userSearch   = $("userSearch");
+  const userList     = $("userList");
+  const chatEmpty    = $("chatEmpty");
+  const chatActive   = $("chatActive");
+  const chatTitle    = $("chatTitle");
   const chatMessages = $("chatMessages");
-  const msgInput    = $("msgInput");
-  const sendBtn     = $("sendBtn");
+  const msgInput     = $("msgInput");
+  const sendBtn      = $("sendBtn");
+  const addPersonBtn = $("addPersonBtn");
+
+  // Modal refs
+  const addPeopleModal   = $("addPeopleModal");
+  const addPeopleList    = $("addPeopleList");
+  const addPeopleClose   = $("addPeopleClose");
+  const addPeopleCancel  = $("addPeopleCancel");
+  const addPeopleConfirm = $("addPeopleConfirm");
+  const groupNameInput   = $("groupNameInput");
 
   /* ── helpers ───────────────────────────────────── */
   function esc(s) {
@@ -55,6 +65,10 @@
     if (diff === 1) return "Yesterday";
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   }
+  function nameFor(email) {
+    const u = users.find(u => u.email === email);
+    return u ? u.name : email;
+  }
 
   async function api(path, opts = {}) {
     const res = await fetch(API + path, {
@@ -67,7 +81,6 @@
 
   /* ── init ──────────────────────────────────────── */
   async function init() {
-    // Must be logged in
     const stored = localStorage.getItem("glc-user") || localStorage.getItem("glc-chat-user");
     if (!stored) {
       loginPrompt.hidden = false;
@@ -75,7 +88,6 @@
     }
     me = JSON.parse(stored);
 
-    // Load users
     try {
       const data = await api("/users");
       users = data.users || [];
@@ -129,24 +141,14 @@
     return `dm:${sorted[0]}:${sorted[1]}`;
   }
 
-  /* ── open DM ───────────────────────────────────── */
-  async function openDM(targetEmail) {
-    const sorted = [me.email, targetEmail].sort();
-    const convId = `dm:${sorted[0]}:${sorted[1]}`;
-
-    // Create conversation if it doesn't exist
-    await api("/conversations", {
-      method: "POST",
-      body: { type: "dm", members: [me.email, targetEmail] }
-    });
-
+  /* ── open conversation (DM or group) ────────────── */
+  async function openConversation(convId, title, type) {
     activeConvId = convId;
+    activeConvType = type;
     lastMsgTs = null;
     messages = [];
 
-    // Update UI
-    const target = users.find(u => u.email === targetEmail);
-    chatTitle.textContent = target ? target.name : targetEmail;
+    chatTitle.textContent = title;
     chatEmpty.style.display = "none";
     chatActive.hidden = false;
     app.classList.add("app--chat-open");
@@ -155,11 +157,27 @@
     await loadMessages();
     await markRead();
 
-    // Start polling
     clearInterval(pollTimer);
     pollTimer = setInterval(pollMessages, POLL_MS);
 
     msgInput.focus();
+  }
+
+  async function openDM(targetEmail) {
+    const sorted = [me.email, targetEmail].sort();
+    const convId = `dm:${sorted[0]}:${sorted[1]}`;
+
+    await api("/conversations", {
+      method: "POST",
+      body: { type: "dm", members: [me.email, targetEmail] }
+    });
+
+    const target = users.find(u => u.email === targetEmail);
+    await openConversation(convId, target ? target.name : targetEmail, "dm");
+  }
+
+  async function openGroup(convId, groupName) {
+    await openConversation(convId, groupName, "group");
   }
 
   /* ── messages ──────────────────────────────────── */
@@ -190,6 +208,7 @@
   function renderMessages() {
     let html = "";
     let lastDate = "";
+    const isGroup = activeConvType === "group";
 
     for (const m of messages) {
       const d = dateLabel(m.timestamp);
@@ -200,9 +219,15 @@
       const isMine = m.sender === me.email;
       const cls = isMine ? "msg--mine" : "msg--other";
 
+      // In group chats, show sender name on other people's messages
+      const senderLabel = (isGroup && !isMine)
+        ? `<div class="msg__sender">${esc(m.senderName || nameFor(m.sender))}</div>`
+        : "";
+
       html += `
         <div class="msg ${cls}">
           <div>
+            ${senderLabel}
             <div class="msg__bubble">${esc(m.text)}</div>
             <div class="msg__time">${timeStr(m.timestamp)}</div>
           </div>
@@ -247,6 +272,89 @@
       body: { user: me.email }
     });
   }
+
+  /* ── Add People modal ──────────────────────────── */
+  function getCurrentMembers() {
+    // For a DM, extract the two member emails from the conv ID
+    if (activeConvId.startsWith("dm:")) {
+      const parts = activeConvId.split(":");
+      return [parts[1], parts[2]];
+    }
+    // For groups we don't have member data cached — return just me
+    return [me.email];
+  }
+
+  function showAddPeopleModal() {
+    const currentMembers = getCurrentMembers();
+
+    // Build the people checklist
+    addPeopleList.innerHTML = users.map(u => {
+      const isMember = currentMembers.includes(u.email);
+      const isMe = u.email === me.email;
+      const label = isMe ? `${esc(u.name)} (you)` : esc(u.name);
+      const mutedClass = isMember ? "modal__person-name--muted" : "";
+
+      return `
+        <label class="modal__person">
+          <input type="checkbox" value="${esc(u.email)}"
+            ${isMember ? "checked disabled" : ""}>
+          <span class="modal__person-name ${mutedClass}">${label}</span>
+        </label>
+      `;
+    }).join("");
+
+    groupNameInput.value = "";
+    addPeopleModal.hidden = false;
+    groupNameInput.focus();
+  }
+
+  function hideAddPeopleModal() {
+    addPeopleModal.hidden = true;
+  }
+
+  async function createGroupFromModal() {
+    const name = groupNameInput.value.trim();
+    if (!name) {
+      groupNameInput.focus();
+      return;
+    }
+
+    // Gather all checked emails
+    const checked = [...addPeopleList.querySelectorAll("input[type=checkbox]:checked")]
+      .map(cb => cb.value);
+
+    if (checked.length < 2) return; // need at least 2 people
+
+    // Make sure current user is included
+    if (!checked.includes(me.email)) checked.push(me.email);
+
+    // Create group conversation
+    const { conversation } = await api("/conversations", {
+      method: "POST",
+      body: { type: "group", name, members: checked }
+    });
+
+    hideAddPeopleModal();
+
+    // Switch to the new group
+    await openGroup(conversation.id, conversation.name);
+  }
+
+  // Wire up modal buttons
+  addPersonBtn.addEventListener("click", showAddPeopleModal);
+  addPeopleClose.addEventListener("click", hideAddPeopleModal);
+  addPeopleCancel.addEventListener("click", hideAddPeopleModal);
+  addPeopleConfirm.addEventListener("click", createGroupFromModal);
+
+  // Close modal on overlay click
+  addPeopleModal.addEventListener("click", e => {
+    if (e.target === addPeopleModal) hideAddPeopleModal();
+  });
+
+  // Close modal on Escape
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !addPeopleModal.hidden) hideAddPeopleModal();
+  });
 
   /* ── init ──────────────────────────────────────── */
   init();

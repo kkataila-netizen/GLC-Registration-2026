@@ -38,6 +38,7 @@
       <div id="chatActive" class="chat__active" hidden>
         <div class="chat__header">
           <div id="chatTitle" class="chat__title"></div>
+          <button id="addPersonBtn" class="chat__add-person" title="Add person to chat">➕</button>
         </div>
 
         <div id="chatMessages" class="chat__messages"></div>
@@ -48,6 +49,26 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Add People / Create Group Modal -->
+  <div id="addPeopleModal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal__header">
+        <span class="modal__title">Create Group Chat</span>
+        <button id="addPeopleClose" class="modal__close">&times;</button>
+      </div>
+      <div class="modal__body">
+        <label class="modal__label">Group name</label>
+        <input type="text" id="groupNameInput" class="modal__input" placeholder="e.g. Project Team">
+        <label class="modal__label">Add people</label>
+        <div id="addPeopleList" class="modal__people-list"></div>
+      </div>
+      <div class="modal__footer">
+        <button id="addPeopleCancel" class="modal__btn modal__btn--cancel">Cancel</button>
+        <button id="addPeopleConfirm" class="modal__btn modal__btn--confirm">Create Group</button>
+      </div>
+    </div>
   </div>
 
   <script src="/js/chat.js"></script>
