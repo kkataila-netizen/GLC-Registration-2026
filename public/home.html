@@ -149,6 +149,16 @@
       background: #7ab8d4;
       transform: translateY(-1px);
     }
+    .hero__cta--secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.4);
+      margin-bottom: 0.75rem;
+    }
+    .hero__cta--secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.6);
+    }
 
     @media (max-width: 640px) {
       .hero { padding: 2rem 1rem; }
@@ -175,7 +185,7 @@
       <li><a href="/info.html">Info</a></li>
       <li><a href="/sessions.html">Sessions</a></li>
       <li><a href="/people.html">People</a></li>
-      <li><a href="/">Register</a></li>
+      <li><a href="/index.html">Register</a></li>
       <li><a href="/admin.html">Admin</a></li>
     </ul>
   </nav>
@@ -201,7 +211,8 @@
       July 14&ndash;16, 2026 <span>&bull;</span> Toronto <span>&bull;</span> Fairmont Royal York
     </div>
 
-    <a href="/" class="hero__cta">Register Now &rarr;</a>
+    <a href="/index.html#loginSection" class="hero__cta hero__cta--secondary">Log In</a>
+    <a href="/index.html" class="hero__cta">Register Now &rarr;</a>
   </section>
 
   <script src="/js/nav-notify.js"></script>

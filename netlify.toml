@@ -7,6 +7,12 @@
   node_bundler = "esbuild"
   included_files = ["node_modules/@netlify/blobs/**"]
 
+# Home page is the default landing page
+[[redirects]]
+  from = "/"
+  to = "/home.html"
+  status = 200
+
 # Redirect API calls to the serverless function
 [[redirects]]
   from = "/chat-api/*"
