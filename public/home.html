@@ -160,6 +160,115 @@
       border-color: rgba(255,255,255,0.6);
     }
 
+    /* Login modal */
+    .login-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .login-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .login-modal__card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+      margin: 1rem;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .login-modal__close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #767676;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .login-modal__close:hover { color: #333; }
+    .login-modal__title {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #414141;
+      margin-bottom: 0.25rem;
+    }
+    .login-modal__subtitle {
+      font-size: 0.875rem;
+      color: #767676;
+      margin-bottom: 1.25rem;
+    }
+    .login-modal__field {
+      margin-bottom: 1rem;
+    }
+    .login-modal__field label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #414141;
+      margin-bottom: 0.25rem;
+    }
+    .login-modal__field input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .login-modal__field input:focus {
+      border-color: #395542;
+    }
+    .login-modal__btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: #395542;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .login-modal__btn:hover { background: #2d4435; }
+    .login-modal__btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-modal__msg {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    .login-modal__msg--error { color: #c53030; }
+    .login-modal__msg--success { color: #395542; }
+    .login-modal__register {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: #767676;
+    }
+    .login-modal__register a {
+      color: #395542;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .login-modal__register a:hover { text-decoration: underline; }
+
     @media (max-width: 640px) {
       .hero { padding: 2rem 1rem; }
       .hero__icon { width: 80px; height: 110px; margin-bottom: 1.5rem; }
@@ -211,20 +320,110 @@
       July 14&ndash;16, 2026 <span>&bull;</span> Toronto <span>&bull;</span> Fairmont Royal York
     </div>
 
-    <a href="/index.html#loginSection" class="hero__cta hero__cta--secondary" id="heroLogin">Log In</a>
+    <a href="/info.html" class="hero__cta hero__cta--secondary" id="heroLogin" style="display:none;">Log In</a>
     <a href="/index.html" class="hero__cta">Register Now &rarr;</a>
   </section>
 
+  <!-- Login modal -->
+  <div class="login-modal" id="loginModal">
+    <div class="login-modal__card">
+      <button class="login-modal__close" id="loginClose">&times;</button>
+      <div class="login-modal__title">Welcome Back</div>
+      <div class="login-modal__subtitle">Log in to your GLC account</div>
+      <form id="homeLoginForm" autocomplete="on">
+        <div class="login-modal__field">
+          <label for="homeEmail">Email</label>
+          <input type="email" id="homeEmail" required autocomplete="email">
+        </div>
+        <div class="login-modal__field">
+          <label for="homePassword">Password</label>
+          <input type="password" id="homePassword" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="login-modal__btn" id="homeLoginBtn">Log In</button>
+        <div class="login-modal__msg" id="homeLoginMsg" hidden></div>
+      </form>
+      <div class="login-modal__register">Don't have an account? <a href="/index.html">Register here</a></div>
+    </div>
+  </div>
+
   <script>
-    // If logged in, redirect Log In button to Info page
-    try {
-      const u = JSON.parse(localStorage.getItem('glc-user'));
-      if (u && u.email) {
-        const btn = document.getElementById('heroLogin');
-        btn.href = '/info.html';
-        btn.textContent = 'Welcome, ' + u.name.split(' ')[0] + ' \u2192';
-      }
-    } catch {}
+    (() => {
+      const btn = document.getElementById('heroLogin');
+      const modal = document.getElementById('loginModal');
+      const closeBtn = document.getElementById('loginClose');
+      const form = document.getElementById('homeLoginForm');
+      const submitBtn = document.getElementById('homeLoginBtn');
+      const msg = document.getElementById('homeLoginMsg');
+
+      // Check login state
+      try {
+        const u = JSON.parse(localStorage.getItem('glc-user'));
+        if (u && u.email) {
+          btn.href = '/info.html';
+          btn.textContent = 'Welcome, ' + u.name.split(' ')[0] + ' \u2192';
+          btn.style.display = '';
+          btn.onclick = null;
+          // Skip modal setup for logged-in users
+          return;
+        }
+      } catch {}
+
+      // Not logged in: show button and wire up modal
+      btn.style.display = '';
+      btn.href = '#';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('open');
+      });
+
+      closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.hidden = true;
+        const email = document.getElementById('homeEmail').value.trim();
+        const password = document.getElementById('homePassword').value;
+        if (!email || !password) {
+          msg.hidden = false;
+          msg.className = 'login-modal__msg login-modal__msg--error';
+          msg.textContent = 'Email and password are required.';
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in\u2026';
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            const user = { name: result.user.name, email: result.user.email };
+            localStorage.setItem('glc-user', JSON.stringify(user));
+            localStorage.setItem('glc-chat-user', JSON.stringify(user));
+            msg.hidden = false;
+            msg.className = 'login-modal__msg login-modal__msg--success';
+            msg.textContent = 'Welcome back, ' + result.user.name + '!';
+            setTimeout(() => { window.location.href = '/info.html'; }, 800);
+          } else {
+            msg.hidden = false;
+            msg.className = 'login-modal__msg login-modal__msg--error';
+            msg.textContent = result.error || 'Invalid email or password.';
+          }
+        } catch {
+          msg.hidden = false;
+          msg.className = 'login-modal__msg login-modal__msg--error';
+          msg.textContent = 'Could not connect to the server.';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Log In';
+        }
+      });
+    })();
   </script>
   <script src="/js/nav-notify.js"></script>
 </body>
