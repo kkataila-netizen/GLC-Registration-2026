@@ -50,6 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init auth UI
   updateAuthUI();
 
+  /* ── dietary "Other" toggle ────────────────────── */
+  const dietarySelect = document.getElementById('dietary');
+  const dietaryOther = document.getElementById('dietaryOther');
+  dietarySelect.addEventListener('change', () => {
+    dietaryOther.style.display = dietarySelect.value === 'Other' ? '' : 'none';
+    if (dietarySelect.value !== 'Other') dietaryOther.value = '';
+  });
+
   /* ── registration form ───────────────────────────── */
   function validateForm(data) {
     const errors = {};
@@ -127,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       phone: document.getElementById('phone').value,
       organization: document.getElementById('organization').value,
       dietary: document.getElementById('dietary').value,
+      dietaryOther: document.getElementById('dietaryOther').value,
       sessions: Array.from(form.querySelectorAll('input[name="sessions"]:checked')).map(cb => cb.value),
       tshirt: document.getElementById('tshirt').value
     };
