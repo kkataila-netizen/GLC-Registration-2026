@@ -6,7 +6,7 @@
   <title>GLC 2026 - Global Leadership Conference</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #1a1a2e; }
+    body { background: #395542; }
 
     .hero {
       position: relative;
@@ -18,79 +18,116 @@
       text-align: center;
       padding: 3rem 1.5rem;
       overflow: hidden;
-      background:
-        radial-gradient(ellipse at 30% 60%, rgba(57,85,66,0.35) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 40%, rgba(93,125,200,0.2) 0%, transparent 55%),
-        linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #1a1a2e 100%);
+      background: #395542;
     }
 
-    /* Subtle grid overlay */
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
-
-    .hero__meta {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 2rem;
+    /* Geometric chevron icon */
+    .hero__icon {
       position: relative;
-    }
-
-    .hero__meta span {
-      margin: 0 0.5rem;
-      opacity: 0.4;
-    }
-
-    .hero__lockup {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.85);
-      line-height: 1.3;
+      width: 120px;
+      height: 160px;
       margin-bottom: 2.5rem;
-      position: relative;
+    }
+    .hero__icon .bar {
+      position: absolute;
+      width: 28px;
+      border-radius: 4px;
+      transform-origin: center;
+    }
+    .hero__icon .bar--1 {
+      height: 120px;
+      background: rgba(255,255,255,0.15);
+      transform: rotate(-20deg);
+      left: 20px;
+      top: 20px;
+    }
+    .hero__icon .bar--2 {
+      height: 130px;
+      background: rgba(255,255,255,0.25);
+      border: 2px solid rgba(140,197,224,0.4);
+      background: transparent;
+      transform: rotate(-20deg);
+      left: 46px;
+      top: 10px;
+    }
+    .hero__icon .bar--3 {
+      height: 140px;
+      background: #8cc5e0;
+      transform: rotate(-20deg);
+      left: 72px;
+      top: 0;
     }
 
     .hero__headline {
       font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: clamp(3rem, 10vw, 8rem);
-      font-weight: 700;
-      color: #fff;
+      font-size: clamp(3rem, 10vw, 7.5rem);
+      font-weight: 300;
+      font-style: italic;
+      color: #ffffff;
       line-height: 1.05;
       letter-spacing: -0.02em;
       position: relative;
+      margin-bottom: 3rem;
+    }
+
+    /* Banyan + GLC lockup */
+    .hero__brand {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
       margin-bottom: 2rem;
+      position: relative;
     }
 
-    .hero__headline em {
-      font-style: italic;
-      background: linear-gradient(135deg, #93c5fd 0%, #a8d8b9 50%, #f5d07a 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .hero__brand-name {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .hero__brand-name small {
+      display: block;
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-top: 2px;
     }
 
-    .hero__tagline {
-      font-family: 'Source Sans 3', Arial, sans-serif;
-      font-size: 1.25rem;
-      color: rgba(255,255,255,0.55);
-      max-width: 520px;
-      line-height: 1.6;
+    .hero__brand-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .hero__brand-conf {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .hero__meta {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
       margin-bottom: 3rem;
       position: relative;
+    }
+
+    .hero__meta span {
+      margin: 0 0.625rem;
+      opacity: 0.5;
     }
 
     .hero__cta {
@@ -98,54 +135,32 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.875rem 2.25rem;
-      background: var(--primary);
-      color: #fff;
+      background: #8cc5e0;
+      color: #2d3436;
       font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 1.0625rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
       text-decoration: none;
       border-radius: 8px;
       transition: background 0.2s, transform 0.2s;
       position: relative;
     }
     .hero__cta:hover {
-      background: var(--primary-hover);
+      background: #7ab8d4;
       transform: translateY(-1px);
-    }
-
-    .hero__details {
-      display: flex;
-      gap: 2.5rem;
-      margin-top: 4rem;
-      position: relative;
-    }
-
-    .hero__detail {
-      text-align: center;
-    }
-
-    .hero__detail-label {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 0.6875rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 0.25rem;
-    }
-
-    .hero__detail-value {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.8);
     }
 
     @media (max-width: 640px) {
       .hero { padding: 2rem 1rem; }
-      .hero__lockup { font-size: 1.125rem; }
-      .hero__details { flex-direction: column; gap: 1.25rem; }
-      .hero__meta { font-size: 0.75rem; }
+      .hero__icon { width: 80px; height: 110px; margin-bottom: 1.5rem; }
+      .hero__icon .bar { width: 20px; }
+      .hero__icon .bar--1 { height: 80px; left: 12px; top: 15px; }
+      .hero__icon .bar--2 { height: 90px; left: 32px; top: 8px; }
+      .hero__icon .bar--3 { height: 95px; left: 52px; top: 0; }
+      .hero__brand { flex-direction: column; gap: 0.5rem; }
+      .hero__brand-divider { width: 40px; height: 1px; }
+      .hero__brand-conf { text-align: center; }
+      .hero__meta { font-size: 0.6875rem; }
     }
   </style>
 </head>
@@ -166,34 +181,27 @@
   </nav>
 
   <section class="hero">
+    <!-- Geometric chevron icon -->
+    <div class="hero__icon">
+      <div class="bar bar--1"></div>
+      <div class="bar bar--2"></div>
+      <div class="bar bar--3"></div>
+    </div>
+
+    <h1 class="hero__headline">Future-Forward</h1>
+
+    <!-- Banyan | GLC lockup -->
+    <div class="hero__brand">
+      <div class="hero__brand-name">banyan<small>SOFTWARE</small></div>
+      <div class="hero__brand-divider"></div>
+      <div class="hero__brand-conf">Global Leadership<br>Conference</div>
+    </div>
+
     <div class="hero__meta">
       July 14&ndash;16, 2026 <span>&bull;</span> Toronto <span>&bull;</span> Fairmont Royal York
     </div>
 
-    <div class="hero__lockup">
-      Global Leadership<br>Conference
-    </div>
-
-    <h1 class="hero__headline"><em>Future-Forward</em></h1>
-
-    <p class="hero__tagline">Three days of strategy, connection, and bold thinking with leaders shaping what comes next.</p>
-
     <a href="/" class="hero__cta">Register Now &rarr;</a>
-
-    <div class="hero__details">
-      <div class="hero__detail">
-        <div class="hero__detail-label">Dates</div>
-        <div class="hero__detail-value">July 14&ndash;16, 2026</div>
-      </div>
-      <div class="hero__detail">
-        <div class="hero__detail-label">Venue</div>
-        <div class="hero__detail-value">Fairmont Royal York</div>
-      </div>
-      <div class="hero__detail">
-        <div class="hero__detail-label">Location</div>
-        <div class="hero__detail-value">Toronto, Canada</div>
-      </div>
-    </div>
   </section>
 
   <script src="/js/nav-notify.js"></script>
