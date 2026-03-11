@@ -7,11 +7,12 @@
   node_bundler = "esbuild"
   included_files = ["node_modules/@netlify/blobs/**"]
 
-# Home page is the default landing page
+# Home page is the default landing page (force=true overrides index.html)
 [[redirects]]
   from = "/"
   to = "/home.html"
   status = 200
+  force = true
 
 # Redirect API calls to the serverless function
 [[redirects]]
