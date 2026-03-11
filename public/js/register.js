@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
       errors.name = 'Name is required and must be at least 2 characters.';
     }
 
+    if (!data.title || data.title.trim().length < 2) {
+      errors.title = 'Title is required.';
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email || !emailRegex.test(data.email.trim())) {
       errors.email = 'A valid email address is required.';
@@ -65,6 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!data.password || data.password.length < 4) {
       errors.password = 'Password is required (at least 4 characters).';
+    }
+
+    if (!data.arrivalDate) {
+      errors.arrivalDate = 'Arrival date is required.';
+    }
+
+    if (!data.departureDate) {
+      errors.departureDate = 'Departure date is required.';
     }
 
     if (data.phone && !/^[0-9\s\-\(\)\+]{7,20}$/.test(data.phone.trim())) {
@@ -107,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const data = {
       name: document.getElementById('name').value,
+      title: document.getElementById('title').value,
       email: document.getElementById('email').value,
       password: document.getElementById('password').value,
       arrivalDate: document.getElementById('arrivalDate').value,
