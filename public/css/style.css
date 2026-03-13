@@ -66,15 +66,7 @@ body {
 .top-nav__logo {
   width: 32px;
   height: 32px;
-  background: #8cc5e0;
-  color: #2d4435;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Libre Franklin', Arial, sans-serif;
-  font-weight: 700;
-  font-size: 16px;
+  object-fit: contain;
 }
 
 .top-nav__title {
