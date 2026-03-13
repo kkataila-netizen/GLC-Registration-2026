@@ -6,7 +6,7 @@
   <title>GLC 2026 - Global Leadership Conference</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #395542; }
+    body { background: #395542; margin: 0; }
 
     .hero {
       position: relative;
@@ -18,44 +18,7 @@
       text-align: center;
       padding: 3rem 1.5rem;
       overflow: hidden;
-      background: #395542;
-    }
-
-    /* Geometric chevron icon */
-    .hero__icon {
-      position: relative;
-      width: 120px;
-      height: 160px;
-      margin-bottom: 2.5rem;
-    }
-    .hero__icon .bar {
-      position: absolute;
-      width: 28px;
-      border-radius: 4px;
-      transform-origin: center;
-    }
-    .hero__icon .bar--1 {
-      height: 120px;
-      background: rgba(255,255,255,0.15);
-      transform: rotate(-20deg);
-      left: 20px;
-      top: 20px;
-    }
-    .hero__icon .bar--2 {
-      height: 130px;
-      background: rgba(255,255,255,0.25);
-      border: 2px solid rgba(140,197,224,0.4);
-      background: transparent;
-      transform: rotate(-20deg);
-      left: 46px;
-      top: 10px;
-    }
-    .hero__icon .bar--3 {
-      height: 140px;
-      background: #8cc5e0;
-      transform: rotate(-20deg);
-      left: 72px;
-      top: 0;
+      background: url('/images/hero-desktop.png') center/cover no-repeat #395542;
     }
 
     .hero__headline {
@@ -270,12 +233,10 @@
     .login-modal__register a:hover { text-decoration: underline; }
 
     @media (max-width: 640px) {
-      .hero { padding: 2rem 1rem; }
-      .hero__icon { width: 80px; height: 110px; margin-bottom: 1.5rem; }
-      .hero__icon .bar { width: 20px; }
-      .hero__icon .bar--1 { height: 80px; left: 12px; top: 15px; }
-      .hero__icon .bar--2 { height: 90px; left: 32px; top: 8px; }
-      .hero__icon .bar--3 { height: 95px; left: 52px; top: 0; }
+      .hero {
+        padding: 2rem 1rem;
+        background-image: url('/images/hero-mobile.png');
+      }
       .hero__brand { flex-direction: column; gap: 0.5rem; }
       .hero__brand-divider { width: 40px; height: 1px; }
       .hero__brand-conf { text-align: center; }
@@ -300,13 +261,6 @@
   </nav>
 
   <section class="hero">
-    <!-- Geometric chevron icon -->
-    <div class="hero__icon">
-      <div class="bar bar--1"></div>
-      <div class="bar bar--2"></div>
-      <div class="bar bar--3"></div>
-    </div>
-
     <h1 class="hero__headline">Future-Forward</h1>
 
     <!-- Banyan | GLC lockup -->
