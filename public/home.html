@@ -178,6 +178,17 @@
         margin-bottom: 0.5rem;
       }
     }
+
+    @media (min-width: 2001px) {
+      .hero__buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+      }
+      .hero__cta--secondary {
+        margin-bottom: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -198,8 +209,10 @@
 
   <section class="hero">
     <div class="hero__spacer"></div>
-    <a href="/info.html" class="hero__cta hero__cta--secondary" id="heroLogin" style="display:none;">Log In</a>
-    <a href="/register.html" class="hero__cta">Register Now &rarr;</a>
+    <div class="hero__buttons">
+      <a href="/info.html" class="hero__cta hero__cta--secondary" id="heroLogin" style="display:none;">Log In</a>
+      <a href="/register.html" class="hero__cta">Register Now &rarr;</a>
+    </div>
   </section>
 
   <!-- Login modal -->
