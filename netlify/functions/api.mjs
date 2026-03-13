@@ -97,6 +97,7 @@ export default async (req, context) => {
     const registration = {
       id: crypto.randomUUID(),
       name: body.name.trim(),
+      title: body.title ? body.title.trim() : '',
       email,
       passwordHash: await hashPassword(body.password),
       arrivalDate: body.arrivalDate || '',
@@ -223,6 +224,7 @@ export default async (req, context) => {
       }
       reg.phone = body.phone ? body.phone.trim() : '';
     }
+    if (body.title !== undefined) reg.title = (body.title || '').trim();
     if (body.organization !== undefined) reg.organization = (body.organization || '').trim();
     if (body.dietary !== undefined) {
       if (body.dietary && !VALID_DIETARY.includes(body.dietary)) {
