@@ -21,76 +21,8 @@
       background: url('/images/hero-mobile.png') center/cover no-repeat #395542;
     }
 
-    .hero__headline {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: clamp(3rem, 10vw, 7.5rem);
-      font-weight: 300;
-      font-style: italic;
-      color: #ffffff;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      position: relative;
-      margin-bottom: 3rem;
-    }
-
-    /* Banyan + GLC lockup */
-    .hero__brand {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-      position: relative;
-    }
-
-    .hero__brand-name {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.01em;
-      line-height: 1;
-    }
-    .hero__brand-name small {
-      display: block;
-      font-size: 0.5rem;
-      font-weight: 600;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-      margin-top: 2px;
-    }
-
-    .hero__brand-divider {
-      width: 1px;
-      height: 32px;
-      background: rgba(255,255,255,0.4);
-    }
-
-    .hero__brand-conf {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #ffffff;
-      line-height: 1.4;
-      text-align: left;
-    }
-
-    .hero__meta {
-      font-family: 'Libre Franklin', Arial, sans-serif;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 3rem;
-      position: relative;
-    }
-
-    .hero__meta span {
-      margin: 0 0.625rem;
-      opacity: 0.5;
+    .hero__spacer {
+      flex: 1;
     }
 
     .hero__cta {
@@ -237,10 +169,6 @@
         padding: 2rem 1rem;
         background-image: url('/images/hero-desktop.png');
       }
-      .hero__brand { flex-direction: column; gap: 0.5rem; }
-      .hero__brand-divider { width: 40px; height: 1px; }
-      .hero__brand-conf { text-align: center; }
-      .hero__meta { font-size: 0.6875rem; }
     }
   </style>
 </head>
@@ -261,19 +189,7 @@
   </nav>
 
   <section class="hero">
-    <h1 class="hero__headline">Future-Forward</h1>
-
-    <!-- Banyan | GLC lockup -->
-    <div class="hero__brand">
-      <div class="hero__brand-name">banyan<small>SOFTWARE</small></div>
-      <div class="hero__brand-divider"></div>
-      <div class="hero__brand-conf">Global Leadership<br>Conference</div>
-    </div>
-
-    <div class="hero__meta">
-      July 14&ndash;16, 2026 <span>&bull;</span> Toronto <span>&bull;</span> Fairmont Royal York
-    </div>
-
+    <div class="hero__spacer"></div>
     <a href="/info.html" class="hero__cta hero__cta--secondary" id="heroLogin" style="display:none;">Log In</a>
     <a href="/register.html" class="hero__cta">Register Now &rarr;</a>
   </section>
