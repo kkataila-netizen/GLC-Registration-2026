@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="person-avatar" style="background:${color}">${initials}</div>
         <div class="person-card__name">${escapeHtml(person.name)}</div>
         <div class="person-card__org">${person.organization ? escapeHtml(person.organization) : '—'}</div>
-        ${person.arrivalDate ? `<div class="person-card__arrival">Arrives ${formatDate(person.arrivalDate)}</div>` : ''}
+        ${person.title ? `<div class="person-card__arrival">${escapeHtml(person.title)}</div>` : ''}
         <div class="person-card__chat">💬 Message</div>
       `;
       card.addEventListener('click', () => {
