@@ -26,17 +26,11 @@
 
 body {
   font-family: 'Source Sans 3', Arial, sans-serif;
-  background: #395542 url('/images/bg-desktop.png') center top/cover no-repeat fixed;
+  background: #faf9f7;
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
   padding-top: 56px;
-}
-
-@media (max-width: 640px) {
-  body {
-    background-image: url('/images/bg-mobile.png');
-  }
 }
 
 /* ========== Top Navigation Bar ========== */
