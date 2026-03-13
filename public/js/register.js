@@ -70,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
       errors.title = 'Title is required.';
     }
 
+    if (!data.organization || data.organization.trim().length < 2) {
+      errors.organization = 'Organization / Company is required.';
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email || !emailRegex.test(data.email.trim())) {
       errors.email = 'A valid email address is required.';
@@ -89,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (data.phone && !/^[0-9\s\-\(\)\+]{7,20}$/.test(data.phone.trim())) {
       errors.phone = 'Phone number format is invalid.';
+    }
+
+    if (!data.tshirt) {
+      errors.tshirt = 'T-Shirt size is required.';
     }
 
     return { valid: Object.keys(errors).length === 0, errors };
