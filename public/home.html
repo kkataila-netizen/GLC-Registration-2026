@@ -211,7 +211,7 @@
     <div class="hero__spacer"></div>
     <div class="hero__buttons">
       <a href="/info.html" class="hero__cta hero__cta--secondary" id="heroLogin" style="display:none;">Log In</a>
-      <a href="/register.html" class="hero__cta">Register Now &rarr;</a>
+      <a href="/register.html" class="hero__cta" id="heroRegister">Register Now &rarr;</a>
     </div>
   </section>
 
@@ -254,6 +254,18 @@
           btn.textContent = 'Welcome, ' + u.name.split(' ')[0] + ' \u2192';
           btn.style.display = '';
           btn.onclick = null;
+          // Replace Register Now with Log Out
+          const regBtn = document.getElementById('heroRegister');
+          if (regBtn) {
+            regBtn.textContent = 'Log Out';
+            regBtn.href = '#';
+            regBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              localStorage.removeItem('glc-user');
+              localStorage.removeItem('glc-chat-user');
+              location.reload();
+            });
+          }
           // Skip modal setup for logged-in users
           return;
         }

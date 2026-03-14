@@ -180,11 +180,24 @@
     }
   }
 
+  /* ── Rename Register tab to Profile when logged in ── */
+  function renameRegisterTab(user) {
+    if (!user) return;
+    const links = document.querySelectorAll(".top-nav__links a");
+    for (const a of links) {
+      const href = (a.getAttribute("href") || "").replace(/\/$/, "");
+      if (href === "/register.html" || href === "/register") {
+        a.textContent = "Profile";
+      }
+    }
+  }
+
   function init() {
     const user = getUser();
 
     // Always enforce admin visibility (even if not logged in)
     enforceAdminVisibility(user);
+    renameRegisterTab(user);
 
     if (!user) return;
     currentUser = user;
