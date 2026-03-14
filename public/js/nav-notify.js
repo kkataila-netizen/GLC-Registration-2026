@@ -87,10 +87,12 @@
     return toast;
   }
 
-  function showToast(count) {
+  function showToast(count, convName) {
     const t = createToast();
-    t.querySelector(".chat-toast__text").textContent =
-      `You have ${count} unread message${count !== 1 ? "s" : ""}`;
+    const text = convName
+      ? `${convName} — ${count} unread message${count !== 1 ? "s" : ""}`
+      : `You have ${count} unread message${count !== 1 ? "s" : ""}`;
+    t.querySelector(".chat-toast__text").textContent = text;
     t.hidden = false;
   }
 
@@ -141,6 +143,7 @@
 
       // Track which conversation has the most recent unread message
       if (data.convId) latestConvId = data.convId;
+      const convName = data.convName || "";
 
       // Update badge + title (always reflects true count)
       updateBadge(link, unread);
@@ -149,12 +152,12 @@
         // New messages arrived (count went up) → reset dismiss, show toast
         if (unread > lastUnread) {
           toastDismissed = false;
-          showToast(unread);
+          showToast(unread, convName);
           sendBrowserNotification(unread);
         }
         // Still have unread and user hasn't dismissed → keep toast visible
         else if (!toastDismissed) {
-          showToast(unread);
+          showToast(unread, convName);
         }
       } else {
         // All read → hide everything, reset dismiss state
