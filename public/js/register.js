@@ -50,6 +50,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init auth UI
   updateAuthUI();
 
+  /* ── profile mode (logged-in user) ─────────────── */
+  async function loadProfile() {
+    const user = getUser();
+    if (!user) return;
+
+    // Update page header
+    const h1 = document.querySelector('.page-header h1');
+    const sub = document.querySelector('.page-header p');
+    if (h1) h1.textContent = 'Profile';
+    if (sub) sub.textContent = 'Update your registration details';
+
+    // Change submit button
+    submitBtn.textContent = 'Save Edits';
+
+    // Make password optional
+    const pwGroup = document.getElementById('password').closest('.form-group');
+    pwGroup.querySelector('label').innerHTML = 'New Password <small style="font-weight:normal;color:#888">(leave blank to keep current)</small>';
+
+    // Fetch registration data
+    try {
+      const res = await fetch('/api/registrations?search=' + encodeURIComponent(user.email));
+      const result = await res.json();
+      const reg = result.registrations.find(r => r.email === user.email.toLowerCase());
+      if (!reg) return;
+
+      // Store ID for PUT requests
+      form.dataset.regId = reg.id;
+
+      // Populate fields
+      document.getElementById('name').value = reg.name || '';
+      document.getElementById('title').value = reg.title || '';
+      document.getElementById('organization').value = reg.organization || '';
+      document.getElementById('email').value = reg.email || '';
+      document.getElementById('arrivalDate').value = reg.arrivalDate || '';
+      document.getElementById('departureDate').value = reg.departureDate || '';
+      document.getElementById('phone').value = reg.phone || '';
+      document.getElementById('dietary').value = reg.dietary || 'None';
+      if (reg.dietary === 'Other') {
+        dietaryOther.style.display = '';
+        dietaryOther.value = reg.dietaryOther || '';
+      }
+      document.getElementById('tshirt').value = reg.tshirt || '';
+      // Check session checkboxes
+      if (reg.sessions && reg.sessions.length) {
+        form.querySelectorAll('input[name="sessions"]').forEach(cb => {
+          cb.checked = reg.sessions.includes(cb.value);
+        });
+      }
+    } catch (e) { console.error('Failed to load profile', e); }
+  }
+
+  loadProfile();
+
   /* ── dietary "Other" toggle ────────────────────── */
   const dietarySelect = document.getElementById('dietary');
   const dietaryOther = document.getElementById('dietaryOther');
@@ -59,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ── registration form ───────────────────────────── */
-  function validateForm(data) {
+  function validateForm(data, isEdit) {
     const errors = {};
 
     if (!data.name || data.name.trim().length < 2) {
@@ -79,8 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
       errors.email = 'A valid email address is required.';
     }
 
-    if (!data.password || data.password.length < 4) {
+    if (!isEdit && (!data.password || data.password.length < 4)) {
       errors.password = 'Password is required (at least 4 characters).';
+    }
+    if (isEdit && data.password && data.password.length > 0 && data.password.length < 4) {
+      errors.password = 'Password must be at least 4 characters.';
     }
 
     if (!data.arrivalDate) {
@@ -148,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tshirt: document.getElementById('tshirt').value
     };
 
-    const { valid, errors } = validateForm(data);
+    const isEdit = !!form.dataset.regId;
+    const { valid, errors } = validateForm(data, isEdit);
     if (!valid) {
       for (const [field, message] of Object.entries(errors)) {
         showFieldError(field, message);
@@ -157,18 +214,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting...';
+    submitBtn.textContent = isEdit ? 'Saving...' : 'Submitting...';
 
     try {
-      const res = await fetch('/api/registrations', {
-        method: 'POST',
+      let url, method;
+      const payload = { ...data };
+
+      if (isEdit) {
+        url = '/api/registrations/' + form.dataset.regId;
+        method = 'PUT';
+        // Don't send empty password on edit
+        if (!payload.password) delete payload.password;
+      } else {
+        url = '/api/registrations';
+        method = 'POST';
+      }
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
 
       const result = await res.json();
 
-      if (res.status === 201) {
+      if (isEdit && res.ok) {
+        showMessage(formMessage, 'success', 'Profile updated successfully!');
+        // Update localStorage if name or email changed
+        setUser({ name: data.name.trim(), email: data.email.trim().toLowerCase() });
+      } else if (res.status === 201) {
         showMessage(formMessage, 'success', 'Registration complete! You are now logged in.');
         form.reset();
         // Auto-login after registration
@@ -184,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage(formMessage, 'error', 'Could not connect to the server. Please try again later.');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Register';
+      submitBtn.textContent = isEdit ? 'Save Edits' : 'Register';
     }
   });
 
