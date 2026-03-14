@@ -119,15 +119,17 @@ export default async (req, context) => {
   // GET /api/registrations/export
   if (method === "GET" && (path === "/registrations/export" || path === "/registrations/export/")) {
     const registrations = await getRegistrations();
-    const headers = ['Name', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Organization', 'Dietary', 'Sessions', 'T-Shirt', 'Registered'];
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'T-Shirt', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
+      escapeCSV(r.title),
+      escapeCSV(r.organization),
       escapeCSV(r.email),
       escapeCSV(r.arrivalDate),
       escapeCSV(r.departureDate),
       escapeCSV(r.phone),
-      escapeCSV(r.organization),
       escapeCSV(r.dietary),
+      escapeCSV(r.dietaryOther),
       escapeCSV(Array.isArray(r.sessions) ? r.sessions.join('; ') : ''),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt)
