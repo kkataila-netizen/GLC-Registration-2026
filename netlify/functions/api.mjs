@@ -105,6 +105,7 @@ export default async (req, context) => {
       phone: body.phone ? body.phone.trim() : '',
       organization: body.organization ? body.organization.trim() : '',
       dietary: body.dietary || 'None',
+      dietaryOther: body.dietaryOther ? body.dietaryOther.trim() : '',
       sessions: Array.isArray(body.sessions) ? body.sessions : [],
       tshirt: body.tshirt || '',
       registeredAt: new Date().toISOString()
@@ -234,6 +235,7 @@ export default async (req, context) => {
       }
       reg.dietary = body.dietary || 'None';
     }
+    if (body.dietaryOther !== undefined) reg.dietaryOther = (body.dietaryOther || '').trim();
     if (body.tshirt !== undefined) {
       if (body.tshirt && !VALID_TSHIRT.includes(body.tshirt)) {
         return json({ error: "Invalid t-shirt size." }, 400);
