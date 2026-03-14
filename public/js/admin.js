@@ -298,6 +298,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // ── Reset Chat ────────────────────────────────────
+    const resetChatBtn = document.getElementById('resetChatBtn');
+    resetChatBtn.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to delete ALL chat conversations and messages? This cannot be undone.')) return;
+      if (!confirm('This will permanently remove all DMs, groups, and message history. Continue?')) return;
+
+      resetChatBtn.disabled = true;
+      resetChatBtn.textContent = 'Resetting...';
+
+      try {
+        const res = await fetch('/chat-api/reset', { method: 'POST' });
+        if (res.ok) {
+          alert('All chat conversations and messages have been cleared.');
+        } else {
+          alert('Failed to reset chat. Please try again.');
+        }
+      } catch {
+        alert('Network error. Please try again.');
+      } finally {
+        resetChatBtn.disabled = false;
+        resetChatBtn.textContent = 'Reset Chat';
+      }
+    });
+
     loadRegistrations();
   }
 });

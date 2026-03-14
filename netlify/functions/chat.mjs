@@ -353,5 +353,28 @@ export default async (req) => {
     return json({ success: true });
   }
 
+  /* ── POST /reset ── clear all conversations & messages ── */
+  if (method === "POST" && /^\/reset\/?$/.test(path)) {
+    // Clear all conversations
+    await saveConversations([]);
+    // Clear all message blobs
+    const msgStore = getStore("chat-messages");
+    try {
+      const { blobs } = await msgStore.list();
+      for (const blob of blobs) {
+        await msgStore.delete(blob.key);
+      }
+    } catch { /* ignore */ }
+    // Clear typing store
+    const typStore = getStore("chat-typing");
+    try {
+      const { blobs } = await typStore.list();
+      for (const blob of blobs) {
+        await typStore.delete(blob.key);
+      }
+    } catch { /* ignore */ }
+    return json({ success: true, message: "All conversations and messages cleared." });
+  }
+
   return json({ error: "Not found" }, 404);
 };
