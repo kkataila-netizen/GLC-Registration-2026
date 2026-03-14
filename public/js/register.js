@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   logoutBtn.addEventListener('click', () => {
     clearUser();
+    location.reload();
   });
 
   // Init auth UI
