@@ -51,6 +51,7 @@
       <div class="toolbar">
         <input type="text" id="searchInput" placeholder="Search by name or email...">
         <span id="regCount" class="badge badge--count">0 registrations</span>
+        <button id="broadcastBtn" class="btn btn-primary">Send Communication</button>
         <button id="exportBtn" class="btn btn-secondary">Export CSV</button>
       </div>
 
@@ -144,6 +145,34 @@
           <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Broadcast Modal -->
+  <div id="broadcastModal" class="admin-modal-overlay" hidden>
+    <div class="card admin-modal">
+      <h2 style="margin-bottom:1rem">Send Communication</h2>
+      <p style="color:var(--text-muted);margin-bottom:1rem">This message will be displayed as a banner notification to all users across the site.</p>
+      <form id="broadcastForm">
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="broadcastSubject" placeholder="e.g. Schedule Update" required>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="broadcastMessage" rows="4" placeholder="Type your message here..." style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:var(--radius);font:inherit;resize:vertical" required></textarea>
+        </div>
+        <div id="broadcastError" class="message message--error" hidden></div>
+        <div id="broadcastSuccess" class="message message--success" hidden></div>
+        <div style="display:flex;gap:.75rem;margin-top:1rem">
+          <button type="button" id="broadcastCancel" class="btn btn-secondary" style="flex:1">Cancel</button>
+          <button type="submit" id="broadcastSend" class="btn btn-primary" style="flex:1">Send to All Users</button>
+        </div>
+      </form>
+      <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem">
+        <h3 style="font-size:.875rem;margin-bottom:.5rem">Previous Communications</h3>
+        <div id="broadcastHistory" style="max-height:200px;overflow-y:auto;font-size:.8125rem"></div>
+      </div>
     </div>
   </div>
 

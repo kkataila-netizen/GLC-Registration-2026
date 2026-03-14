@@ -292,5 +292,44 @@ export default async (req, context) => {
     return json({ success: true, user: { name: user.name, email: user.email } });
   }
 
+  // ── Broadcasts ────────────────────────────────────
+  const broadcastStore = getStore("broadcasts");
+
+  // POST /api/broadcast — send a new broadcast
+  if (method === "POST" && (path === "/broadcast" || path === "/broadcast/")) {
+    const body = await req.json();
+    if (!body.subject || !body.message) {
+      return json({ error: "Subject and message are required." }, 400);
+    }
+    const broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
+    const broadcast = {
+      id: crypto.randomUUID(),
+      subject: body.subject.trim(),
+      message: body.message.trim(),
+      sentBy: body.sentBy || 'Admin',
+      sentAt: new Date().toISOString()
+    };
+    broadcasts.unshift(broadcast);
+    await broadcastStore.setJSON("all", broadcasts);
+    return json({ success: true, broadcast }, 201);
+  }
+
+  // GET /api/broadcasts — get all broadcasts
+  if (method === "GET" && (path === "/broadcasts" || path === "/broadcasts/")) {
+    const broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
+    return json({ broadcasts });
+  }
+
+  // DELETE /api/broadcast/:id — delete a broadcast
+  if (method === "DELETE" && path.startsWith("/broadcast/")) {
+    const id = path.split("/")[2];
+    let broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
+    const idx = broadcasts.findIndex(b => b.id === id);
+    if (idx === -1) return json({ error: "Broadcast not found." }, 404);
+    broadcasts.splice(idx, 1);
+    await broadcastStore.setJSON("all", broadcasts);
+    return json({ success: true });
+  }
+
   return json({ error: "Not found" }, 404);
 };

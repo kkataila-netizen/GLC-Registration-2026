@@ -227,6 +227,100 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '/api/registrations/export';
     });
 
+    // ── Broadcast / Communication ──────────────────
+    const broadcastBtn = document.getElementById('broadcastBtn');
+    const broadcastModal = document.getElementById('broadcastModal');
+    const broadcastForm = document.getElementById('broadcastForm');
+    const broadcastCancel = document.getElementById('broadcastCancel');
+    const broadcastError = document.getElementById('broadcastError');
+    const broadcastSuccess = document.getElementById('broadcastSuccess');
+    const broadcastHistory = document.getElementById('broadcastHistory');
+
+    broadcastBtn.addEventListener('click', () => {
+      broadcastError.hidden = true;
+      broadcastSuccess.hidden = true;
+      broadcastModal.hidden = false;
+      loadBroadcastHistory();
+    });
+
+    broadcastCancel.addEventListener('click', () => { broadcastModal.hidden = true; });
+    broadcastModal.addEventListener('click', (e) => {
+      if (e.target === broadcastModal) broadcastModal.hidden = true;
+    });
+
+    async function loadBroadcastHistory() {
+      try {
+        const res = await fetch('/api/broadcasts');
+        const data = await res.json();
+        if (!data.broadcasts || data.broadcasts.length === 0) {
+          broadcastHistory.innerHTML = '<p style="color:var(--text-muted)">No communications sent yet.</p>';
+          return;
+        }
+        broadcastHistory.innerHTML = data.broadcasts.map(b => `
+          <div style="padding:.5rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start;gap:.5rem">
+            <div>
+              <strong>${esc(b.subject)}</strong>
+              <div style="color:var(--text-muted);margin-top:.125rem">${esc(b.message).substring(0, 100)}${b.message.length > 100 ? '…' : ''}</div>
+              <div style="color:var(--text-muted);font-size:.75rem;margin-top:.25rem">${formatDate(b.sentAt)}</div>
+            </div>
+            <button class="btn-action btn-action--danger" data-del-broadcast="${b.id}" style="flex-shrink:0">×</button>
+          </div>
+        `).join('');
+
+        broadcastHistory.querySelectorAll('[data-del-broadcast]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Delete this communication?')) return;
+            await fetch('/api/broadcast/' + btn.dataset.delBroadcast, { method: 'DELETE' });
+            loadBroadcastHistory();
+          });
+        });
+      } catch { broadcastHistory.innerHTML = '<p style="color:red">Failed to load history.</p>'; }
+    }
+
+    broadcastForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      broadcastError.hidden = true;
+      broadcastSuccess.hidden = true;
+
+      const subject = document.getElementById('broadcastSubject').value.trim();
+      const message = document.getElementById('broadcastMessage').value.trim();
+
+      if (!subject || !message) {
+        broadcastError.textContent = 'Subject and message are required.';
+        broadcastError.hidden = false;
+        return;
+      }
+
+      const sendBtn = document.getElementById('broadcastSend');
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('/api/broadcast', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, message, sentBy: 'Admin' })
+        });
+
+        if (res.ok) {
+          broadcastSuccess.textContent = 'Communication sent to all users!';
+          broadcastSuccess.hidden = false;
+          broadcastForm.reset();
+          loadBroadcastHistory();
+        } else {
+          const data = await res.json();
+          broadcastError.textContent = data.error || 'Failed to send.';
+          broadcastError.hidden = false;
+        }
+      } catch {
+        broadcastError.textContent = 'Network error. Please try again.';
+        broadcastError.hidden = false;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send to All Users';
+      }
+    });
+
     loadRegistrations();
   }
 });

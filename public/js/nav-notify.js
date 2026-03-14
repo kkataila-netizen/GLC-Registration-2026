@@ -192,12 +192,44 @@
     }
   }
 
+  /* ── Broadcast banner for all users ──────────────── */
+  async function checkBroadcasts() {
+    try {
+      const res = await fetch('/api/broadcasts');
+      const data = await res.json();
+      if (!data.broadcasts || data.broadcasts.length === 0) return;
+
+      const dismissed = JSON.parse(localStorage.getItem('glc-dismissed-broadcasts') || '[]');
+      const latest = data.broadcasts.find(b => !dismissed.includes(b.id));
+      if (!latest) return;
+
+      // Create banner
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#395542;color:#fff;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;font-size:.875rem;box-shadow:0 2px 8px rgba(0,0,0,0.2)';
+      banner.innerHTML = `
+        <div style="flex:1"><strong>${latest.subject}</strong> — ${latest.message}</div>
+        <button id="dismissBroadcast" style="background:none;border:none;color:#fff;font-size:1.25rem;cursor:pointer;padding:0 .25rem">&times;</button>
+      `;
+      document.body.prepend(banner);
+      // Push body down
+      document.body.style.paddingTop = banner.offsetHeight + 'px';
+
+      document.getElementById('dismissBroadcast').addEventListener('click', () => {
+        dismissed.push(latest.id);
+        localStorage.setItem('glc-dismissed-broadcasts', JSON.stringify(dismissed));
+        banner.remove();
+        document.body.style.paddingTop = '';
+      });
+    } catch {}
+  }
+
   function init() {
     const user = getUser();
 
     // Always enforce admin visibility (even if not logged in)
     enforceAdminVisibility(user);
     renameRegisterTab(user);
+    checkBroadcasts();
 
     if (!user) return;
     currentUser = user;
