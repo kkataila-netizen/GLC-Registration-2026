@@ -234,48 +234,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const broadcastCancel = document.getElementById('broadcastCancel');
     const broadcastError = document.getElementById('broadcastError');
     const broadcastSuccess = document.getElementById('broadcastSuccess');
-    const broadcastHistory = document.getElementById('broadcastHistory');
 
     broadcastBtn.addEventListener('click', () => {
       broadcastError.hidden = true;
       broadcastSuccess.hidden = true;
       broadcastModal.hidden = false;
-      loadBroadcastHistory();
     });
 
     broadcastCancel.addEventListener('click', () => { broadcastModal.hidden = true; });
     broadcastModal.addEventListener('click', (e) => {
       if (e.target === broadcastModal) broadcastModal.hidden = true;
     });
-
-    async function loadBroadcastHistory() {
-      try {
-        const res = await fetch('/api/broadcasts');
-        const data = await res.json();
-        if (!data.broadcasts || data.broadcasts.length === 0) {
-          broadcastHistory.innerHTML = '<p style="color:var(--text-muted)">No communications sent yet.</p>';
-          return;
-        }
-        broadcastHistory.innerHTML = data.broadcasts.map(b => `
-          <div style="padding:.5rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start;gap:.5rem">
-            <div>
-              <strong>${esc(b.subject)}</strong>
-              <div style="color:var(--text-muted);margin-top:.125rem">${esc(b.message).substring(0, 100)}${b.message.length > 100 ? '…' : ''}</div>
-              <div style="color:var(--text-muted);font-size:.75rem;margin-top:.25rem">${formatDate(b.sentAt)}</div>
-            </div>
-            <button class="btn-action btn-action--danger" data-del-broadcast="${b.id}" style="flex-shrink:0">×</button>
-          </div>
-        `).join('');
-
-        broadcastHistory.querySelectorAll('[data-del-broadcast]').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            if (!confirm('Delete this communication?')) return;
-            await fetch('/api/broadcast/' + btn.dataset.delBroadcast, { method: 'DELETE' });
-            loadBroadcastHistory();
-          });
-        });
-      } catch { broadcastHistory.innerHTML = '<p style="color:red">Failed to load history.</p>'; }
-    }
 
     broadcastForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -291,6 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Get admin user info from localStorage
+      let senderEmail = 'kkataila@banyansoftware.com';
+      let senderName = 'Admin';
+      try {
+        const u = JSON.parse(localStorage.getItem('glc-user'));
+        if (u) { senderEmail = u.email; senderName = u.name; }
+      } catch {}
+
       const sendBtn = document.getElementById('broadcastSend');
       sendBtn.disabled = true;
       sendBtn.textContent = 'Sending...';
@@ -299,14 +276,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('/api/broadcast', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subject, message, sentBy: 'Admin' })
+          body: JSON.stringify({ subject, message, senderEmail, senderName })
         });
 
         if (res.ok) {
-          broadcastSuccess.textContent = 'Communication sent to all users!';
+          const data = await res.json();
+          broadcastSuccess.textContent = `Communication sent to ${data.memberCount} users via group chat!`;
           broadcastSuccess.hidden = false;
           broadcastForm.reset();
-          loadBroadcastHistory();
         } else {
           const data = await res.json();
           broadcastError.textContent = data.error || 'Failed to send.';

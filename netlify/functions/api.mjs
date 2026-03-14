@@ -292,43 +292,65 @@ export default async (req, context) => {
     return json({ success: true, user: { name: user.name, email: user.email } });
   }
 
-  // ── Broadcasts ────────────────────────────────────
-  const broadcastStore = getStore("broadcasts");
-
-  // POST /api/broadcast — send a new broadcast
+  // ── Broadcast via Chat ────────────────────────────
+  // POST /api/broadcast — create a group chat with all users and send the message
   if (method === "POST" && (path === "/broadcast" || path === "/broadcast/")) {
     const body = await req.json();
     if (!body.subject || !body.message) {
       return json({ error: "Subject and message are required." }, 400);
     }
-    const broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
-    const broadcast = {
-      id: crypto.randomUUID(),
-      subject: body.subject.trim(),
-      message: body.message.trim(),
-      sentBy: body.sentBy || 'Admin',
-      sentAt: new Date().toISOString()
+
+    const registrations = await getRegistrations();
+    if (registrations.length === 0) {
+      return json({ error: "No registered users to send to." }, 400);
+    }
+
+    const senderEmail = body.senderEmail || "kkataila@banyansoftware.com";
+    const senderName = body.senderName || "Admin";
+    const allEmails = [...new Set(registrations.map(r => r.email))];
+    // Ensure sender is in members
+    if (!allEmails.includes(senderEmail)) allEmails.push(senderEmail);
+
+    const convStore = getStore("chat-conversations");
+    const msgStore = getStore("chat-messages");
+    const convs = (await convStore.get("all", { type: "json" })) || [];
+
+    // Create group conversation
+    const convId = `group:${crypto.randomUUID()}`;
+    const now = new Date().toISOString();
+    const groupName = `📢 ${body.subject.trim()}`;
+
+    const conv = {
+      id: convId,
+      type: "group",
+      name: groupName,
+      members: allEmails,
+      createdBy: senderEmail,
+      createdAt: now,
+      lastMessage: null
     };
-    broadcasts.unshift(broadcast);
-    await broadcastStore.setJSON("all", broadcasts);
-    return json({ success: true, broadcast }, 201);
-  }
 
-  // GET /api/broadcasts — get all broadcasts
-  if (method === "GET" && (path === "/broadcasts" || path === "/broadcasts/")) {
-    const broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
-    return json({ broadcasts });
-  }
+    // Create the message
+    const msg = {
+      id: crypto.randomUUID(),
+      sender: senderEmail,
+      senderName: senderName,
+      text: body.message.trim(),
+      type: "text",
+      fileName: "",
+      fileData: "",
+      reactions: {},
+      readBy: [{ email: senderEmail, at: now }],
+      timestamp: now
+    };
 
-  // DELETE /api/broadcast/:id — delete a broadcast
-  if (method === "DELETE" && path.startsWith("/broadcast/")) {
-    const id = path.split("/")[2];
-    let broadcasts = (await broadcastStore.get("all", { type: "json" })) || [];
-    const idx = broadcasts.findIndex(b => b.id === id);
-    if (idx === -1) return json({ error: "Broadcast not found." }, 404);
-    broadcasts.splice(idx, 1);
-    await broadcastStore.setJSON("all", broadcasts);
-    return json({ success: true });
+    conv.lastMessage = { text: msg.text, senderName: msg.senderName, timestamp: msg.timestamp };
+    convs.push(conv);
+
+    await convStore.setJSON("all", convs);
+    await msgStore.setJSON(convId, [msg]);
+
+    return json({ success: true, conversationId: convId, memberCount: allEmails.length }, 201);
   }
 
   return json({ error: "Not found" }, 404);
