@@ -6,6 +6,8 @@
 
   const API = "/chat-api";
   const POLL_MS = 3000;
+  const BROADCAST_CONV_ID = "group:broadcast-communications";
+  const ADMIN_EMAIL = "kkataila@banyansoftware.com";
 
   /* ── state ─────────────────────────────────────── */
   let me = null;
@@ -249,7 +251,14 @@
     clearInterval(pollTimer);
     pollTimer = setInterval(pollMessages, POLL_MS);
 
-    msgInput.focus();
+    // Broadcast channel is read-only for non-admin users
+    const inputArea = document.querySelector(".chat__input-area");
+    if (convId === BROADCAST_CONV_ID && me.email !== ADMIN_EMAIL) {
+      inputArea.style.display = "none";
+    } else {
+      inputArea.style.display = "";
+      msgInput.focus();
+    }
   }
 
   async function openDM(targetEmail) {

@@ -156,10 +156,18 @@ export default async (req) => {
   }
 
   /* ── POST /conversations/:id/messages ───────────── */
+  const BROADCAST_CONV_ID = "group:broadcast-communications";
+  const ADMIN_EMAIL = "kkataila@banyansoftware.com";
   const postMsg = path.match(/^\/conversations\/(.+?)\/messages\/?$/);
   if (method === "POST" && postMsg) {
     const convId = decodeURIComponent(postMsg[1]);
     const body = await req.json();
+
+    // Broadcast channel is one-way: only admin can post
+    if (convId === BROADCAST_CONV_ID && body.sender !== ADMIN_EMAIL) {
+      return json({ error: "Broadcast channel is read-only" }, 403);
+    }
+
     if (!body.sender || !body.text && !body.fileData) {
       return json({ error: "sender and (text or fileData) required" }, 400);
     }
