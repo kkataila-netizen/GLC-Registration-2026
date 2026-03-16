@@ -263,6 +263,7 @@
               e.preventDefault();
               localStorage.removeItem('glc-user');
               localStorage.removeItem('glc-chat-user');
+              localStorage.removeItem('glc-user-token');
               location.reload();
             });
           }
@@ -308,6 +309,7 @@
             const user = { name: result.user.name, email: result.user.email };
             localStorage.setItem('glc-user', JSON.stringify(user));
             localStorage.setItem('glc-chat-user', JSON.stringify(user));
+            if (result.userToken) localStorage.setItem('glc-user-token', result.userToken);
             msg.hidden = false;
             msg.className = 'login-modal__msg login-modal__msg--success';
             msg.textContent = 'Welcome back, ' + result.user.name + '!';

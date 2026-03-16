@@ -17,17 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
     catch { return null; }
   }
 
-  function setUser(user) {
+  function setUser(user, token) {
     localStorage.setItem('glc-user', JSON.stringify(user));
     // Also set chat user for backward compat
     localStorage.setItem('glc-chat-user', JSON.stringify(user));
+    if (token) localStorage.setItem('glc-user-token', token);
     updateAuthUI();
   }
 
   function clearUser() {
     localStorage.removeItem('glc-user');
     localStorage.removeItem('glc-chat-user');
+    localStorage.removeItem('glc-user-token');
     updateAuthUI();
+  }
+
+  function getUserToken() {
+    return localStorage.getItem('glc-user-token') || '';
   }
 
   function updateAuthUI() {
@@ -69,9 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pwGroup = document.getElementById('password').closest('.form-group');
     pwGroup.querySelector('label').innerHTML = 'New Password <small style="font-weight:normal;color:#888">(leave blank to keep current)</small>';
 
-    // Fetch registration data
+    // Fetch registration data (authenticated)
     try {
-      const res = await fetch('/api/registrations?search=' + encodeURIComponent(user.email));
+      const res = await fetch('/api/registrations?search=' + encodeURIComponent(user.email), {
+        headers: { 'Authorization': 'Bearer ' + getUserToken() }
+      });
       const result = await res.json();
       const reg = result.registrations.find(r => r.email === user.email.toLowerCase());
       if (!reg) return;
@@ -221,11 +229,14 @@ document.addEventListener('DOMContentLoaded', () => {
       let url, method;
       const payload = { ...data };
 
+      const fetchHeaders = { 'Content-Type': 'application/json' };
+
       if (isEdit) {
         url = '/api/registrations/' + form.dataset.regId;
         method = 'PUT';
         // Don't send empty password on edit
         if (!payload.password) delete payload.password;
+        fetchHeaders['Authorization'] = 'Bearer ' + getUserToken();
       } else {
         url = '/api/registrations';
         method = 'POST';
@@ -233,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: fetchHeaders,
         body: JSON.stringify(payload)
       });
 
@@ -241,13 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (isEdit && res.ok) {
         showMessage(formMessage, 'success', 'Profile updated successfully!');
-        // Update localStorage if name or email changed
-        setUser({ name: data.name.trim(), email: data.email.trim().toLowerCase() });
+        // Update localStorage if name or email changed; update token if returned
+        setUser({ name: data.name.trim(), email: data.email.trim().toLowerCase() }, result.userToken);
       } else if (res.status === 201) {
         showMessage(formMessage, 'success', 'Registration complete! You are now logged in.');
         form.reset();
-        // Auto-login after registration
-        setUser({ name: data.name.trim(), email: data.email.trim().toLowerCase() });
+        // Auto-login after registration with token
+        setUser({ name: data.name.trim(), email: data.email.trim().toLowerCase() }, result.userToken);
       } else if (res.status === 409) {
         showMessage(formMessage, 'error', result.errors?.[0] || 'This email is already registered.');
       } else if (res.status === 400) {
@@ -289,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await res.json();
 
       if (res.ok) {
-        setUser({ name: result.user.name, email: result.user.email });
+        setUser({ name: result.user.name, email: result.user.email }, result.userToken);
         showMessage(loginMessage, 'success', `Welcome back, ${result.user.name}!`);
         loginForm.reset();
       } else {

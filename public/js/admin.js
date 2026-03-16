@@ -1,27 +1,46 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const ADMIN_PASSWORD = 'GLC2026';
-
   const gate = document.getElementById('adminGate');
   const gateForm = document.getElementById('gateForm');
   const gatePassword = document.getElementById('gatePassword');
   const gateError = document.getElementById('gateError');
   const adminContent = document.getElementById('adminContent');
 
+  function getAdminToken() {
+    return sessionStorage.getItem('adminToken');
+  }
+
+  function adminHeaders(extra = {}) {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getAdminToken(), ...extra };
+  }
+
   // Check if already authenticated this session
-  if (sessionStorage.getItem('adminAuth') === 'true') {
+  if (getAdminToken()) {
     showDashboard();
   } else {
     gatePassword.focus();
   }
 
-  gateForm.addEventListener('submit', (e) => {
+  gateForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     gateError.hidden = true;
 
-    if (gatePassword.value === ADMIN_PASSWORD) {
-      sessionStorage.setItem('adminAuth', 'true');
-      showDashboard();
-    } else {
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: gatePassword.value })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        sessionStorage.setItem('adminToken', data.token);
+        showDashboard();
+      } else {
+        gateError.hidden = false;
+        gatePassword.value = '';
+        gatePassword.focus();
+      }
+    } catch {
       gateError.hidden = false;
       gatePassword.value = '';
       gatePassword.focus();
@@ -50,7 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
           ? `/api/registrations?search=${encodeURIComponent(search)}`
           : '/api/registrations';
 
-        const res = await fetch(url);
+        const res = await fetch(url, {
+          headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+        });
+
+        if (res.status === 401) {
+          sessionStorage.removeItem('adminToken');
+          location.reload();
+          return;
+        }
+
         const data = await res.json();
 
         regCount.textContent = `${data.total} registration${data.total !== 1 ? 's' : ''}`;
@@ -121,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
 
       try {
-        const res = await fetch(`/api/registrations/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/registrations/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+        });
         if (!res.ok) {
           const data = await res.json();
           alert(data.error || 'Failed to delete.');
@@ -175,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const res = await fetch(`/api/registrations/${id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: adminHeaders(),
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -223,8 +254,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 300);
     });
 
-    exportBtn.addEventListener('click', () => {
-      window.location.href = '/api/registrations/export';
+    exportBtn.addEventListener('click', async () => {
+      // Use fetch with auth header instead of direct navigation
+      try {
+        const res = await fetch('/api/registrations/export', {
+          headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+        });
+        if (!res.ok) {
+          alert('Failed to export. Please try again.');
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'registrations.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        alert('Network error. Please try again.');
+      }
     });
 
     // ── Broadcast / Communication ──────────────────
@@ -275,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const res = await fetch('/api/broadcast', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: adminHeaders(),
           body: JSON.stringify({ subject, message, senderEmail, senderName })
         });
 
