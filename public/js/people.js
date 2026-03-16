@@ -76,13 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return div.innerHTML;
   }
 
+  function getUserToken() {
+    return localStorage.getItem('glc-user-token') || '';
+  }
+
   async function fetchPeople(search) {
     try {
-      let url = '/api/registrations';
+      let url = '/api/people';
       if (search) {
         url += '?search=' + encodeURIComponent(search);
       }
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + getUserToken() }
+      });
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       countBadge.textContent = data.total + ' attendee' + (data.total !== 1 ? 's' : '');

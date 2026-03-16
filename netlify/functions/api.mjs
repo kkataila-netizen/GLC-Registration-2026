@@ -182,6 +182,35 @@ export default async (req, context) => {
     return json({ success: true, registration, userToken }, 201);
   }
 
+  // GET /api/people  ★ USER AUTH REQUIRED — returns limited public fields only
+  if (method === "GET" && (path === "/people" || path === "/people/")) {
+    const isAdmin = await validateAdminToken(req);
+    const userAuth = !isAdmin ? await validateUserToken(req) : null;
+    if (!isAdmin && !userAuth) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+
+    let registrations = await getRegistrations();
+    const search = url.searchParams.get("search");
+    if (search) {
+      const term = search.toLowerCase();
+      registrations = registrations.filter(r =>
+        r.name.toLowerCase().includes(term) ||
+        r.email.toLowerCase().includes(term) ||
+        (r.organization || "").toLowerCase().includes(term)
+      );
+    }
+
+    // Only expose public-safe fields
+    const safe = registrations.map(r => ({
+      name: r.name,
+      title: r.title || '',
+      organization: r.organization || '',
+      email: r.email
+    }));
+    return json({ registrations: safe, total: safe.length });
+  }
+
   // GET /api/registrations/export  ★ ADMIN ONLY
   if (method === "GET" && (path === "/registrations/export" || path === "/registrations/export/")) {
     if (!(await validateAdminToken(req))) {
