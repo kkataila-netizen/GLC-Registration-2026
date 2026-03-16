@@ -169,16 +169,16 @@
     } catch { /* network error – skip */ }
   }
 
-  /* ── Admin tab visibility ──────────────────────── */
+  /* ── Admin tab visibility (hidden by default in HTML) ── */
   function enforceAdminVisibility(user) {
     const ADMIN_EMAIL = "kkataila@banyansoftware.com";
+    if (!user || user.email !== ADMIN_EMAIL) return;
+    // Only show the admin link for the admin user
     const links = document.querySelectorAll(".top-nav__links a");
     for (const a of links) {
       const href = (a.getAttribute("href") || "").replace(/\/$/, "");
       if (href === "/admin.html" || href === "/admin") {
-        if (!user || user.email !== ADMIN_EMAIL) {
-          a.closest("li").style.display = "none";
-        }
+        a.closest("li").style.display = "";
       }
     }
   }
