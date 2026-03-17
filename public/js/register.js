@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dietaryOther.style.display = '';
         dietaryOther.value = reg.dietaryOther || '';
       }
+      document.getElementById('welcomeReception').checked = !!reg.welcomeReception;
       document.getElementById('tshirtFit').value = reg.tshirtFit || '';
       document.getElementById('tshirt').value = reg.tshirt || '';
       // Check session checkboxes
@@ -211,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dietary: document.getElementById('dietary').value,
       dietaryOther: document.getElementById('dietaryOther').value,
       sessions: Array.from(form.querySelectorAll('input[name="sessions"]:checked')).map(cb => cb.value),
+      welcomeReception: document.getElementById('welcomeReception').checked,
       tshirtFit: document.getElementById('tshirtFit').value,
       tshirt: document.getElementById('tshirt').value
     };

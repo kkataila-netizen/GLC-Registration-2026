@@ -170,6 +170,7 @@ export default async (req, context) => {
       dietary: body.dietary || 'None',
       dietaryOther: body.dietaryOther ? body.dietaryOther.trim() : '',
       sessions: Array.isArray(body.sessions) ? body.sessions : [],
+      welcomeReception: !!body.welcomeReception,
       tshirtFit: body.tshirtFit || '',
       tshirt: body.tshirt || '',
       registeredAt: new Date().toISOString()
@@ -218,7 +219,7 @@ export default async (req, context) => {
       return json({ error: "Unauthorized" }, 401);
     }
     const registrations = await getRegistrations();
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
       escapeCSV(r.title),
@@ -230,6 +231,7 @@ export default async (req, context) => {
       escapeCSV(r.dietary),
       escapeCSV(r.dietaryOther),
       escapeCSV(Array.isArray(r.sessions) ? r.sessions.join('; ') : ''),
+      escapeCSV(r.welcomeReception ? 'Yes' : 'No'),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt)
@@ -375,6 +377,7 @@ export default async (req, context) => {
       }
       reg.sessions = body.sessions;
     }
+    if (body.welcomeReception !== undefined) reg.welcomeReception = !!body.welcomeReception;
     if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
     if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
     if (body.password) {
