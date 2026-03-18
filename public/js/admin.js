@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminContent = document.getElementById('adminContent');
 
   function getAdminToken() {
-    return sessionStorage.getItem('adminToken');
+    return localStorage.getItem('glc-admin-token');
   }
 
   function adminHeaders(extra = {}) {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        sessionStorage.setItem('adminToken', data.token);
+        localStorage.setItem('glc-admin-token', data.token);
         showDashboard();
       } else {
         gateError.hidden = false;
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (res.status === 401) {
-          sessionStorage.removeItem('adminToken');
+          localStorage.removeItem('glc-admin-token');
           location.reload();
           return;
         }
