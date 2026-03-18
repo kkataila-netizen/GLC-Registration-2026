@@ -12,29 +12,39 @@ async function hashPassword(password) {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* ── Admin token helpers ──────────────────────────── */
-async function getAdminTokens() {
-  const store = getStore("admin-tokens");
-  try {
-    return (await store.get("all", { type: "json" })) || [];
-  } catch { return []; }
+/* ── Stateless HMAC admin tokens (no Blobs needed) ── */
+async function getHmacKey() {
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(ADMIN_PASSWORD),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify']
+  );
 }
 
-async function saveAdminTokens(tokens) {
-  const store = getStore("admin-tokens");
-  await store.setJSON("all", tokens);
+async function generateAdminToken() {
+  const timestamp = Date.now().toString();
+  const key = await getHmacKey();
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(timestamp));
+  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${timestamp}.${sigHex}`;
 }
 
 async function validateAdminToken(req) {
   const auth = req.headers.get("authorization") || "";
-  const token = auth.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return false;
-  const tokens = await getAdminTokens();
-  const now = Date.now();
-  // Clean expired tokens
-  const valid = tokens.filter(t => now - t.createdAt < TOKEN_EXPIRY_MS);
-  if (valid.length !== tokens.length) await saveAdminTokens(valid);
-  return valid.some(t => t.token === token);
+  const raw = auth.replace(/^Bearer\s+/i, "").trim();
+  if (!raw) return false;
+  const dot = raw.indexOf('.');
+  if (dot === -1) return false;
+  const timestamp = raw.slice(0, dot);
+  const sigHex = raw.slice(dot + 1);
+  const ts = parseInt(timestamp, 10);
+  if (isNaN(ts) || Date.now() - ts > TOKEN_EXPIRY_MS) return false;
+  const key = await getHmacKey();
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(timestamp));
+  const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return sigHex === expected;
 }
 
 /* ── User auth helper (for profile access) ────────── */
@@ -128,11 +138,7 @@ export default async (req, context) => {
       return json({ error: "Incorrect password." }, 401);
     }
 
-    const token = crypto.randomUUID();
-    const tokens = await getAdminTokens();
-    tokens.push({ token, createdAt: Date.now() });
-    await saveAdminTokens(tokens);
-
+    const token = await generateAdminToken();
     return json({ success: true, token });
   }
 
