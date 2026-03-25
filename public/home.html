@@ -219,24 +219,43 @@
   <div class="login-modal" id="loginModal">
     <div class="login-modal__card">
       <button class="login-modal__close" id="loginClose">&times;</button>
-      <div class="login-modal__title">Welcome Back</div>
-      <div class="login-modal__subtitle">Log in to your GLC account</div>
-      <form id="homeLoginForm" autocomplete="on">
-        <div class="login-modal__field">
-          <label for="homeEmail">Email</label>
-          <input type="email" id="homeEmail" required autocomplete="email">
-        </div>
-        <div class="login-modal__field">
-          <label for="homePassword">Password</label>
-          <input type="password" id="homePassword" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="login-modal__btn" id="homeLoginBtn">Log In</button>
-        <div class="login-modal__msg" id="homeLoginMsg" hidden></div>
-        <div style="text-align:center;margin-top:0.6rem;font-size:0.85rem;">
-          <a href="/reset-password.html" style="color:#395542;text-decoration:none;opacity:0.75;">Forgot your password?</a>
-        </div>
-      </form>
-      <div class="login-modal__register">Don't have an account? <a href="/register.html">Register here</a></div>
+
+      <!-- Login form -->
+      <div id="loginView">
+        <div class="login-modal__title">Welcome Back</div>
+        <div class="login-modal__subtitle">Log in to your GLC account</div>
+        <form id="homeLoginForm" autocomplete="on">
+          <div class="login-modal__field">
+            <label for="homeEmail">Email</label>
+            <input type="email" id="homeEmail" required autocomplete="email">
+          </div>
+          <div class="login-modal__field">
+            <label for="homePassword">Password</label>
+            <input type="password" id="homePassword" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="login-modal__btn" id="homeLoginBtn">Log In</button>
+          <div class="login-modal__msg" id="homeLoginMsg" hidden></div>
+          <div style="text-align:center;margin-top:0.6rem;font-size:0.85rem;">
+            <a href="#" id="forgotLink" style="color:#395542;text-decoration:none;opacity:0.75;">Forgot your password?</a>
+          </div>
+        </form>
+        <div class="login-modal__register">Don't have an account? <a href="/register.html">Register here</a></div>
+      </div>
+
+      <!-- Forgot password form -->
+      <div id="forgotView" hidden>
+        <div class="login-modal__title">Reset Password</div>
+        <div class="login-modal__subtitle">Enter your email and we'll send a reset link.</div>
+        <form id="forgotForm" autocomplete="on">
+          <div class="login-modal__field">
+            <label for="forgotEmail">Email</label>
+            <input type="email" id="forgotEmail" required autocomplete="email">
+          </div>
+          <button type="submit" class="login-modal__btn" id="forgotBtn">Send Reset Link</button>
+          <div class="login-modal__msg" id="forgotMsg" hidden></div>
+        </form>
+        <div class="login-modal__register"><a href="#" id="backToLogin" style="color:#395542;">Back to login</a></div>
+      </div>
     </div>
   </div>
 
@@ -286,6 +305,49 @@
       closeBtn.addEventListener('click', () => modal.classList.remove('open'));
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // Forgot password toggle
+      const loginView = document.getElementById('loginView');
+      const forgotView = document.getElementById('forgotView');
+      document.getElementById('forgotLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.hidden = true;
+        forgotView.hidden = false;
+      });
+      document.getElementById('backToLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        forgotView.hidden = true;
+        loginView.hidden = false;
+        document.getElementById('forgotMsg').hidden = true;
+      });
+
+      document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const forgotMsg = document.getElementById('forgotMsg');
+        const forgotBtn = document.getElementById('forgotBtn');
+        const email = document.getElementById('forgotEmail').value.trim();
+        forgotMsg.hidden = true;
+        forgotBtn.disabled = true;
+        forgotBtn.textContent = 'Sending\u2026';
+        try {
+          await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          forgotMsg.hidden = false;
+          forgotMsg.className = 'login-modal__msg login-modal__msg--success';
+          forgotMsg.textContent = 'If that email is registered, a reset link has been sent. Check your inbox.';
+          document.getElementById('forgotEmail').value = '';
+        } catch {
+          forgotMsg.hidden = false;
+          forgotMsg.className = 'login-modal__msg login-modal__msg--error';
+          forgotMsg.textContent = 'Could not connect. Please try again.';
+        } finally {
+          forgotBtn.disabled = false;
+          forgotBtn.textContent = 'Send Reset Link';
+        }
       });
 
       form.addEventListener('submit', async (e) => {
