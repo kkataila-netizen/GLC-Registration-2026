@@ -504,5 +504,74 @@ export default async (req, context) => {
     return json({ success: true, conversationId: BROADCAST_CONV_ID, memberCount: allEmails.length }, 201);
   }
 
+  /* ── POST /api/forgot-password ──────────────────── */
+  if (method === "POST" && (path === "/forgot-password" || path === "/forgot-password/")) {
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+
+    const email = (body.email || "").trim().toLowerCase();
+    // Always return success to prevent email enumeration
+    if (!email) return json({ success: true });
+
+    const registrations = await getRegistrations();
+    const user = registrations.find(r => r.email === email);
+    if (!user) return json({ success: true });
+
+    const token = crypto.randomUUID();
+    const store = getStore("password-reset-tokens");
+    await store.setJSON(token, { email, expiresAt: Date.now() + 60 * 60 * 1000 });
+
+    const resetUrl = `https://luxury-sunflower-899449.netlify.app/reset-password.html?token=${token}`;
+    const resendKey = process.env.RESEND_API_KEY;
+
+    if (resendKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
+        body: JSON.stringify({
+          from: "GLC Registration <onboarding@resend.dev>",
+          to: [email],
+          subject: "Reset your GLC password",
+          html: `<p>Hi ${user.name},</p>
+<p>Click the link below to reset your GLC 2026 password. This link expires in 1 hour.</p>
+<p><a href="${resetUrl}" style="background:#395542;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;display:inline-block">Reset Password</a></p>
+<p>If you didn't request this, you can ignore this email.</p>`
+        })
+      });
+    }
+
+    return json({ success: true });
+  }
+
+  /* ── POST /api/reset-password ───────────────────── */
+  if (method === "POST" && (path === "/reset-password" || path === "/reset-password/")) {
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+
+    const { token, password } = body;
+    if (!token || !password) return json({ error: "Token and password are required." }, 400);
+    if (password.length < 4) return json({ error: "Password must be at least 4 characters." }, 400);
+
+    const store = getStore("password-reset-tokens");
+    let record;
+    try { record = await store.get(token, { type: "json" }); } catch { record = null; }
+
+    if (!record) return json({ error: "Invalid or expired reset link." }, 400);
+    if (Date.now() > record.expiresAt) {
+      await store.delete(token);
+      return json({ error: "This reset link has expired. Please request a new one." }, 400);
+    }
+
+    const registrations = await getRegistrations();
+    const index = registrations.findIndex(r => r.email === record.email);
+    if (index === -1) return json({ error: "Account not found." }, 404);
+
+    registrations[index].passwordHash = await hashPassword(password);
+    await saveRegistrations(registrations);
+    await store.delete(token);
+
+    return json({ success: true });
+  }
+
   return json({ error: "Not found" }, 404);
 };
