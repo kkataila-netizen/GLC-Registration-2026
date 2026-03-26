@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -522,23 +523,30 @@ export default async (req, context) => {
     await store.setJSON(token, { email, expiresAt: Date.now() + 60 * 60 * 1000 });
 
     const resetUrl = `https://luxury-sunflower-899449.netlify.app/reset-password.html?token=${token}`;
-    const resendKey = process.env.RESEND_API_KEY;
 
-    if (resendKey) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
-        body: JSON.stringify({
-          from: "GLC Registration <onboarding@resend.dev>",
-          to: [email],
-          subject: "Reset your GLC password",
-          html: `<p>Hi ${user.name},</p>
-<p>Click the link below to reset your GLC 2026 password. This link expires in 1 hour.</p>
+    const ses = new SESClient({
+      region: process.env.AWS_SES_REGION || "us-east-1",
+      credentials: {
+        accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY
+      }
+    });
+
+    await ses.send(new SendEmailCommand({
+      Source: process.env.SES_FROM_EMAIL || "GLC Registration <noreply@banyansoftware.com>",
+      Destination: { ToAddresses: [email] },
+      Message: {
+        Subject: { Data: "Reset your GLC 2026 password" },
+        Body: {
+          Html: {
+            Data: `<p>Hi ${user.name},</p>
+<p>Click the button below to reset your GLC 2026 password. This link expires in 1 hour.</p>
 <p><a href="${resetUrl}" style="background:#395542;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;display:inline-block">Reset Password</a></p>
-<p>If you didn't request this, you can ignore this email.</p>`
-        })
-      });
-    }
+<p>If you didn't request this, you can safely ignore this email.</p>`
+          }
+        }
+      }
+    }));
 
     return json({ success: true });
   }
