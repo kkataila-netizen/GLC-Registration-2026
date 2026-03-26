@@ -533,7 +533,7 @@ export default async (req, context) => {
     });
 
     await ses.send(new SendEmailCommand({
-      Source: process.env.SES_FROM_EMAIL || "GLC Registration <noreply-glc@banyansoftware.com>",
+      Source: process.env.SES_FROM_EMAIL || "GLC Registration <noreply-glc@banyansoftware.cloud>",
       Destination: { ToAddresses: [email] },
       Message: {
         Subject: { Data: "Reset your GLC 2026 password" },
