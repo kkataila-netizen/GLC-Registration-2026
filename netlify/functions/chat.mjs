@@ -86,6 +86,7 @@ export default async (req) => {
 
   /* ── GET /conversations?user=email ──────────────── */
   const BROADCAST_CONV_ID = "group:broadcast-communications";
+  const ADMIN_EMAIL = "kkataila@banyansoftware.com";
   if (method === "GET" && /^\/conversations\/?$/.test(path)) {
     const user = url.searchParams.get("user");
     if (!user) return json({ error: "user param required" }, 400);
@@ -170,8 +171,6 @@ export default async (req) => {
   }
 
   /* ── POST /conversations/:id/messages ───────────── */
-  const BROADCAST_CONV_ID = "group:broadcast-communications";
-  const ADMIN_EMAIL = "kkataila@banyansoftware.com";
   const postMsg = path.match(/^\/conversations\/(.+?)\/messages\/?$/);
   if (method === "POST" && postMsg) {
     const convId = decodeURIComponent(postMsg[1]);
