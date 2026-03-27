@@ -85,10 +85,24 @@ export default async (req) => {
   }
 
   /* ── GET /conversations?user=email ──────────────── */
+  const BROADCAST_CONV_ID = "group:broadcast-communications";
   if (method === "GET" && /^\/conversations\/?$/.test(path)) {
     const user = url.searchParams.get("user");
     if (!user) return json({ error: "user param required" }, 400);
     let convs = await getConversations();
+
+    // Keep broadcast group membership in sync with all registered users
+    const broadcastConv = convs.find(c => c.id === BROADCAST_CONV_ID);
+    if (broadcastConv) {
+      const regs = await getRegistrations();
+      const allEmails = regs.map(r => r.email);
+      const before = broadcastConv.members.length;
+      broadcastConv.members = [...new Set([...broadcastConv.members, ...allEmails])];
+      if (broadcastConv.members.length !== before) {
+        await saveConversations(convs);
+      }
+    }
+
     convs = convs.filter(c => c.members.includes(user));
     convs.sort((a, b) => {
       const ta = a.lastMessage?.timestamp || a.createdAt;

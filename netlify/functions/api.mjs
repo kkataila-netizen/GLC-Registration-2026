@@ -201,6 +201,17 @@ export default async (req, context) => {
     registrations.push(registration);
     await saveRegistrations(registrations);
 
+    // Add new registrant to broadcast group if it already exists
+    try {
+      const convStore = getStore("chat-conversations");
+      const convs = (await convStore.get("all", { type: "json" })) || [];
+      const broadcastConv = convs.find(c => c.id === "group:broadcast-communications");
+      if (broadcastConv && !broadcastConv.members.includes(email)) {
+        broadcastConv.members.push(email);
+        await convStore.setJSON("all", convs);
+      }
+    } catch {}
+
     // Return a user token so the client can make authenticated requests
     const userToken = `user:${email}:${registration.passwordHash}`;
     return json({ success: true, registration, userToken }, 201);
