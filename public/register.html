@@ -31,6 +31,24 @@
 
     <div class="card">
       <form id="registrationForm" novalidate>
+        <!-- Profile Photo — shown only in profile/edit mode -->
+        <div id="photoSection" class="form-group" style="display:none">
+          <label>Profile Photo</label>
+          <div class="photo-upload">
+            <div id="photoPreview" class="photo-preview">
+              <span id="photoInitials" class="photo-preview__initials"></span>
+              <img id="photoImg" class="photo-preview__img" alt="Profile photo" style="display:none">
+            </div>
+            <div class="photo-upload__controls">
+              <label for="photoFile" class="btn btn-secondary" style="cursor:pointer;display:inline-block">Choose Photo</label>
+              <input type="file" id="photoFile" accept="image/*" style="display:none">
+              <button type="button" id="photoRemoveBtn" class="btn btn-secondary" style="display:none">Remove Photo</button>
+            </div>
+            <p class="photo-upload__hint">JPG or PNG · Max 2 MB · Resized to 200×200</p>
+          </div>
+          <div id="photoMessage" class="message" hidden></div>
+        </div>
+
         <div class="form-group">
           <label><span class="required">Full Name</span></label>
           <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="name">

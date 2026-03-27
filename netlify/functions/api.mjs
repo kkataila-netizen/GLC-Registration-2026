@@ -101,6 +101,21 @@ function escapeCSV(value) {
   return str;
 }
 
+/* ── Profile photo helpers ────────────────────────── */
+async function getProfilePhoto(email) {
+  const store = getStore("profile-photos");
+  try { return (await store.get(email, { type: "text" })) || null; }
+  catch { return null; }
+}
+async function saveProfilePhoto(email, dataUrl) {
+  const store = getStore("profile-photos");
+  await store.set(email, dataUrl);
+}
+async function deleteProfilePhoto(email) {
+  const store = getStore("profile-photos");
+  try { await store.delete(email); } catch {}
+}
+
 async function getRegistrations() {
   const store = getStore("registrations");
   try {
@@ -579,6 +594,48 @@ export default async (req, context) => {
     await store.delete(token);
 
     return json({ success: true });
+  }
+
+  /* ── POST /api/profile-photo  ★ AUTH REQUIRED ───── */
+  if (method === "POST" && (path === "/profile-photo" || path === "/profile-photo/")) {
+    const userAuth = await validateUserToken(req);
+    if (!userAuth) return json({ error: "Unauthorized" }, 401);
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    if (!body.photo || !body.photo.startsWith("data:image/")) {
+      return json({ error: "Invalid photo data." }, 400);
+    }
+    if (body.photo.length > 700000) {
+      return json({ error: "Photo too large. Please use a smaller image." }, 400);
+    }
+    await saveProfilePhoto(userAuth.email, body.photo);
+    return json({ success: true });
+  }
+
+  /* ── DELETE /api/profile-photo  ★ AUTH REQUIRED ─── */
+  if (method === "DELETE" && (path === "/profile-photo" || path === "/profile-photo/")) {
+    const userAuth = await validateUserToken(req);
+    if (!userAuth) return json({ error: "Unauthorized" }, 401);
+    await deleteProfilePhoto(userAuth.email);
+    return json({ success: true });
+  }
+
+  /* ── GET /api/profile-photo  ★ PUBLIC ────────────── */
+  if (method === "GET" && (path === "/profile-photo" || path === "/profile-photo/")) {
+    const email = (url.searchParams.get("email") || "").trim().toLowerCase();
+    if (!email) return new Response(null, { status: 400 });
+    const photo = await getProfilePhoto(email);
+    if (!photo) return new Response(null, { status: 404 });
+    const mimeMatch = photo.match(/^data:(image\/[^;]+);base64,/);
+    const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+    const base64 = photo.replace(/^data:image\/[^;]+;base64,/, "");
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Response(bytes.buffer, {
+      status: 200,
+      headers: { "Content-Type": mime, "Cache-Control": "public, max-age=86400" }
+    });
   }
 
   return json({ error: "Not found" }, 404);

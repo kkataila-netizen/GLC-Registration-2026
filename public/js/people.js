@@ -56,13 +56,53 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'person-card';
       card.style.cursor = 'pointer';
       card.title = `Click to message ${person.name}`;
-      card.innerHTML = `
-        <div class="person-avatar" style="background:${color}">${initials}</div>
-        <div class="person-card__name">${escapeHtml(person.name)}</div>
-        <div class="person-card__org">${person.organization ? escapeHtml(person.organization) : '—'}</div>
-        ${person.title ? `<div class="person-card__arrival">${escapeHtml(person.title)}</div>` : ''}
-        <div class="person-card__chat">💬 Message</div>
-      `;
+
+      // Avatar: start with initials, swap to photo if one exists
+      const avatarWrap = document.createElement('div');
+      avatarWrap.className = 'person-avatar';
+      avatarWrap.style.background = color;
+      avatarWrap.textContent = initials;
+
+      const photoUrl = `/api/profile-photo?email=${encodeURIComponent(person.email)}`;
+      const preloader = new Image();
+      preloader.onload = () => {
+        // Photo exists — replace initials with circular photo
+        const img = document.createElement('img');
+        img.className = 'person-avatar-photo';
+        img.src = photoUrl;
+        img.alt = person.name;
+        avatarWrap.textContent = '';
+        avatarWrap.style.background = 'transparent';
+        avatarWrap.appendChild(img);
+      };
+      preloader.src = photoUrl; // 404 = onload never fires, initials stay
+
+      // Name
+      const nameEl = document.createElement('div');
+      nameEl.className = 'person-card__name';
+      nameEl.textContent = person.name;
+
+      // Organisation
+      const orgEl = document.createElement('div');
+      orgEl.className = 'person-card__org';
+      orgEl.textContent = person.organization || '—';
+
+      // Title (optional)
+      const chatEl = document.createElement('div');
+      chatEl.className = 'person-card__chat';
+      chatEl.textContent = '💬 Message';
+
+      card.appendChild(avatarWrap);
+      card.appendChild(nameEl);
+      card.appendChild(orgEl);
+      if (person.title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'person-card__arrival';
+        titleEl.textContent = person.title;
+        card.appendChild(titleEl);
+      }
+      card.appendChild(chatEl);
+
       card.addEventListener('click', () => {
         window.open('/chat.html?dm=' + encodeURIComponent(person.email), 'glc-chat', 'width=960,height=700');
       });

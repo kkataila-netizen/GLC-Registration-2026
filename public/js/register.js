@@ -114,6 +114,120 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadProfile();
 
+  /* ── profile photo ──────────────────────────────── */
+  const photoSection   = document.getElementById('photoSection');
+  const photoPreview   = document.getElementById('photoPreview');
+  const photoInitials  = document.getElementById('photoInitials');
+  const photoImg       = document.getElementById('photoImg');
+  const photoFile      = document.getElementById('photoFile');
+  const photoRemoveBtn = document.getElementById('photoRemoveBtn');
+  const photoMessage   = document.getElementById('photoMessage');
+
+  function showPhotoMsg(type, text) {
+    photoMessage.hidden = false;
+    photoMessage.className = `message message--${type}`;
+    photoMessage.textContent = text;
+    setTimeout(() => { photoMessage.hidden = true; }, 3000);
+  }
+
+  function setPhotoPreview(dataUrl) {
+    photoImg.src = dataUrl;
+    photoImg.style.display = 'block';
+    photoInitials.style.display = 'none';
+    photoRemoveBtn.style.display = 'inline-block';
+  }
+
+  function clearPhotoPreview() {
+    photoImg.src = '';
+    photoImg.style.display = 'none';
+    photoInitials.style.display = '';
+    photoRemoveBtn.style.display = 'none';
+  }
+
+  function resizeImageToDataUrl(file, maxSize = 200) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+          canvas.width  = Math.round(img.width  * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function initPhotoSection() {
+    const user = getUser();
+    if (!user) return;
+    photoSection.style.display = '';
+    // Set initials as placeholder
+    photoInitials.textContent = user.name
+      ? user.name.trim().split(/\s+/).map(p => p[0]).join('').toUpperCase().slice(0, 2)
+      : '?';
+    // Load existing photo
+    fetch(`/api/profile-photo?email=${encodeURIComponent(user.email)}`)
+      .then(r => r.ok ? r.blob() : null)
+      .then(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        setPhotoPreview(url);
+      })
+      .catch(() => {});
+  }
+
+  photoFile.addEventListener('change', async () => {
+    const file = photoFile.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showPhotoMsg('error', 'File too large. Please choose an image under 2 MB.');
+      photoFile.value = '';
+      return;
+    }
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      setPhotoPreview(dataUrl);
+      // Upload immediately
+      const res = await fetch('/api/profile-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getUserToken() },
+        body: JSON.stringify({ photo: dataUrl })
+      });
+      if (res.ok) {
+        showPhotoMsg('success', 'Photo saved!');
+      } else {
+        const d = await res.json();
+        showPhotoMsg('error', d.error || 'Failed to upload photo.');
+      }
+    } catch {
+      showPhotoMsg('error', 'Could not upload photo. Please try again.');
+    }
+    photoFile.value = '';
+  });
+
+  photoRemoveBtn.addEventListener('click', async () => {
+    try {
+      await fetch('/api/profile-photo', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + getUserToken() }
+      });
+      clearPhotoPreview();
+      showPhotoMsg('success', 'Photo removed.');
+    } catch {
+      showPhotoMsg('error', 'Could not remove photo.');
+    }
+  });
+
+  initPhotoSection();
+
   /* ── dietary "Other" toggle ────────────────────── */
   const dietarySelect = document.getElementById('dietary');
   const dietaryOther = document.getElementById('dietaryOther');
