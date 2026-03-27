@@ -84,8 +84,13 @@
     return res.json();
   }
 
-  /* ── unread counts ────────────────────────────────── */
+  /* ── refresh conversations (groups + unread) ────────── */
   async function loadUnreadCounts() {
+    try {
+      // Re-fetch the full conversation list so member counts stay current
+      const convData = await api(`/conversations?user=${encodeURIComponent(me.email)}`);
+      groups = (convData.conversations || []).filter(c => c.type === "group");
+    } catch {}
     try {
       const data = await api(`/unread-per-conv?user=${encodeURIComponent(me.email)}`);
       unreadCounts = data.counts || {};

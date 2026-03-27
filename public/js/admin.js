@@ -371,6 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Silently sync broadcast group membership with current registrations
+    fetch('/chat-api/sync-broadcast', { method: 'POST' }).catch(() => {});
+
     loadRegistrations();
   }
 });

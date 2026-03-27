@@ -375,6 +375,18 @@ export default async (req) => {
     return json({ success: true });
   }
 
+  /* ── POST /sync-broadcast ── force sync broadcast members ── */
+  if (method === "POST" && /^\/sync-broadcast\/?$/.test(path)) {
+    const convs = await getConversations();
+    const broadcastConv = convs.find(c => c.id === BROADCAST_CONV_ID);
+    if (!broadcastConv) return json({ error: "Broadcast conversation not found. Send a broadcast first." }, 404);
+    const regs = await getRegistrations();
+    const allEmails = regs.map(r => r.email);
+    broadcastConv.members = [...new Set([...broadcastConv.members, ...allEmails])];
+    await saveConversations(convs);
+    return json({ success: true, memberCount: broadcastConv.members.length });
+  }
+
   /* ── POST /reset ── clear all conversations & messages ── */
   if (method === "POST" && /^\/reset\/?$/.test(path)) {
     // Clear all conversations
