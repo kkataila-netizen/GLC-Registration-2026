@@ -78,6 +78,10 @@ body {
   width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: .6875rem; font-weight: 700; color: #fff; flex-shrink: 0;
+  overflow: hidden;
+}
+.user-item__avatar-photo {
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block;
 }
 .user-item__info { flex: 1; min-width: 0; }
 .user-item__name { font-size: .875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

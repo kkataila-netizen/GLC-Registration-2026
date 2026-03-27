@@ -221,6 +221,29 @@
     userList.querySelectorAll("[data-group-id]").forEach(el => {
       el.addEventListener("click", () => openGroup(el.dataset.groupId, el.dataset.groupName));
     });
+
+    // Swap initials for profile photos where available
+    loadSidebarPhotos();
+  }
+
+  function loadSidebarPhotos() {
+    userList.querySelectorAll("[data-email]").forEach(item => {
+      const email = item.dataset.email;
+      const avatarEl = item.querySelector(".user-item__avatar");
+      if (!avatarEl) return;
+      const preloader = new Image();
+      preloader.onload = () => {
+        const img = document.createElement("img");
+        img.src = preloader.src;
+        img.alt = avatarEl.textContent.trim();
+        img.className = "user-item__avatar-photo";
+        avatarEl.textContent = "";
+        avatarEl.style.background = "transparent";
+        avatarEl.style.padding = "0";
+        avatarEl.appendChild(img);
+      };
+      preloader.src = `/api/profile-photo?email=${encodeURIComponent(email)}`;
+    });
   }
 
   function dmIdFor(email) {
