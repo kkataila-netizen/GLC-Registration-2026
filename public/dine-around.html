@@ -6,6 +6,16 @@
   <title>Dine Around Event - GLC Conference</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
+  <!-- Admin-only gate: redirect non-admins immediately -->
+  <script>
+    (() => {
+      const ADMIN_EMAIL = "kkataila@banyansoftware.com";
+      try {
+        const u = JSON.parse(localStorage.getItem("glc-user"));
+        if (!u || u.email !== ADMIN_EMAIL) { window.location.replace("/home.html"); }
+      } catch { window.location.replace("/home.html"); }
+    })();
+  </script>
   <style>
     .dine-intro {
       background: #fff;
