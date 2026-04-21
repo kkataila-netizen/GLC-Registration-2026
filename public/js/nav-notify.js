@@ -171,7 +171,7 @@
 
   /* ── Admin + Dine Around tab visibility (hidden by default in HTML) ── */
   function enforceAdminVisibility(user) {
-    const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
+    const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
     const isAdmin = user && ADMIN_EMAILS.includes(user.email);
     const links = document.querySelectorAll(".top-nav__links a");
     for (const a of links) {

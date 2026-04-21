@@ -7,7 +7,7 @@
   const API = "/chat-api";
   const POLL_MS = 3000;
   const BROADCAST_CONV_ID = "group:broadcast-communications";
-  const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
+  const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
 
   /* ── state ─────────────────────────────────────── */
   let me = null;

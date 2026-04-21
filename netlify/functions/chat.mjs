@@ -86,7 +86,7 @@ export default async (req) => {
 
   /* ── GET /conversations?user=email ──────────────── */
   const BROADCAST_CONV_ID = "group:broadcast-communications";
-  const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
+  const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
   if (method === "GET" && /^\/conversations\/?$/.test(path)) {
     const user = url.searchParams.get("user");
     if (!user) return json({ error: "user param required" }, 400);
