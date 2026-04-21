@@ -201,7 +201,7 @@
       showMessage(`You're registered for ${restaurant ? restaurant.name : 'the selected restaurant'}!`);
 
       // Reload page after short delay so fresh counts are shown
-      setTimeout(() => location.reload(), 1200);
+      setTimeout(() => location.reload(), 800);
 
     } catch {
       showMessage('Network error. Please try again.', 'error');
