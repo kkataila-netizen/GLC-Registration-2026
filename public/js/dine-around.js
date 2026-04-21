@@ -221,12 +221,6 @@
       currentSelection = restaurantId;
       renderCards(cachedAvailability, currentSelection);
 
-      // Background server sync after 2 s to confirm true counts
-      setTimeout(async () => {
-        cachedAvailability = await loadAvailability();
-        renderCards(cachedAvailability, currentSelection);
-      }, 2000);
-
     } catch {
       showMessage('Network error. Please try again.', 'error');
     } finally {
