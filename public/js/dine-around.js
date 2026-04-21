@@ -200,11 +200,8 @@
       const restaurant = RESTAURANTS.find(r => r.id === restaurantId);
       showMessage(`You're registered for ${restaurant ? restaurant.name : 'the selected restaurant'}!`);
 
-      // Brief delay so DB write is fully committed before re-fetching counts
-      await new Promise(r => setTimeout(r, 600));
-      currentSelection = restaurantId;
-      const availability = await loadAvailability();
-      renderCards(availability, restaurantId);
+      // Reload page after short delay so fresh counts are shown
+      setTimeout(() => location.reload(), 1200);
 
     } catch {
       showMessage('Network error. Please try again.', 'error');
