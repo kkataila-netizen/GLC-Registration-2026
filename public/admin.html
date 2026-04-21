@@ -28,10 +28,10 @@
   <!-- Redirect non-admin users immediately -->
   <script>
     (() => {
-      const ADMIN_EMAIL = "kkataila@banyansoftware.com";
+      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
       try {
         const u = JSON.parse(localStorage.getItem("glc-user"));
-        if (!u || u.email !== ADMIN_EMAIL) { window.location.replace("/home.html"); return; }
+        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); return; }
       } catch { window.location.replace("/home.html"); }
     })();
   </script>

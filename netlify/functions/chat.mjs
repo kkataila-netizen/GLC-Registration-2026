@@ -86,7 +86,7 @@ export default async (req) => {
 
   /* ── GET /conversations?user=email ──────────────── */
   const BROADCAST_CONV_ID = "group:broadcast-communications";
-  const ADMIN_EMAIL = "kkataila@banyansoftware.com";
+  const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
   if (method === "GET" && /^\/conversations\/?$/.test(path)) {
     const user = url.searchParams.get("user");
     if (!user) return json({ error: "user param required" }, 400);
@@ -177,7 +177,7 @@ export default async (req) => {
     const body = await req.json();
 
     // Broadcast channel is one-way: only admin can post
-    if (convId === BROADCAST_CONV_ID && body.sender !== ADMIN_EMAIL) {
+    if (convId === BROADCAST_CONV_ID && !ADMIN_EMAILS.includes(body.sender)) {
       return json({ error: "Broadcast channel is read-only" }, 403);
     }
 

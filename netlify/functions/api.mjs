@@ -3,7 +3,8 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const ADMIN_EMAIL = "kkataila@banyansoftware.com";
+const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca"];
+const isAdminEmail = (e) => ADMIN_EMAILS.includes((e || "").toLowerCase());
 const ADMIN_PASSWORD = "GLC2026";
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
