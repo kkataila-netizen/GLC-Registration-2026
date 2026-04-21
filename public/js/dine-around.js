@@ -221,6 +221,9 @@
       currentSelection = restaurantId;
       renderCards(cachedAvailability, currentSelection);
 
+      // Reset the 30s poll so it doesn't fire immediately with stale server data
+      resetPoll();
+
     } catch {
       showMessage('Network error. Please try again.', 'error');
     } finally {
@@ -230,10 +233,16 @@
 
   // Keep track of current selection for polling re-renders
   let currentSelection = null;
+  let pollInterval = null;
 
   async function refreshAvailability() {
     cachedAvailability = await loadAvailability();
     renderCards(cachedAvailability, currentSelection);
+  }
+
+  function resetPoll() {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(refreshAvailability, 30000);
   }
 
   async function init() {
@@ -254,7 +263,7 @@
     renderCards(availability, userSelection);
 
     // Auto-refresh availability every 30 seconds
-    setInterval(refreshAvailability, 30000);
+    resetPoll();
   }
 
   document.addEventListener('DOMContentLoaded', init);
