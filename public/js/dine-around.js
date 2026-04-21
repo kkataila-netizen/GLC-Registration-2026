@@ -200,8 +200,10 @@
       const restaurant = RESTAURANTS.find(r => r.id === restaurantId);
       showMessage(`You're registered for ${restaurant ? restaurant.name : 'the selected restaurant'}!`);
 
-      // Refresh availability + re-render
-      const [availability] = await Promise.all([loadAvailability()]);
+      // Brief delay so DB write is fully committed before re-fetching counts
+      await new Promise(r => setTimeout(r, 600));
+      currentSelection = restaurantId;
+      const availability = await loadAvailability();
       renderCards(availability, restaurantId);
 
     } catch {
@@ -209,6 +211,14 @@
     } finally {
       document.querySelectorAll('.dine-card__select').forEach(b => b.disabled = false);
     }
+  }
+
+  // Keep track of current selection for polling re-renders
+  let currentSelection = null;
+
+  async function refreshAvailability() {
+    const availability = await loadAvailability();
+    renderCards(availability, currentSelection);
   }
 
   async function init() {
@@ -224,7 +234,11 @@
       user ? loadUserSelection() : Promise.resolve(null)
     ]);
 
+    currentSelection = userSelection;
     renderCards(availability, userSelection);
+
+    // Auto-refresh availability every 30 seconds
+    setInterval(refreshAvailability, 30000);
   }
 
   document.addEventListener('DOMContentLoaded', init);
