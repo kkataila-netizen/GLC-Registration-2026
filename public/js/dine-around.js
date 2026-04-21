@@ -45,6 +45,9 @@
   // Cached after first fetch
   let cachedRegId = null;
 
+  // Last known availability counts — updated on load and after selection
+  let cachedAvailability = {};
+
   function esc(s) {
     const d = document.createElement('div');
     d.textContent = s;
@@ -177,6 +180,7 @@
     }
 
     const regId = cachedRegId;
+    const prevSelection = currentSelection;
 
     // Disable all buttons while saving
     document.querySelectorAll('.dine-card__select').forEach(b => b.disabled = true);
@@ -200,8 +204,28 @@
       const restaurant = RESTAURANTS.find(r => r.id === restaurantId);
       showMessage(`You're registered for ${restaurant ? restaurant.name : 'the selected restaurant'}!`);
 
-      // Reload page after short delay so fresh counts are shown
-      setTimeout(() => location.reload(), 800);
+      // Optimistically update counts immediately — no reload needed
+      const optimistic = {};
+      RESTAURANTS.forEach(r => {
+        optimistic[r.id] = { taken: cachedAvailability[r.id]?.taken || 0 };
+      });
+      // Free up the previous selection
+      if (prevSelection && prevSelection !== restaurantId && optimistic[prevSelection]) {
+        optimistic[prevSelection].taken = Math.max(0, optimistic[prevSelection].taken - 1);
+      }
+      // Claim the new selection (only add if this is a new pick, not a re-select)
+      if (prevSelection !== restaurantId) {
+        optimistic[restaurantId].taken = (optimistic[restaurantId].taken || 0) + 1;
+      }
+      cachedAvailability = optimistic;
+      currentSelection = restaurantId;
+      renderCards(cachedAvailability, currentSelection);
+
+      // Background server sync after 2 s to confirm true counts
+      setTimeout(async () => {
+        cachedAvailability = await loadAvailability();
+        renderCards(cachedAvailability, currentSelection);
+      }, 2000);
 
     } catch {
       showMessage('Network error. Please try again.', 'error');
@@ -214,8 +238,8 @@
   let currentSelection = null;
 
   async function refreshAvailability() {
-    const availability = await loadAvailability();
-    renderCards(availability, currentSelection);
+    cachedAvailability = await loadAvailability();
+    renderCards(cachedAvailability, currentSelection);
   }
 
   async function init() {
@@ -231,6 +255,7 @@
       user ? loadUserSelection() : Promise.resolve(null)
     ]);
 
+    cachedAvailability = availability;
     currentSelection = userSelection;
     renderCards(availability, userSelection);
 
