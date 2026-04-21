@@ -42,9 +42,8 @@
     return localStorage.getItem('glc-user-token') || '';
   }
 
-  function getRegId() {
-    return localStorage.getItem('glc-reg-id') || '';
-  }
+  // Cached after first fetch
+  let cachedRegId = null;
 
   function esc(s) {
     const d = document.createElement('div');
@@ -151,8 +150,7 @@
   async function loadUserSelection() {
     const user = getUser();
     const token = getUserToken();
-    const regId = getRegId();
-    if (!user || !token || !regId) return null;
+    if (!user || !token) return null;
 
     try {
       const res = await fetch(`/api/registrations?search=${encodeURIComponent(user.email)}`, {
@@ -161,7 +159,9 @@
       if (!res.ok) return null;
       const data = await res.json();
       const reg = (data.registrations || []).find(r => r.email === user.email.toLowerCase());
-      return reg ? (reg.dineAround || null) : null;
+      if (!reg) return null;
+      cachedRegId = reg.id; // cache for use in selectRestaurant
+      return reg.dineAround || null;
     } catch {
       return null;
     }
@@ -170,12 +170,13 @@
   async function selectRestaurant(restaurantId) {
     const user = getUser();
     const token = getUserToken();
-    const regId = getRegId();
 
-    if (!user || !token || !regId) {
+    if (!user || !token || !cachedRegId) {
       showMessage('Please log in to make your selection.', 'error');
       return;
     }
+
+    const regId = cachedRegId;
 
     // Disable all buttons while saving
     document.querySelectorAll('.dine-card__select').forEach(b => b.disabled = true);
