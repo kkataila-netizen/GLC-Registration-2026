@@ -252,7 +252,7 @@ export default async (req, context) => {
       return json({ error: "Unauthorized" }, 401);
     }
     const registrations = await getRegistrations();
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
       escapeCSV(r.title),
@@ -265,6 +265,7 @@ export default async (req, context) => {
       escapeCSV(r.dietaryOther),
       escapeCSV(Array.isArray(r.sessions) ? r.sessions.join('; ') : ''),
       escapeCSV(r.welcomeReception ? 'Yes' : 'No'),
+      escapeCSV(r.dineAround === 'biffs' ? "Biff's Bistro" : r.dineAround === 'jump' ? 'Jump Restaurant' : r.dineAround === 'joneses' ? 'The Joneses' : ''),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt)
@@ -277,6 +278,22 @@ export default async (req, context) => {
       headers: {
         "Content-Type": "text/csv",
         "Content-Disposition": 'attachment; filename="registrations.csv"'
+      }
+    });
+  }
+
+  // GET /api/dine-around — public availability counts, no PII
+  if (method === "GET" && (path === "/dine-around" || path === "/dine-around/")) {
+    const registrations = await getRegistrations();
+    const counts = { biffs: 0, jump: 0, joneses: 0 };
+    for (const r of registrations) {
+      if (r.dineAround && counts[r.dineAround] !== undefined) counts[r.dineAround]++;
+    }
+    return json({
+      availability: {
+        biffs:   { taken: counts.biffs,   capacity: 72  },
+        jump:    { taken: counts.jump,    capacity: 100 },
+        joneses: { taken: counts.joneses, capacity: 70  }
       }
     });
   }
@@ -411,6 +428,13 @@ export default async (req, context) => {
       reg.sessions = body.sessions;
     }
     if (body.welcomeReception !== undefined) reg.welcomeReception = !!body.welcomeReception;
+    if (body.dineAround !== undefined) {
+      const VALID_DINE = ['biffs', 'jump', 'joneses', ''];
+      if (!VALID_DINE.includes(body.dineAround)) {
+        return json({ error: "Invalid restaurant selection." }, 400);
+      }
+      reg.dineAround = body.dineAround || '';
+    }
     if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
     if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
     if (body.password) {
