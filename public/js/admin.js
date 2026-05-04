@@ -453,12 +453,27 @@ document.addEventListener('DOMContentLoaded', () => {
         csvFileInput.value = '';
         csvFileName.textContent = 'No file chosen';
         loadRegistrations(searchInput.value.trim());
+
+        // Switch to close state
+        importCancel.disabled = true;
+        importCancel.style.opacity = '0.4';
+        importConfirm.disabled = false;
+        importConfirm.textContent = 'Close';
+        importConfirm.onclick = () => {
+          importModal.hidden = true;
+          importConfirm.textContent = 'Yes, Overwrite Data';
+          importConfirm.onclick = null;
+          importCancel.disabled = false;
+          importCancel.style.opacity = '';
+        };
       } catch {
         importError.textContent = 'Network error. Please try again.';
         importError.hidden = false;
       } finally {
-        importConfirm.disabled = false;
-        importConfirm.textContent = 'Yes, Overwrite Data';
+        if (importConfirm.textContent !== 'Close') {
+          importConfirm.disabled = false;
+          importConfirm.textContent = 'Yes, Overwrite Data';
+        }
       }
     });
 
