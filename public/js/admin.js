@@ -370,6 +370,144 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // ── Import CSV ────────────────────────────────────
+    const importBtn     = document.getElementById('importBtn');
+    const importModal   = document.getElementById('importModal');
+    const importCancel  = document.getElementById('importCancel');
+    const importConfirm = document.getElementById('importConfirm');
+    const csvFileInput  = document.getElementById('csvFileInput');
+    const csvFileName   = document.getElementById('csvFileName');
+    const importError   = document.getElementById('importError');
+    const importSuccess = document.getElementById('importSuccess');
+
+    let parsedCSVRecords = null;
+
+    importBtn.addEventListener('click', () => {
+      csvFileInput.value = '';
+      csvFileName.textContent = 'No file chosen';
+      importConfirm.disabled = true;
+      importError.hidden = true;
+      importSuccess.hidden = true;
+      parsedCSVRecords = null;
+      importModal.hidden = false;
+    });
+
+    importCancel.addEventListener('click', () => { importModal.hidden = true; });
+    importModal.addEventListener('click', (e) => {
+      if (e.target === importModal) importModal.hidden = true;
+    });
+
+    csvFileInput.addEventListener('change', () => {
+      importError.hidden = true;
+      importSuccess.hidden = true;
+      importConfirm.disabled = true;
+      parsedCSVRecords = null;
+      const file = csvFileInput.files[0];
+      if (!file) { csvFileName.textContent = 'No file chosen'; return; }
+      csvFileName.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          parsedCSVRecords = parseCSV(evt.target.result);
+          if (parsedCSVRecords.length === 0) {
+            importError.textContent = 'No data rows found in the CSV.';
+            importError.hidden = false;
+            return;
+          }
+          importConfirm.disabled = false;
+          importSuccess.textContent = `${parsedCSVRecords.length} row${parsedCSVRecords.length !== 1 ? 's' : ''} ready to import.`;
+          importSuccess.hidden = false;
+        } catch (err) {
+          importError.textContent = 'Could not parse CSV. Make sure it is a valid CSV file.';
+          importError.hidden = false;
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    importConfirm.addEventListener('click', async () => {
+      if (!parsedCSVRecords || parsedCSVRecords.length === 0) return;
+      importError.hidden = true;
+      importSuccess.hidden = true;
+      importConfirm.disabled = true;
+      importConfirm.textContent = 'Uploading…';
+
+      try {
+        const res = await fetch('/api/registrations/import', {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({ records: parsedCSVRecords })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          importError.textContent = data.error || 'Import failed. Please try again.';
+          importError.hidden = false;
+          return;
+        }
+
+        importSuccess.textContent = `Done! ${data.updated} record${data.updated !== 1 ? 's' : ''} updated, ${data.skipped} skipped.`;
+        importSuccess.hidden = false;
+        parsedCSVRecords = null;
+        csvFileInput.value = '';
+        csvFileName.textContent = 'No file chosen';
+        loadRegistrations(searchInput.value.trim());
+      } catch {
+        importError.textContent = 'Network error. Please try again.';
+        importError.hidden = false;
+      } finally {
+        importConfirm.disabled = false;
+        importConfirm.textContent = 'Yes, Overwrite Data';
+      }
+    });
+
+    // ── CSV Parser ────────────────────────────────────
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (line[i + 1] === '"') { current += '"'; i++; }
+            else { inQuotes = false; }
+          } else { current += ch; }
+        } else {
+          if (ch === '"') { inQuotes = true; }
+          else if (ch === ',') { result.push(current); current = ''; }
+          else { current += ch; }
+        }
+      }
+      result.push(current);
+      return result;
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const headers = parseCSVLine(lines[0]);
+      // Normalise headers to camelCase field names matching our export
+      const KEY_MAP = {
+        'name': 'name', 'title': 'title', 'organization': 'organization',
+        'email': 'email', 'arrival date': 'arrivalDate', 'departure date': 'departureDate',
+        'phone': 'phone', 'dietary': 'dietary', 'dietary other': 'dietaryOther',
+        'sessions': 'sessions', 'welcome reception': 'welcomeReception',
+        'dine around': 'dineAround', 't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
+        'registered': 'registeredAt'
+      };
+      const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());
+      return lines.slice(1)
+        .filter(l => l.trim())
+        .map(line => {
+          const vals = parseCSVLine(line);
+          const obj = {};
+          keys.forEach((k, i) => { obj[k] = vals[i] !== undefined ? vals[i] : ''; });
+          return obj;
+        });
+    }
+
     // Silently sync broadcast group membership with current registrations
     fetch('/chat-api/sync-broadcast', { method: 'POST' }).catch(() => {});
 

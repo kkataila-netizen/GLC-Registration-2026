@@ -632,6 +632,64 @@ export default async (req, context) => {
     return json({ success: true });
   }
 
+  /* ── POST /api/registrations/import  ★ ADMIN ONLY ── */
+  if (method === "POST" && (path === "/registrations/import" || path === "/registrations/import/")) {
+    if (!(await validateAdminToken(req))) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400); }
+
+    const records = body.records;
+    if (!Array.isArray(records) || records.length === 0) {
+      return json({ error: "No records provided." }, 400);
+    }
+
+    const DINE_MAP = {
+      "biff's bistro": 'biffs',
+      "jump restaurant": 'jump',
+      "the joneses": 'joneses',
+      '': ''
+    };
+
+    const registrations = await getRegistrations();
+    let updated = 0;
+    let skipped = 0;
+
+    for (const rec of records) {
+      const email = (rec.email || '').trim().toLowerCase();
+      if (!email) { skipped++; continue; }
+
+      const index = registrations.findIndex(r => r.email === email);
+      if (index === -1) { skipped++; continue; }
+
+      const reg = registrations[index];
+
+      if (rec.name)                         reg.name           = rec.name.trim();
+      if (rec.title         !== undefined)  reg.title          = (rec.title || '').trim();
+      if (rec.organization  !== undefined)  reg.organization   = (rec.organization || '').trim();
+      if (rec.arrivalDate   !== undefined)  reg.arrivalDate    = (rec.arrivalDate || '').trim();
+      if (rec.departureDate !== undefined)  reg.departureDate  = (rec.departureDate || '').trim();
+      if (rec.phone         !== undefined)  reg.phone          = (rec.phone || '').trim();
+      if (rec.dietary !== undefined && VALID_DIETARY.includes(rec.dietary)) reg.dietary = rec.dietary;
+      if (rec.dietaryOther  !== undefined)  reg.dietaryOther   = (rec.dietaryOther || '').trim();
+      if (rec.sessions      !== undefined)  reg.sessions       = rec.sessions ? rec.sessions.split('; ').filter(s => s.trim()) : [];
+      if (rec.welcomeReception !== undefined) reg.welcomeReception = rec.welcomeReception.toLowerCase() === 'yes';
+      if (rec.dineAround !== undefined) {
+        const dineKey = (rec.dineAround || '').toLowerCase();
+        if (DINE_MAP[dineKey] !== undefined) reg.dineAround = DINE_MAP[dineKey];
+      }
+      if (rec.tshirtFit !== undefined) reg.tshirtFit = (rec.tshirtFit || '').trim();
+      if (rec.tshirt !== undefined && (VALID_TSHIRT.includes(rec.tshirt) || rec.tshirt === '')) reg.tshirt = rec.tshirt;
+
+      registrations[index] = reg;
+      updated++;
+    }
+
+    await saveRegistrations(registrations);
+    return json({ success: true, updated, skipped });
+  }
+
   /* ── POST /api/profile-photo  ★ AUTH REQUIRED ───── */
   if (method === "POST" && (path === "/profile-photo" || path === "/profile-photo/")) {
     const userAuth = await validateUserToken(req);

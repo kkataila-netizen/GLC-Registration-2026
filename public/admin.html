@@ -66,6 +66,7 @@
         <span id="regCount" class="badge badge--count">0 registrations</span>
         <button id="broadcastBtn" class="btn btn-primary">Broadcast Communication</button>
         <button id="exportBtn" class="btn btn-secondary">Export CSV</button>
+        <button id="importBtn" class="btn btn-secondary">Upload CSV</button>
         <button id="resetChatBtn" class="btn btn-secondary" style="background:#b91c1c;color:#fff;border-color:#b91c1c">Reset Chat</button>
       </div>
 
@@ -182,6 +183,28 @@
           <button type="submit" id="broadcastSend" class="btn btn-primary" style="flex:1">Send to All Users</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Import CSV Modal -->
+  <div id="importModal" class="admin-modal-overlay" hidden>
+    <div class="card admin-modal">
+      <h2 style="margin-bottom:0.5rem">Upload CSV</h2>
+      <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.9rem;color:#856404;">
+        ⚠️ <strong>Warning:</strong> This will overwrite registration data for every row found in the file. Rows are matched by email address — records not found will be skipped. <strong>This cannot be undone.</strong>
+      </div>
+      <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem">Use the exported CSV as your template. Do not change the column headers or the email column.</p>
+      <div style="margin-bottom:1rem">
+        <label class="btn btn-secondary" for="csvFileInput" style="display:inline-block;cursor:pointer">Choose CSV file</label>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none">
+        <span id="csvFileName" style="margin-left:0.75rem;font-size:0.875rem;color:var(--text-muted)">No file chosen</span>
+      </div>
+      <div id="importError" class="message message--error" hidden></div>
+      <div id="importSuccess" class="message message--success" hidden></div>
+      <div style="display:flex;gap:.75rem;margin-top:1rem">
+        <button type="button" id="importCancel" class="btn btn-secondary" style="flex:1">Cancel</button>
+        <button type="button" id="importConfirm" class="btn btn-primary" style="flex:1" disabled>Yes, Overwrite Data</button>
+      </div>
     </div>
   </div>
 
