@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>${esc(r.email)}</td>
           <td>${esc(r.arrivalDate) || '—'}</td>
           <td>${esc(r.departureDate) || '—'}</td>
-          <td>${esc(r.phone) || '—'}</td>
           <td>${esc(r.organization) || '—'}</td>
           <td>${esc(r.dietary) || 'None'}</td>
           <td>${Array.isArray(r.sessions) && r.sessions.length ? esc(r.sessions.join(', ')) : '—'}</td>
