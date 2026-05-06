@@ -120,7 +120,10 @@ async function deleteProfilePhoto(email) {
 async function getRegistrations() {
   const store = getStore("registrations");
   try {
-    const data = await store.get("all", { type: "json" });
+    // Strong consistency: ensures we never return stale data after a recent write.
+    // Eventually-consistent reads can return old values for several seconds after
+    // a PUT, which caused admin edits to look like they hadn't saved.
+    const data = await store.get("all", { type: "json", consistency: "strong" });
     return data || [];
   } catch {
     return [];
