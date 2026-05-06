@@ -57,6 +57,7 @@
   const retakeBtn   = document.getElementById('retakeBtn');
   const skipBtn     = document.getElementById('skipPhotoBtn');
   const completeBtn = document.getElementById('completeBtn');
+  const checkOutBtn = document.getElementById('checkOutBtn');
 
   // ── Load registrations ────────────────────────────
   async function loadAttendees() {
@@ -161,6 +162,9 @@
         <span class="ci-detail-value">${esc(String(value))}</span>`;
       modalDetails.appendChild(row);
     });
+
+    // Show Check Out button only for already-checked-in attendees
+    checkOutBtn.style.display = attendee.checkedIn ? '' : 'none';
 
     // Camera: reset to idle
     setCamState('idle');
@@ -283,6 +287,32 @@
     }
   }
 
+  async function checkOut() {
+    if (!currentAttendee) return;
+    checkOutBtn.disabled = true;
+    checkOutBtn.textContent = 'Removing…';
+    try {
+      const res = await fetch(`/api/registrations/${currentAttendee.id}`, {
+        method: 'PUT',
+        headers: adminHeaders(),
+        body: JSON.stringify({ checkedIn: false })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Check-out failed');
+      }
+      const idx = allAttendees.findIndex(a => a.id === currentAttendee.id);
+      if (idx !== -1) { allAttendees[idx].checkedIn = false; allAttendees[idx].checkedInAt = ''; }
+      closeModal();
+      filterAndRender(searchInput.value.trim());
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      checkOutBtn.disabled = false;
+      checkOutBtn.textContent = '↩  Check Out';
+    }
+  }
+
   function showSuccessFlash(name) {
     const flash = document.createElement('div');
     flash.className = 'ci-success-flash';
@@ -304,6 +334,7 @@
   retakeBtn.addEventListener('click',    retakePhoto);
   completeBtn.addEventListener('click',  () => completeCheckin(true));
   skipBtn.addEventListener('click',      () => completeCheckin(false));
+  checkOutBtn.addEventListener('click',  checkOut);
 
   // ── Init ──────────────────────────────────────────
   loadAttendees();

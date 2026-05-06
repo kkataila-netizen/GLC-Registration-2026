@@ -441,6 +441,7 @@ export default async (req, context) => {
     if (body.checkedIn !== undefined) {
       reg.checkedIn = !!body.checkedIn;
       if (reg.checkedIn && !reg.checkedInAt) reg.checkedInAt = new Date().toISOString();
+      if (!reg.checkedIn) reg.checkedInAt = '';
     }
     if (body.password) {
       if (body.password.length < 4) {
