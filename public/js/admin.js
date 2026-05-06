@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>${esc(r.organization) || '—'}</td>
           <td>${esc(r.dietary) || 'None'}</td>
           <td>${Array.isArray(r.sessions) && r.sessions.length ? esc(r.sessions.join(', ')) : '—'}</td>
+          <td>${r.welcomeReception ? '✓ Yes' : 'No'}</td>
           <td>${esc(r.tshirt) || '—'}</td>
           <td>${formatDate(r.registeredAt)}</td>
           <td style="white-space:nowrap">
