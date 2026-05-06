@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Check In — GLC 2026</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    :root { --ci-green: #395542; --ci-green-lt: #f0f7f2; }
+
+    body { background: #f8f9fa; }
+
+    /* ── Top bar ── */
+    .ci-topbar {
+      position: sticky; top: 52px; z-index: 50;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.25rem;
+      display: flex; gap: 0.85rem; align-items: center;
+    }
+    .ci-search {
+      flex: 1; font-size: 1.05rem; font-family: inherit;
+      padding: 0.7rem 1rem;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      outline: none; transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .ci-search:focus { border-color: var(--ci-green); }
+    .ci-stats {
+      white-space: nowrap; font-weight: 600; font-size: 0.875rem;
+      color: var(--text-muted);
+      background: var(--ci-green-lt); padding: 0.45rem 0.85rem;
+      border-radius: 99px;
+    }
+    .ci-stats strong { color: var(--ci-green); }
+
+    /* ── Attendee grid ── */
+    .ci-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.85rem; padding: 1.25rem;
+    }
+
+    .ci-card {
+      background: #fff; border: 2px solid var(--border);
+      border-radius: 0.75rem; padding: 1.1rem 0.85rem;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    .ci-card:hover  { border-color: var(--ci-green); box-shadow: 0 4px 14px rgba(57,85,66,0.15); transform: translateY(-2px); }
+    .ci-card:active { transform: translateY(0); box-shadow: none; }
+    .ci-card--checked { border-color: #86efac; background: #f0fdf4; }
+
+    .ci-avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      margin: 0 auto 0.65rem; overflow: hidden;
+      background: #e5e7eb; position: relative;
+    }
+    .ci-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ci-initials {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.25rem; color: #6b7280;
+    }
+
+    .ci-card-name { font-weight: 700; font-size: 0.875rem; line-height: 1.3; margin-bottom: 0.2rem; }
+    .ci-card-org  { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.55rem; }
+
+    .ci-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 600;
+      padding: 0.18rem 0.55rem; border-radius: 99px;
+    }
+    .ci-badge--in      { background: #dcfce7; color: #166534; }
+    .ci-badge--pending { background: #f3f4f6; color: #6b7280; }
+
+    /* ── Modal overlay ── */
+    .ci-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .ci-modal {
+      background: #fff; border-radius: 1rem;
+      width: 100%; max-width: 860px; max-height: 92vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .ci-modal__header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .ci-modal__header h2 { margin: 0; font-size: 1.3rem; }
+    .ci-modal__sub { color: var(--text-muted); font-size: 0.875rem; margin-top: 0.15rem; }
+    .ci-modal__close {
+      width: 34px; height: 34px; flex-shrink: 0;
+      border: none; background: #f3f4f6; border-radius: 50%;
+      cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; margin-left: 0.75rem;
+    }
+    .ci-modal__close:hover { background: #e5e7eb; }
+
+    .ci-modal__body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      flex: 1; overflow: hidden; min-height: 0;
+    }
+    @media (max-width: 580px) {
+      .ci-modal__body { grid-template-columns: 1fr; overflow-y: auto; }
+      .ci-details      { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    /* ── Detail panel ── */
+    .ci-details { padding: 1.1rem 1.4rem; overflow-y: auto; border-right: 1px solid var(--border); }
+    .ci-already-in {
+      background: #dcfce7; color: #166534; border-radius: var(--radius);
+      padding: 0.55rem 0.85rem; font-size: 0.85rem; font-weight: 600;
+      margin-bottom: 0.9rem;
+    }
+    .ci-detail-row {
+      display: flex; gap: 0.5rem;
+      padding: 0.45rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem;
+    }
+    .ci-detail-row:last-child { border-bottom: none; }
+    .ci-detail-label { font-weight: 600; color: var(--text-muted); min-width: 115px; flex-shrink: 0; }
+    .ci-detail-value { color: #111; word-break: break-word; }
+
+    /* ── Camera panel ── */
+    .ci-camera {
+      padding: 1.1rem 1.25rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.65rem; overflow-y: auto;
+    }
+    .ci-camera-label {
+      font-weight: 600; font-size: 0.875rem;
+      color: var(--text-muted); align-self: flex-start;
+    }
+
+    .ci-video-wrap {
+      width: 100%; aspect-ratio: 4/3; max-height: 260px;
+      background: #111; border-radius: 0.6rem; overflow: hidden;
+    }
+    .ci-video-wrap video {
+      width: 100%; height: 100%; object-fit: cover;
+      transform: scaleX(-1); /* mirror so selfie feels natural */
+    }
+    #photoPreview {
+      width: 100%; aspect-ratio: 4/3; max-height: 260px;
+      object-fit: cover; border-radius: 0.6rem; display: block;
+    }
+    .ci-existing-photo {
+      width: 90px; height: 90px; border-radius: 50%;
+      object-fit: cover; border: 3px solid #e5e7eb;
+      display: block; margin: 0 auto 0.25rem;
+    }
+
+    .btn-cam-primary {
+      width: 100%; padding: 0.7rem 1rem;
+      background: #1d4ed8; color: #fff; border: none;
+      border-radius: var(--radius); font-size: 0.9rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cam-primary:hover { background: #1e40af; }
+
+    .btn-cam-secondary {
+      width: 100%; padding: 0.55rem 1rem;
+      background: #f3f4f6; color: #374151; border: none;
+      border-radius: var(--radius); font-size: 0.875rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cam-secondary:hover { background: #e5e7eb; }
+
+    .ci-cam-hint {
+      font-size: 0.78rem; color: var(--text-muted); text-align: center;
+    }
+
+    /* ── Footer ── */
+    .ci-modal__footer {
+      padding: 0.9rem 1.4rem; border-top: 1px solid var(--border);
+      display: flex; gap: 0.65rem; justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .btn-checkin-skip {
+      padding: 0.7rem 1.2rem;
+      background: #fff; color: #374151;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-checkin-skip:hover { background: #f3f4f6; }
+    .btn-checkin-skip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-checkin-go {
+      padding: 0.7rem 1.6rem;
+      background: var(--ci-green); color: #fff; border: none;
+      border-radius: var(--radius); font-size: 1rem; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-checkin-go:hover { background: #2d4435; }
+    .btn-checkin-go:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* ── Success flash ── */
+    .ci-success-flash {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(22,101,52,0.95);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #fff; gap: 0.35rem;
+      animation: fadeInFlash 0.25s ease;
+    }
+    .ci-success-flash__icon { font-size: 3.5rem; }
+    .ci-success-flash__title { font-size: 1.8rem; font-weight: 700; }
+    .ci-success-flash__name  { font-size: 1.2rem; opacity: 0.85; }
+    @keyframes fadeInFlash { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/home.html" class="top-nav__brand">
+      <img src="/images/glc-white.png" alt="GLC" class="top-nav__logo">
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/home.html">Home</a></li>
+      <li><a href="/info.html">Info</a></li>
+      <li><a href="/sessions.html">Sessions</a></li>
+      <li><a href="/people.html">People</a></li>
+      <li style="display:none"><a href="/dine-around.html">Dine Around</a></li>
+      <li><a href="/register.html">Register</a></li>
+      <li style="display:none"><a href="/checkin.html" class="active">Check In</a></li>
+      <li style="display:none"><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <!-- Admin guard: must be admin AND have admin token -->
+  <script>
+    (() => {
+      const ADMIN_EMAILS = ["kkataila@banyansoftware.com","gretchen@theexperienceagency.ca","nkotyk@banyansoftware.com","tcross@banyansoftware.com","dreimer@banyansoftware.com"];
+      try {
+        const u = JSON.parse(localStorage.getItem("glc-user"));
+        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); return; }
+      } catch { window.location.replace("/home.html"); return; }
+      if (!localStorage.getItem("glc-admin-token")) { window.location.replace("/admin.html"); }
+    })();
+  </script>
+
+  <!-- Sticky search bar -->
+  <div class="ci-topbar">
+    <input type="search" id="searchInput" class="ci-search"
+           placeholder="🔍  Search attendee by name or organization…"
+           autocomplete="off" autocorrect="off" spellcheck="false">
+    <div id="checkinStats" class="ci-stats">Loading…</div>
+  </div>
+
+  <!-- Attendee grid -->
+  <div id="attendeeGrid" class="ci-grid"></div>
+  <p id="emptyState" hidden
+     style="text-align:center;padding:3rem;color:var(--text-muted);font-size:1rem">
+    No attendees found.
+  </p>
+
+  <!-- Check-in modal -->
+  <div id="checkinModal" class="ci-overlay" hidden>
+    <div class="ci-modal">
+
+      <!-- Header -->
+      <div class="ci-modal__header">
+        <div>
+          <h2 id="modalName"></h2>
+          <div class="ci-modal__sub" id="modalOrg"></div>
+        </div>
+        <button class="ci-modal__close" id="modalClose" aria-label="Close">✕</button>
+      </div>
+
+      <!-- Body: two panels -->
+      <div class="ci-modal__body">
+
+        <!-- Left: registration details -->
+        <div class="ci-details" id="modalDetails"></div>
+
+        <!-- Right: camera / photo -->
+        <div class="ci-camera">
+          <div class="ci-camera-label">Profile Photo</div>
+
+          <!-- Idle: show existing photo + open camera button -->
+          <div id="camIdle" style="width:100%;text-align:center">
+            <div id="existingPhotoWrap" style="display:none;margin-bottom:0.75rem">
+              <img id="existingPhoto" class="ci-existing-photo" alt="Current photo on file">
+              <div class="ci-cam-hint" style="margin-top:0.3rem">Current photo on file</div>
+            </div>
+            <button class="btn-cam-primary" id="startCamBtn">📷  Open Camera</button>
+            <div class="ci-cam-hint" style="margin-top:0.5rem">Uses the front-facing camera</div>
+          </div>
+
+          <!-- Live: video preview + capture button -->
+          <div id="camLive" style="display:none;width:100%">
+            <div class="ci-video-wrap">
+              <video id="cameraVideo" autoplay playsinline muted></video>
+            </div>
+            <button class="btn-cam-primary" id="captureBtn" style="margin-top:0.5rem">
+              📸  Take Photo
+            </button>
+          </div>
+
+          <!-- Preview: captured photo + retake -->
+          <div id="camPreview" style="display:none;width:100%">
+            <img id="photoPreview" alt="Captured photo">
+            <button class="btn-cam-secondary" id="retakeBtn" style="margin-top:0.5rem">
+              ↺  Retake Photo
+            </button>
+          </div>
+
+          <!-- Error: camera unavailable -->
+          <div id="camError" style="display:none;width:100%;text-align:center">
+            <div style="font-size:2.25rem;margin-bottom:0.4rem">📵</div>
+            <div style="font-weight:700;color:#b91c1c;margin-bottom:0.3rem">Camera unavailable</div>
+            <div class="ci-cam-hint">
+              Check browser camera permissions.<br>
+              You can still check in without a photo.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="ci-modal__footer">
+        <button class="btn-checkin-skip" id="skipPhotoBtn">Check In Without Photo</button>
+        <button class="btn-checkin-go"   id="completeBtn">✓  Complete Check-In</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/js/checkin.js"></script>
+  <script src="/js/nav-notify.js"></script>
+</body>
+</html>

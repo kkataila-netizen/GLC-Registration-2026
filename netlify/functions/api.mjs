@@ -438,6 +438,10 @@ export default async (req, context) => {
     }
     if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
     if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
+    if (body.checkedIn !== undefined) {
+      reg.checkedIn = !!body.checkedIn;
+      if (reg.checkedIn && !reg.checkedInAt) reg.checkedInAt = new Date().toISOString();
+    }
     if (body.password) {
       if (body.password.length < 4) {
         return json({ error: "Password must be at least 4 characters." }, 400);
@@ -691,18 +695,24 @@ export default async (req, context) => {
   }
 
   /* ── POST /api/profile-photo  ★ AUTH REQUIRED ───── */
+  /* Admin can supply body.email to upload on behalf of any attendee   */
   if (method === "POST" && (path === "/profile-photo" || path === "/profile-photo/")) {
-    const userAuth = await validateUserToken(req);
-    if (!userAuth) return json({ error: "Unauthorized" }, 401);
+    const isAdmin  = await validateAdminToken(req);
+    const userAuth = !isAdmin ? await validateUserToken(req) : null;
+    if (!isAdmin && !userAuth) return json({ error: "Unauthorized" }, 401);
     let body;
     try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    const targetEmail = isAdmin && body.email
+      ? body.email.trim().toLowerCase()
+      : (userAuth ? userAuth.email : null);
+    if (!targetEmail) return json({ error: "Target email required." }, 400);
     if (!body.photo || !body.photo.startsWith("data:image/")) {
       return json({ error: "Invalid photo data." }, 400);
     }
     if (body.photo.length > 700000) {
       return json({ error: "Photo too large. Please use a smaller image." }, 400);
     }
-    await saveProfilePhoto(userAuth.email, body.photo);
+    await saveProfilePhoto(targetEmail, body.photo);
     return json({ success: true });
   }
 
