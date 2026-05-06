@@ -531,7 +531,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Silently sync broadcast group membership with current registrations
     fetch('/chat-api/sync-broadcast', { method: 'POST' }).catch(() => {});
 
-    // Reload table whenever the admin returns to this tab/page
+    // Reload when restored from browser back-forward cache (covers nav-link returns)
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) location.reload();
+    });
+
+    // Re-fetch when switching back to this tab
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) loadRegistrations(searchInput.value.trim());
     });
