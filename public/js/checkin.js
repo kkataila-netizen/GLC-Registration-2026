@@ -107,8 +107,8 @@
           <img src="/api/profile-photo?email=${encodeURIComponent(a.email)}"
                alt=""
                style="display:block"
-               onerror="this.style.display='none'">
-          <div class="ci-initials">${esc(initials)}</div>
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ci-initials" style="display:none">${esc(initials)}</div>
         </div>
         <div class="ci-card-name">${esc(a.name)}</div>
         <div class="ci-card-org">${esc(a.organization || '—')}</div>
