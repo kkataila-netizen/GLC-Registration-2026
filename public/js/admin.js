@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportBtn = document.getElementById('exportBtn');
 
     let debounceTimer = null;
+    // Cache the latest registrations so we can re-render after edits
+    // without re-reading from Netlify Blobs (which has eventual consistency)
+    let currentRegistrations = [];
 
     async function loadRegistrations(search = '') {
       try {
@@ -83,8 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const data = await res.json();
 
+        currentRegistrations = data.registrations || [];
         regCount.textContent = `${data.total} registration${data.total !== 1 ? 's' : ''}`;
-        renderTable(data.registrations);
+        renderTable(currentRegistrations);
       } catch {
         regCount.textContent = 'Error loading data';
         renderTable([]);
@@ -223,8 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        // Use the server's authoritative response to update our local cache
+        // and re-render immediately — avoids any Blobs read-after-write lag.
+        if (data.registration) {
+          const idx = currentRegistrations.findIndex(r => r.id === id);
+          if (idx !== -1) currentRegistrations[idx] = data.registration;
+          renderTable(currentRegistrations);
+        }
         editModal.hidden = true;
-        setTimeout(() => location.reload(), 3000);
       } catch {
         editError.textContent = 'Network error. Please try again.';
         editError.hidden = false;
