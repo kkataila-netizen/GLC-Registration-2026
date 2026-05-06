@@ -174,6 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editOrg').value = reg.organization || '';
       document.getElementById('editDietary').value = reg.dietary || 'None';
       document.getElementById('editTshirt').value = reg.tshirt || '';
+      document.getElementById('editSessionBOS').checked = Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop');
+      document.getElementById('editWelcomeReception').checked = !!reg.welcomeReception;
       editError.hidden = true;
       editModal.hidden = false;
     }
@@ -197,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         organization: document.getElementById('editOrg').value,
         dietary: document.getElementById('editDietary').value,
         tshirt: document.getElementById('editTshirt').value,
+        sessions: document.getElementById('editSessionBOS').checked ? ['Tue: Banyan Fundamentals Workshop'] : [],
+        welcomeReception: document.getElementById('editWelcomeReception').checked,
       };
 
       const pw = document.getElementById('editPassword').value;
