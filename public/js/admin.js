@@ -65,12 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadRegistrations(search = '') {
       try {
+        const cacheBust = `_=${Date.now()}`;
         const url = search
-          ? `/api/registrations?search=${encodeURIComponent(search)}`
-          : '/api/registrations';
+          ? `/api/registrations?search=${encodeURIComponent(search)}&${cacheBust}`
+          : `/api/registrations?${cacheBust}`;
 
         const res = await fetch(url, {
-          headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+          headers: { 'Authorization': 'Bearer ' + getAdminToken() },
+          cache: 'no-store'
         });
 
         if (res.status === 401) {
@@ -222,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         editModal.hidden = true;
-        setTimeout(() => location.reload(), 600);
+        setTimeout(() => location.reload(), 1500);
       } catch {
         editError.textContent = 'Network error. Please try again.';
         editError.hidden = false;
