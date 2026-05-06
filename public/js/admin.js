@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         editModal.hidden = true;
-        loadRegistrations(searchInput.value.trim());
+        setTimeout(() => location.reload(), 600);
       } catch {
         editError.textContent = 'Network error. Please try again.';
         editError.hidden = false;
