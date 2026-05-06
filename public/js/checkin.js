@@ -30,6 +30,7 @@
   let currentAttendee   = null;
   let videoStream       = null;
   let capturedPhoto     = null; // data URL or null
+  let hasExistingPhoto  = false;
 
   // ── DOM refs ─────────────────────────────────────
   const searchInput  = document.getElementById('searchInput');
@@ -168,13 +169,27 @@
 
     // Camera: reset to idle
     setCamState('idle');
-    capturedPhoto = null;
+    capturedPhoto    = null;
+    hasExistingPhoto = false;
+
+    // Disable Complete until we know if a photo already exists
+    completeBtn.disabled = true;
 
     // Try loading existing profile photo
     existingWrap.style.display = 'none';
     existingPhoto.src = `/api/profile-photo?email=${encodeURIComponent(attendee.email)}`;
-    existingPhoto.onload  = () => { existingWrap.style.display = 'block'; };
-    existingPhoto.onerror = () => { existingWrap.style.display = 'none'; };
+    existingPhoto.onload = () => {
+      existingWrap.style.display = 'block';
+      hasExistingPhoto = true;
+      completeBtn.disabled = false; // photo on file — no new photo required
+      document.getElementById('camHint').textContent = 'Photo on file. You can retake it or proceed.';
+    };
+    existingPhoto.onerror = () => {
+      existingWrap.style.display = 'none';
+      hasExistingPhoto = false;
+      // Keep button disabled — photo is required
+      document.getElementById('camHint').textContent = 'No photo on file — please take one to continue.';
+    };
 
     // Show modal
     modal.hidden = false;
@@ -219,10 +234,12 @@
     photoPreview.src = capturedPhoto;
     setCamState('preview');
     stopCamera();
+    completeBtn.disabled = false; // photo captured — always allow proceeding
   }
 
   function retakePhoto() {
     capturedPhoto = null;
+    if (!hasExistingPhoto) completeBtn.disabled = true; // require new photo again
     startCamera();
   }
 
