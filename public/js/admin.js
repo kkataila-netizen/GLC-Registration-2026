@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         editModal.hidden = true;
-        setTimeout(() => location.reload(), 1500);
+        setTimeout(() => location.reload(), 3000);
       } catch {
         editError.textContent = 'Network error. Please try again.';
         editError.hidden = false;
