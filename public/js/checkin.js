@@ -68,7 +68,9 @@
       });
       if (res.status === 401) { location.replace('/admin.html'); return; }
       const data = await res.json();
-      allAttendees = data.registrations || [];
+      allAttendees = (data.registrations || []).slice().sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+      );
       filterAndRender('');
     } catch {
       statsEl.textContent = 'Error loading attendees';

@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.hidden = false;
     emptyState.hidden = true;
 
+    // Sort alphabetically by name (case-insensitive)
+    registrations = [...registrations].sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+    );
+
     registrations.forEach(person => {
       const initials = getInitials(person.name);
       const colorIndex = hashName(person.name) % AVATAR_COLORS.length;

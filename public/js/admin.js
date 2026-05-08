@@ -86,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const data = await res.json();
 
-        currentRegistrations = data.registrations || [];
+        currentRegistrations = (data.registrations || []).slice().sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+        );
         regCount.textContent = `${data.total} registration${data.total !== 1 ? 's' : ''}`;
         renderTable(currentRegistrations);
       } catch {
@@ -232,6 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.registration) {
           const idx = currentRegistrations.findIndex(r => r.id === id);
           if (idx !== -1) currentRegistrations[idx] = data.registration;
+          // Re-sort in case the name changed
+          currentRegistrations.sort((a, b) =>
+            (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+          );
           renderTable(currentRegistrations);
         }
         editModal.hidden = true;
