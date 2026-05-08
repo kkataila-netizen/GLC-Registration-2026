@@ -173,8 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
     photoInitials.textContent = user.name
       ? user.name.trim().split(/\s+/).map(p => p[0]).join('').toUpperCase().slice(0, 2)
       : '?';
-    // Load existing photo
-    fetch(`/api/profile-photo?email=${encodeURIComponent(user.email)}`)
+    // Load existing photo (with cache-buster so newly uploaded photos appear immediately)
+    const v = localStorage.getItem('glc-photo-bust') || '';
+    fetch(`/api/profile-photo?email=${encodeURIComponent(user.email)}${v ? '&v=' + v : ''}`)
       .then(r => r.ok ? r.blob() : null)
       .then(blob => {
         if (!blob) return;
@@ -202,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ photo: dataUrl })
       });
       if (res.ok) {
+        // Bump cache key so all photo URLs across the app refresh
+        localStorage.setItem('glc-photo-bust', Date.now().toString());
         showPhotoMsg('success', 'Photo saved!');
       } else {
         const d = await res.json();
@@ -219,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + getUserToken() }
       });
+      localStorage.setItem('glc-photo-bust', Date.now().toString());
       clearPhotoPreview();
       showPhotoMsg('success', 'Photo removed.');
     } catch {

@@ -742,7 +742,7 @@ export default async (req, context) => {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new Response(bytes.buffer, {
       status: 200,
-      headers: { "Content-Type": mime, "Cache-Control": "public, max-age=86400" }
+      headers: { "Content-Type": mime, "Cache-Control": "public, max-age=60, must-revalidate" }
     });
   }
 

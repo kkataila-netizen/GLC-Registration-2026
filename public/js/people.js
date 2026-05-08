@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarWrap.style.background = color;
       avatarWrap.textContent = initials;
 
-      const photoUrl = `/api/profile-photo?email=${encodeURIComponent(person.email)}`;
+      const v = localStorage.getItem('glc-photo-bust') || '';
+      const photoUrl = `/api/profile-photo?email=${encodeURIComponent(person.email)}${v ? '&v=' + v : ''}`;
       const preloader = new Image();
       preloader.onload = () => {
         // Photo exists — replace initials with circular photo

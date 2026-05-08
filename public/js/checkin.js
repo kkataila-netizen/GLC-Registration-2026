@@ -104,9 +104,11 @@
       const initials = (a.name || '?').split(' ').filter(Boolean)
         .map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
+      const photoVer = localStorage.getItem('glc-photo-bust') || '';
+      const photoSuffix = photoVer ? '&v=' + photoVer : '';
       card.innerHTML = `
         <div class="ci-avatar">
-          <img src="/api/profile-photo?email=${encodeURIComponent(a.email)}"
+          <img src="/api/profile-photo?email=${encodeURIComponent(a.email)}${photoSuffix}"
                alt=""
                style="display:block"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -179,7 +181,8 @@
 
     // Try loading existing profile photo
     existingWrap.style.display = 'none';
-    existingPhoto.src = `/api/profile-photo?email=${encodeURIComponent(attendee.email)}`;
+    const v = localStorage.getItem('glc-photo-bust') || '';
+    existingPhoto.src = `/api/profile-photo?email=${encodeURIComponent(attendee.email)}${v ? '&v=' + v : ''}`;
     existingPhoto.onload = () => {
       existingWrap.style.display = 'block';
       hasExistingPhoto = true;
@@ -272,6 +275,8 @@
           const d = await pr.json().catch(() => ({}));
           throw new Error(d.error || 'Photo upload failed');
         }
+        // Bump cache key so the new photo shows everywhere
+        localStorage.setItem('glc-photo-bust', Date.now().toString());
       }
 
       // 2. Mark checked in

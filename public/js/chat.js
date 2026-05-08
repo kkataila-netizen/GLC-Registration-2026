@@ -247,7 +247,8 @@
         avatarEl.style.padding = "0";
         avatarEl.appendChild(img);
       };
-      preloader.src = `/api/profile-photo?email=${encodeURIComponent(email)}`;
+      const v = localStorage.getItem('glc-photo-bust') || '';
+      preloader.src = `/api/profile-photo?email=${encodeURIComponent(email)}${v ? '&v=' + v : ''}`;
     });
   }
 
