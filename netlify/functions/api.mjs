@@ -3,6 +3,22 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+// 10-minute headshot slots from 10:00 AM to 2:50 PM on Tuesday July 14, 2026
+function buildHeadshotSlots() {
+  const out = [];
+  for (let h = 10; h < 15; h++) {
+    for (let m = 0; m < 60; m += 10) {
+      if (h === 14 && m === 60) continue;
+      out.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+  return out;
+}
+const VALID_HEADSHOT_SLOTS = buildHeadshotSlots();
+function isValidHeadshotSlot(slot) {
+  return slot === '' || VALID_HEADSHOT_SLOTS.includes(slot);
+}
 const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
 const isAdminEmail = (e) => ADMIN_EMAILS.includes((e || "").toLowerCase());
 const ADMIN_PASSWORD = "GLC2026";
@@ -183,6 +199,15 @@ export default async (req, context) => {
       return json({ success: false, errors: ["This email is already registered."] }, 409);
     }
 
+    // Validate headshot slot if provided
+    const headshotSlot = body.headshotSlot || '';
+    if (!isValidHeadshotSlot(headshotSlot)) {
+      return json({ success: false, errors: ["Invalid headshot time slot."] }, 400);
+    }
+    if (headshotSlot && registrations.some(r => r.headshotSlot === headshotSlot)) {
+      return json({ success: false, errors: ["That headshot time slot is already taken. Please pick another."] }, 409);
+    }
+
     const registration = {
       id: crypto.randomUUID(),
       name: body.name.trim(),
@@ -199,6 +224,7 @@ export default async (req, context) => {
       welcomeReception: !!body.welcomeReception,
       tshirtFit: body.tshirtFit || '',
       tshirt: body.tshirt || '',
+      headshotSlot,
       registeredAt: new Date().toISOString()
     };
 
@@ -264,7 +290,14 @@ export default async (req, context) => {
       taichi: "Tai Chi in the Park",
       paddleboard: "Stand-Up Paddleboarding"
     };
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    function formatHeadshotSlot(slot) {
+      if (!slot) return '';
+      const [h, m] = slot.split(':').map(Number);
+      const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+    }
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
       escapeCSV(r.title),
@@ -279,6 +312,7 @@ export default async (req, context) => {
       escapeCSV(r.welcomeReception ? 'Yes' : 'No'),
       escapeCSV(r.dineAround === 'biffs' ? "Biff's Bistro" : r.dineAround === 'jump' ? 'Jump Restaurant' : r.dineAround === 'joneses' ? 'The Joneses' : ''),
       escapeCSV(MC_LABELS[r.morningConnection] || ''),
+      escapeCSV(formatHeadshotSlot(r.headshotSlot || '')),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt)
@@ -309,6 +343,15 @@ export default async (req, context) => {
         joneses: { taken: counts.joneses, capacity: 70  }
       }
     });
+  }
+
+  // GET /api/headshots — list of taken slots (no PII, just the slot ids)
+  if (method === "GET" && (path === "/headshots" || path === "/headshots/")) {
+    const registrations = await getRegistrations();
+    const taken = registrations
+      .filter(r => r.headshotSlot)
+      .map(r => r.headshotSlot);
+    return json({ slots: VALID_HEADSHOT_SLOTS, taken });
   }
 
   // GET /api/morning-connections — public availability counts, no PII
@@ -473,6 +516,20 @@ export default async (req, context) => {
         return json({ error: "Invalid Morning Connections selection." }, 400);
       }
       reg.morningConnection = body.morningConnection || '';
+    }
+    if (body.headshotSlot !== undefined) {
+      const newSlot = body.headshotSlot || '';
+      if (!isValidHeadshotSlot(newSlot)) {
+        return json({ error: "Invalid headshot time slot." }, 400);
+      }
+      // Conflict check: only if changing to a different non-empty slot
+      if (newSlot && newSlot !== reg.headshotSlot) {
+        const taken = registrations.some(r => r.id !== reg.id && r.headshotSlot === newSlot);
+        if (taken) {
+          return json({ error: "That headshot time slot is already taken. Please pick another." }, 409);
+        }
+      }
+      reg.headshotSlot = newSlot;
     }
     if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
     if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
@@ -736,6 +793,27 @@ export default async (req, context) => {
       if (rec.morningConnection !== undefined) {
         const mcKey = (rec.morningConnection || '').toLowerCase();
         if (MC_MAP[mcKey] !== undefined) reg.morningConnection = MC_MAP[mcKey];
+      }
+      if (rec.headshotSlot !== undefined) {
+        const raw = (rec.headshotSlot || '').trim();
+        if (!raw) {
+          reg.headshotSlot = '';
+        } else {
+          // Accept either "HH:MM" or "H:MM AM/PM"
+          let parsed = '';
+          const m24 = raw.match(/^(\d{1,2}):(\d{2})$/);
+          const m12 = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+          if (m24) {
+            parsed = `${String(parseInt(m24[1],10)).padStart(2,'0')}:${m24[2]}`;
+          } else if (m12) {
+            let h = parseInt(m12[1], 10);
+            const isPm = m12[3].toUpperCase() === 'PM';
+            if (isPm && h < 12) h += 12;
+            if (!isPm && h === 12) h = 0;
+            parsed = `${String(h).padStart(2,'0')}:${m12[2]}`;
+          }
+          if (isValidHeadshotSlot(parsed)) reg.headshotSlot = parsed;
+        }
       }
       if (rec.tshirtFit !== undefined) reg.tshirtFit = (rec.tshirtFit || '').trim();
       if (rec.tshirt !== undefined && (VALID_TSHIRT.includes(rec.tshirt) || rec.tshirt === '')) reg.tshirt = rec.tshirt;

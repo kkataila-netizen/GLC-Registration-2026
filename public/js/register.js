@@ -11,6 +11,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const loggedInEmail = document.getElementById('loggedInEmail');
   const logoutBtn = document.getElementById('logoutBtn');
 
+  /* ── headshot slot helpers ──────────────────────── */
+  function buildHeadshotSlots() {
+    const out = [];
+    for (let h = 10; h < 15; h++) {
+      for (let m = 0; m < 60; m += 10) {
+        out.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+      }
+    }
+    return out;
+  }
+  function formatSlotLabel(slot) {
+    const [h, m] = slot.split(':').map(Number);
+    const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+  }
+
+  const headshotCheckbox = document.getElementById('headshotYes');
+  const headshotSelect   = document.getElementById('headshotSlot');
+  const headshotHint     = document.getElementById('headshotHint');
+
+  async function populateHeadshotSlots(currentSlot = '') {
+    let taken = [];
+    try {
+      const res = await fetch('/api/headshots');
+      if (res.ok) {
+        const data = await res.json();
+        taken = data.taken || [];
+      }
+    } catch { /* network — fall back to empty taken list */ }
+
+    // Clear existing options (keep the placeholder)
+    headshotSelect.innerHTML = '<option value="">-- Select a time slot --</option>';
+
+    buildHeadshotSlots().forEach(slot => {
+      const opt = document.createElement('option');
+      opt.value = slot;
+      opt.textContent = formatSlotLabel(slot);
+      const isTakenByOther = taken.includes(slot) && slot !== currentSlot;
+      if (isTakenByOther) {
+        opt.disabled = true;
+        opt.textContent += ' — taken';
+      }
+      if (slot === currentSlot) opt.selected = true;
+      headshotSelect.appendChild(opt);
+    });
+  }
+
+  function toggleHeadshotVisibility() {
+    const checked = headshotCheckbox.checked;
+    headshotSelect.style.display = checked ? '' : 'none';
+    headshotHint.style.display   = checked ? '' : 'none';
+    if (!checked) headshotSelect.value = '';
+  }
+
+  headshotCheckbox.addEventListener('change', () => {
+    toggleHeadshotVisibility();
+    if (headshotCheckbox.checked) populateHeadshotSlots(headshotSelect.value);
+  });
+
+  // Initial population (for fresh registrations)
+  populateHeadshotSlots();
+
   /* ── auth state ──────────────────────────────────── */
   function getUser() {
     try { return JSON.parse(localStorage.getItem('glc-user')); }
@@ -103,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('welcomeReception').checked = !!reg.welcomeReception;
       document.getElementById('tshirtFit').value = reg.tshirtFit || '';
       document.getElementById('tshirt').value = reg.tshirt || '';
+      // Headshot — populate slots and pre-select the user's current one
+      const hsSlot = reg.headshotSlot || '';
+      headshotCheckbox.checked = !!hsSlot;
+      toggleHeadshotVisibility();
+      await populateHeadshotSlots(hsSlot);
       // Check session checkboxes
       if (reg.sessions && reg.sessions.length) {
         form.querySelectorAll('input[name="sessions"]').forEach(cb => {
@@ -332,7 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sessions: Array.from(form.querySelectorAll('input[name="sessions"]:checked')).map(cb => cb.value),
       welcomeReception: document.getElementById('welcomeReception').checked,
       tshirtFit: document.getElementById('tshirtFit').value,
-      tshirt: document.getElementById('tshirt').value
+      tshirt: document.getElementById('tshirt').value,
+      headshotSlot: headshotCheckbox.checked ? headshotSelect.value : ''
     };
 
     const isEdit = !!form.dataset.regId;

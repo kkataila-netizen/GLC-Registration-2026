@@ -172,6 +172,43 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    function buildHeadshotSlots() {
+      const out = [];
+      for (let h = 10; h < 15; h++) {
+        for (let m = 0; m < 60; m += 10) {
+          out.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+        }
+      }
+      return out;
+    }
+    function formatSlotLabel(slot) {
+      const [h, m] = slot.split(':').map(Number);
+      const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+    }
+
+    async function populateAdminHeadshotSlots(currentSlot = '') {
+      const select = document.getElementById('editHeadshotSlot');
+      let taken = [];
+      try {
+        const res = await fetch('/api/headshots');
+        if (res.ok) { taken = (await res.json()).taken || []; }
+      } catch { /* ignore */ }
+      select.innerHTML = '<option value="">-- None --</option>';
+      buildHeadshotSlots().forEach(slot => {
+        const opt = document.createElement('option');
+        opt.value = slot;
+        opt.textContent = formatSlotLabel(slot);
+        if (taken.includes(slot) && slot !== currentSlot) {
+          opt.disabled = true;
+          opt.textContent += ' — taken';
+        }
+        if (slot === currentSlot) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
     function openEditModal(reg) {
       document.getElementById('editId').value = reg.id;
       document.getElementById('editName').value = reg.name || '';
@@ -186,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editSessionBOS').checked = Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop');
       document.getElementById('editWelcomeReception').checked = !!reg.welcomeReception;
       document.getElementById('editMorningConnection').value = reg.morningConnection || '';
+      populateAdminHeadshotSlots(reg.headshotSlot || '');
       editError.hidden = true;
       editModal.hidden = false;
     }
@@ -212,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessions: document.getElementById('editSessionBOS').checked ? ['Tue: Banyan Fundamentals Workshop'] : [],
         welcomeReception: document.getElementById('editWelcomeReception').checked,
         morningConnection: document.getElementById('editMorningConnection').value,
+        headshotSlot: document.getElementById('editHeadshotSlot').value,
       };
 
       const pw = document.getElementById('editPassword').value;
@@ -535,6 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'phone': 'phone', 'dietary': 'dietary', 'dietary other': 'dietaryOther',
         'sessions': 'sessions', 'welcome reception': 'welcomeReception',
         'dine around': 'dineAround', 'morning connection': 'morningConnection',
+        'headshot slot': 'headshotSlot',
         't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
         'registered': 'registeredAt'
       };
