@@ -57,7 +57,7 @@
       time: "7:00 – 8:00 am",
       description: "Ready to test your balance? Join Toronto SUP at the waterfront for a fun and energizing intro to stand-up paddleboarding. Whether you're a first-timer or a seasoned paddler, this one is guaranteed to make a splash. Note: this activity requires transportation to and from Cherry Beach.",
       capacity: 41,
-      photo: "https://images.unsplash.com/photo-1530870110042-98b2cb110834?w=800&q=80&fit=crop&crop=center"
+      photo: "/images/SUP.jpg"
     }
   ];
 
