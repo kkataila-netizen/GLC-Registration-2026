@@ -256,7 +256,15 @@ export default async (req, context) => {
       return json({ error: "Unauthorized" }, 401);
     }
     const registrations = await getRegistrations();
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    const MC_LABELS = {
+      yoga1: "Yoga & Puppies — Session #1",
+      yoga2: "Yoga & Puppies — Session #2",
+      walking: "Downtown Toronto Walking Tour",
+      canoeing: "Canoeing Toronto",
+      taichi: "Tai Chi in the Park",
+      paddleboard: "Stand-Up Paddleboarding"
+    };
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
       escapeCSV(r.title),
@@ -270,6 +278,7 @@ export default async (req, context) => {
       escapeCSV(Array.isArray(r.sessions) ? r.sessions.join('; ') : ''),
       escapeCSV(r.welcomeReception ? 'Yes' : 'No'),
       escapeCSV(r.dineAround === 'biffs' ? "Biff's Bistro" : r.dineAround === 'jump' ? 'Jump Restaurant' : r.dineAround === 'joneses' ? 'The Joneses' : ''),
+      escapeCSV(MC_LABELS[r.morningConnection] || ''),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt)
@@ -298,6 +307,25 @@ export default async (req, context) => {
         biffs:   { taken: counts.biffs,   capacity: 72  },
         jump:    { taken: counts.jump,    capacity: 100 },
         joneses: { taken: counts.joneses, capacity: 70  }
+      }
+    });
+  }
+
+  // GET /api/morning-connections — public availability counts, no PII
+  if (method === "GET" && (path === "/morning-connections" || path === "/morning-connections/")) {
+    const registrations = await getRegistrations();
+    const counts = { yoga1: 0, yoga2: 0, walking: 0, canoeing: 0, taichi: 0, paddleboard: 0 };
+    for (const r of registrations) {
+      if (r.morningConnection && counts[r.morningConnection] !== undefined) counts[r.morningConnection]++;
+    }
+    return json({
+      availability: {
+        yoga1:       { taken: counts.yoga1,       capacity: 22 },
+        yoga2:       { taken: counts.yoga2,       capacity: 22 },
+        walking:     { taken: counts.walking,     capacity: 35 },
+        canoeing:    { taken: counts.canoeing,    capacity: 45 },
+        taichi:      { taken: counts.taichi,      capacity: 25 },
+        paddleboard: { taken: counts.paddleboard, capacity: 41 }
       }
     });
   }
@@ -438,6 +466,13 @@ export default async (req, context) => {
         return json({ error: "Invalid restaurant selection." }, 400);
       }
       reg.dineAround = body.dineAround || '';
+    }
+    if (body.morningConnection !== undefined) {
+      const VALID_MC = ['yoga1', 'yoga2', 'walking', 'canoeing', 'taichi', 'paddleboard', ''];
+      if (!VALID_MC.includes(body.morningConnection)) {
+        return json({ error: "Invalid Morning Connections selection." }, 400);
+      }
+      reg.morningConnection = body.morningConnection || '';
     }
     if (body.arrivalDate !== undefined) reg.arrivalDate = body.arrivalDate || '';
     if (body.departureDate !== undefined) reg.departureDate = body.departureDate || '';
@@ -659,6 +694,17 @@ export default async (req, context) => {
       "the joneses": 'joneses',
       '': ''
     };
+    const MC_MAP = {
+      "yoga & puppies — session #1": 'yoga1',
+      "yoga & puppies - session #1": 'yoga1',
+      "yoga & puppies — session #2": 'yoga2',
+      "yoga & puppies - session #2": 'yoga2',
+      "downtown toronto walking tour": 'walking',
+      "canoeing toronto": 'canoeing',
+      "tai chi in the park": 'taichi',
+      "stand-up paddleboarding": 'paddleboard',
+      '': ''
+    };
 
     const registrations = await getRegistrations();
     let updated = 0;
@@ -686,6 +732,10 @@ export default async (req, context) => {
       if (rec.dineAround !== undefined) {
         const dineKey = (rec.dineAround || '').toLowerCase();
         if (DINE_MAP[dineKey] !== undefined) reg.dineAround = DINE_MAP[dineKey];
+      }
+      if (rec.morningConnection !== undefined) {
+        const mcKey = (rec.morningConnection || '').toLowerCase();
+        if (MC_MAP[mcKey] !== undefined) reg.morningConnection = MC_MAP[mcKey];
       }
       if (rec.tshirtFit !== undefined) reg.tshirtFit = (rec.tshirtFit || '').trim();
       if (rec.tshirt !== undefined && (VALID_TSHIRT.includes(rec.tshirt) || rec.tshirt === '')) reg.tshirt = rec.tshirt;

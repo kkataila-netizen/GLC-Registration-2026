@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editTshirt').value = reg.tshirt || '';
       document.getElementById('editSessionBOS').checked = Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop');
       document.getElementById('editWelcomeReception').checked = !!reg.welcomeReception;
+      document.getElementById('editMorningConnection').value = reg.morningConnection || '';
       editError.hidden = true;
       editModal.hidden = false;
     }
@@ -210,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tshirt: document.getElementById('editTshirt').value,
         sessions: document.getElementById('editSessionBOS').checked ? ['Tue: Banyan Fundamentals Workshop'] : [],
         welcomeReception: document.getElementById('editWelcomeReception').checked,
+        morningConnection: document.getElementById('editMorningConnection').value,
       };
 
       const pw = document.getElementById('editPassword').value;
@@ -532,7 +534,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'email': 'email', 'arrival date': 'arrivalDate', 'departure date': 'departureDate',
         'phone': 'phone', 'dietary': 'dietary', 'dietary other': 'dietaryOther',
         'sessions': 'sessions', 'welcome reception': 'welcomeReception',
-        'dine around': 'dineAround', 't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
+        'dine around': 'dineAround', 'morning connection': 'morningConnection',
+        't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
         'registered': 'registeredAt'
       };
       const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());

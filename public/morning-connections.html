@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dine Around Event - GLC Conference</title>
+  <title>Morning Connections - GLC Conference</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <!-- Admin-only gate: redirect non-admins immediately -->
@@ -17,7 +17,7 @@
     })();
   </script>
   <style>
-    .dine-intro {
+    .mc-intro {
       background: #fff;
       border-radius: var(--radius);
       padding: 1.25rem 1.5rem;
@@ -27,19 +27,19 @@
       font-size: 0.9375rem;
       line-height: 1.6;
     }
-    .dine-intro strong { color: #395542; }
+    .mc-intro strong { color: #395542; }
 
-    .dine-grid {
+    .mc-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.25rem;
       margin-bottom: 2rem;
     }
     @media (max-width: 900px) {
-      .dine-grid { grid-template-columns: 1fr; }
+      .mc-grid { grid-template-columns: 1fr; }
     }
 
-    .dine-card {
+    .mc-card {
       background: #fff;
       border-radius: var(--radius);
       border: 2px solid var(--border);
@@ -48,58 +48,68 @@
       flex-direction: column;
       transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .dine-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.10); }
-    .dine-card--selected {
+    .mc-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.10); }
+    .mc-card--selected {
       border-color: #395542;
       box-shadow: 0 0 0 3px rgba(57,85,66,0.15);
     }
-    .dine-card--full { opacity: 0.6; }
+    .mc-card--full { opacity: 0.6; }
 
-    .dine-card__photo {
+    .mc-card__photo {
       width: 100%;
       height: 200px;
       object-fit: cover;
       display: block;
     }
 
-    .dine-card__body {
+    .mc-card__body {
       padding: 1.25rem;
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
-    .dine-card__name {
+    .mc-card__name {
       font-family: 'Libre Franklin', Arial, sans-serif;
       font-size: 1.125rem;
       font-weight: 700;
       color: #111;
     }
-    .dine-card__tagline {
+    .mc-card__tagline {
       font-size: 0.8125rem;
       font-weight: 600;
       color: #395542;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    .dine-card__desc {
+    .mc-card__desc {
       font-size: 0.9rem;
       color: #444;
       line-height: 1.55;
       flex: 1;
     }
+    .mc-card__time {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1f2937;
+      background: #f0f7f2;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.4rem;
+      display: inline-block;
+      margin-top: 0.25rem;
+    }
 
-    .dine-card__capacity {
+    .mc-card__capacity {
       margin-top: 0.75rem;
     }
-    .dine-card__capacity-label {
+    .mc-card__capacity-label {
       font-size: 0.8125rem;
       color: #555;
       margin-bottom: 0.35rem;
       display: flex;
       justify-content: space-between;
     }
-    .dine-card__capacity-label span { font-weight: 600; color: #111; }
+    .mc-card__capacity-label span { font-weight: 600; color: #111; }
     .capacity-bar {
       height: 6px;
       background: #e5e7eb;
@@ -115,7 +125,7 @@
     .capacity-bar__fill--warning { background: #d97706; }
     .capacity-bar__fill--full    { background: #dc2626; }
 
-    .dine-card__select {
+    .mc-card__select {
       margin-top: 1rem;
       width: 100%;
       padding: 0.65rem 1rem;
@@ -129,18 +139,18 @@
       color: #fff;
       transition: background 0.15s, color 0.15s;
     }
-    .dine-card__select:hover:not(:disabled) { background: #2d4435; border-color: #2d4435; }
-    .dine-card__select:disabled { opacity: 1; cursor: not-allowed; background: #9ca3af; border-color: #9ca3af; color: #fff; }
-    .dine-card__select--chosen {
+    .mc-card__select:hover:not(:disabled) { background: #2d4435; border-color: #2d4435; }
+    .mc-card__select:disabled { opacity: 1; cursor: not-allowed; background: #9ca3af; border-color: #9ca3af; color: #fff; }
+    .mc-card__select--chosen {
       background: #fff;
       color: #395542;
       border-color: #395542;
     }
-    .dine-card__select--chosen:hover:not(:disabled) {
+    .mc-card__select--chosen:hover:not(:disabled) {
       background: #f0f7f2;
     }
 
-    .dine-selected-badge {
+    .mc-selected-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
@@ -153,7 +163,7 @@
       margin-top: 0.5rem;
     }
 
-    .dine-login-notice {
+    .mc-login-notice {
       background: #f8f9fa;
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -162,16 +172,16 @@
       color: #555;
       margin-bottom: 1.5rem;
     }
-    .dine-login-notice a { color: #395542; font-weight: 600; }
+    .mc-login-notice a { color: #395542; font-weight: 600; }
 
-    .dine-message {
+    .mc-message {
       padding: 0.75rem 1rem;
       border-radius: var(--radius);
       font-size: 0.9rem;
       margin-bottom: 1rem;
     }
-    .dine-message--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-    .dine-message--error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .mc-message--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .mc-message--error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
   </style>
 </head>
 <body>
@@ -185,8 +195,8 @@
       <li><a href="/info.html">Info</a></li>
       <li><a href="/sessions.html">Sessions</a></li>
       <li><a href="/people.html">People</a></li>
-      <li><a href="/dine-around.html" class="active">Dine Around</a></li>
-      <li style="display:none"><a href="/morning-connections.html">Morning Connections</a></li>
+      <li style="display:none"><a href="/dine-around.html">Dine Around</a></li>
+      <li><a href="/morning-connections.html" class="active">Morning Connections</a></li>
       <li style="display:none"><a href="/checkin.html">Check In</a></li>
       <li><a href="/register.html">Register</a></li>
       <li style="display:none"><a href="/admin.html">Admin</a></li>
@@ -195,25 +205,25 @@
 
   <div class="container">
     <header class="page-header">
-      <h1>Dine Around Event</h1>
-      <p>Thursday Evening &mdash; July 16, 2026</p>
+      <h1>Morning Connections</h1>
+      <p>Start your day with connection &amp; movement</p>
     </header>
 
-    <div class="dine-intro">
-      Join us for a curated Dine Around evening across Toronto, where you'll choose from three distinct restaurant experiences. Each venue has been selected to offer a unique atmosphere, menu, and style of dining.
+    <div class="mc-intro">
+      Kick off the conference day with one of these guided morning experiences. Each option is designed to spark connection, energize your morning, and explore Toronto in a new way.
       <br><br>
-      <strong>Space is limited</strong> — selections are confirmed on a first-come basis. Restaurant selections will be confirmed in advance of the event. Dietary restrictions will be accommodated within each venue.
+      <strong>Space is limited</strong> — selections are confirmed on a first-come basis. You may only choose one activity.
     </div>
 
-    <div id="dineMessage" class="dine-message" hidden></div>
-    <div id="loginNotice" class="dine-login-notice" hidden>
-      Please <a href="/register.html">log in</a> to make your restaurant selection.
+    <div id="mcMessage" class="mc-message" hidden></div>
+    <div id="loginNotice" class="mc-login-notice" hidden>
+      Please <a href="/register.html">log in</a> to make your selection.
     </div>
 
-    <div id="dineGrid" class="dine-grid"></div>
+    <div id="mcGrid" class="mc-grid"></div>
   </div>
 
-  <script src="/js/dine-around.js"></script>
+  <script src="/js/morning-connections.js"></script>
   <script src="/js/nav-notify.js"></script>
 </body>
 </html>
