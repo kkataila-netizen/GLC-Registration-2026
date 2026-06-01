@@ -12,7 +12,7 @@
       time: "8:00 – 8:25 am",
       description: "Start your morning with stretches, smiles, and a whole lot of tail wags. Join a guided yoga session alongside adorable rescue puppies for a truly one-of-a-kind way to set the tone for the day ahead.",
       capacity: 22,
-      photo: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80&fit=crop&crop=center"
+      photo: "/images/puppy_yoga.webp"
     },
     {
       id: 'yoga2',
@@ -21,7 +21,7 @@
       time: "9:30 – 9:00 am",
       description: "Start your morning with stretches, smiles, and a whole lot of tail wags. Join a guided yoga session alongside adorable rescue puppies for a truly one-of-a-kind way to set the tone for the day ahead.",
       capacity: 22,
-      photo: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80&fit=crop&crop=center"
+      photo: "/images/puppy_yoga.webp"
     },
     {
       id: 'walking',
@@ -39,7 +39,7 @@
       time: "7:30 – 9:00 am",
       description: "Hit the water before the day hits you. Meet your guide at Harbourfront for a group canoe experience on Lake Ontario that's equal parts adventure and fresh air. No experience needed, just show up ready to paddle.",
       capacity: 45,
-      photo: "https://images.unsplash.com/photo-1572125675722-238a4f1f8ea2?w=800&q=80&fit=crop&crop=center"
+      photo: "/images/canoe.jpg"
     },
     {
       id: 'taichi',
