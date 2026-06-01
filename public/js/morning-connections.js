@@ -48,7 +48,7 @@
       time: "7:00 – 8:00 am",
       description: "Find your centre in one of Toronto's charming green spaces. This gentle, meditative movement practice is accessible to all levels and offers a grounding start to a full day of ideas and conversation.",
       capacity: 25,
-      photo: "https://images.unsplash.com/photo-1599447421416-3414500d18a5?w=800&q=80&fit=crop&crop=center"
+      photo: "/images/Tai.png"
     },
     {
       id: 'paddleboard',
