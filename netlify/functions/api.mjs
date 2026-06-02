@@ -4,7 +4,7 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-// 10-minute headshot slots from 10:00 AM to 2:50 PM on Tuesday July 14, 2026
+// 10-minute headshot slots from 10:00 AM to 2:50 PM on Wednesday July 15, 2026
 function buildHeadshotSlots() {
   const out = [];
   for (let h = 10; h < 15; h++) {
