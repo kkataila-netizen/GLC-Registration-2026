@@ -176,11 +176,9 @@
     const links = document.querySelectorAll(".top-nav__links a");
     for (const a of links) {
       const href = (a.getAttribute("href") || "").replace(/\/$/, "");
-      const isAdminLink   = href === "/admin.html"       || href === "/admin";
-      const isDineLink    = href === "/dine-around.html"  || href === "/dine-around";
-      const isMcLink      = href === "/morning-connections.html" || href === "/morning-connections";
-      const isCheckinLink = href === "/checkin.html"      || href === "/checkin";
-      if ((isAdminLink || isDineLink || isMcLink || isCheckinLink) && isAdmin) {
+      const isAdminLink   = href === "/admin.html"  || href === "/admin";
+      const isCheckinLink = href === "/checkin.html" || href === "/checkin";
+      if ((isAdminLink || isCheckinLink) && isAdmin) {
         a.closest("li").style.display = "";
       }
     }

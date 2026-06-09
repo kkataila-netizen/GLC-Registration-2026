@@ -6,16 +6,6 @@
   <title>Dine Around Event - GLC Conference</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/images/favicon.png">
-  <!-- Admin-only gate: redirect non-admins immediately -->
-  <script>
-    (() => {
-      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
-      try {
-        const u = JSON.parse(localStorage.getItem("glc-user"));
-        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); }
-      } catch { window.location.replace("/home.html"); }
-    })();
-  </script>
   <style>
     .dine-intro {
       background: #fff;
@@ -186,7 +176,7 @@
       <li><a href="/sessions.html">Sessions</a></li>
       <li><a href="/people.html">People</a></li>
       <li><a href="/dine-around.html" class="active">Dine Around</a></li>
-      <li style="display:none"><a href="/morning-connections.html">Morning Connections</a></li>
+      <li><a href="/morning-connections.html">Morning Connections</a></li>
       <li style="display:none"><a href="/checkin.html">Check In</a></li>
       <li><a href="/register.html">Register</a></li>
       <li style="display:none"><a href="/admin.html">Admin</a></li>
