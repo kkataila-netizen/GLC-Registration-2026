@@ -196,6 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.ok) { taken = (await res.json()).taken || []; }
       } catch { /* ignore */ }
       select.innerHTML = '<option value="">-- None --</option>';
+
+      // Queue option
+      const queueOpt = document.createElement('option');
+      queueOpt.value = 'queue';
+      queueOpt.textContent = '📋 Queue (waitlist for added slots)';
+      if (currentSlot === 'queue') queueOpt.selected = true;
+      select.appendChild(queueOpt);
+
+      const sep = document.createElement('option');
+      sep.disabled = true;
+      sep.textContent = '──────── Time slots ────────';
+      select.appendChild(sep);
+
       buildHeadshotSlots().forEach(slot => {
         const opt = document.createElement('option');
         opt.value = slot;

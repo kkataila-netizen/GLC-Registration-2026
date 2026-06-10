@@ -16,8 +16,11 @@ function buildHeadshotSlots() {
   return out;
 }
 const VALID_HEADSHOT_SLOTS = buildHeadshotSlots();
+// Special non-exclusive value — multiple users can hold "queue" simultaneously,
+// it's a waitlist for additional slots being added.
+const HEADSHOT_QUEUE = 'queue';
 function isValidHeadshotSlot(slot) {
-  return slot === '' || VALID_HEADSHOT_SLOTS.includes(slot);
+  return slot === '' || slot === HEADSHOT_QUEUE || VALID_HEADSHOT_SLOTS.includes(slot);
 }
 const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
 const isAdminEmail = (e) => ADMIN_EMAILS.includes((e || "").toLowerCase());
@@ -204,7 +207,7 @@ export default async (req, context) => {
     if (!isValidHeadshotSlot(headshotSlot)) {
       return json({ success: false, errors: ["Invalid headshot time slot."] }, 400);
     }
-    if (headshotSlot && registrations.some(r => r.headshotSlot === headshotSlot)) {
+    if (headshotSlot && headshotSlot !== HEADSHOT_QUEUE && registrations.some(r => r.headshotSlot === headshotSlot)) {
       return json({ success: false, errors: ["That headshot time slot is already taken. Please pick another."] }, 409);
     }
 
@@ -292,6 +295,7 @@ export default async (req, context) => {
     };
     function formatHeadshotSlot(slot) {
       if (!slot) return '';
+      if (slot === HEADSHOT_QUEUE) return 'Queue (waitlist)';
       const [h, m] = slot.split(':').map(Number);
       const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
       const ampm = h >= 12 ? 'PM' : 'AM';
@@ -345,13 +349,14 @@ export default async (req, context) => {
     });
   }
 
-  // GET /api/headshots — list of taken slots (no PII, just the slot ids)
+  // GET /api/headshots — list of taken slots + queue size (no PII)
   if (method === "GET" && (path === "/headshots" || path === "/headshots/")) {
     const registrations = await getRegistrations();
     const taken = registrations
-      .filter(r => r.headshotSlot)
+      .filter(r => r.headshotSlot && r.headshotSlot !== HEADSHOT_QUEUE)
       .map(r => r.headshotSlot);
-    return json({ slots: VALID_HEADSHOT_SLOTS, taken });
+    const queueCount = registrations.filter(r => r.headshotSlot === HEADSHOT_QUEUE).length;
+    return json({ slots: VALID_HEADSHOT_SLOTS, taken, queueCount });
   }
 
   // GET /api/morning-connections — public availability counts, no PII
@@ -522,8 +527,8 @@ export default async (req, context) => {
       if (!isValidHeadshotSlot(newSlot)) {
         return json({ error: "Invalid headshot time slot." }, 400);
       }
-      // Conflict check: only if changing to a different non-empty slot
-      if (newSlot && newSlot !== reg.headshotSlot) {
+      // Conflict check: only for real time slots, not the queue (multiple can queue)
+      if (newSlot && newSlot !== HEADSHOT_QUEUE && newSlot !== reg.headshotSlot) {
         const taken = registrations.some(r => r.id !== reg.id && r.headshotSlot === newSlot);
         if (taken) {
           return json({ error: "That headshot time slot is already taken. Please pick another." }, 409);
@@ -798,6 +803,8 @@ export default async (req, context) => {
         const raw = (rec.headshotSlot || '').trim();
         if (!raw) {
           reg.headshotSlot = '';
+        } else if (/^queue/i.test(raw)) {
+          reg.headshotSlot = HEADSHOT_QUEUE;
         } else {
           // Accept either "HH:MM" or "H:MM AM/PM"
           let parsed = '';

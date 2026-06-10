@@ -45,6 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear existing options (keep the placeholder)
     headshotSelect.innerHTML = '<option value="">-- Select a time slot --</option>';
 
+    // Queue / waitlist option at the top — always available, no capacity limit
+    const queueOpt = document.createElement('option');
+    queueOpt.value = 'queue';
+    queueOpt.textContent = '📋 We are extending more time spots for Headshots — check here to book your spot in Queue';
+    if (currentSlot === 'queue') queueOpt.selected = true;
+    headshotSelect.appendChild(queueOpt);
+
+    // Visual separator
+    const sep = document.createElement('option');
+    sep.disabled = true;
+    sep.textContent = '──────── Time slots ────────';
+    headshotSelect.appendChild(sep);
+
     buildHeadshotSlots().forEach(slot => {
       const opt = document.createElement('option');
       opt.value = slot;
