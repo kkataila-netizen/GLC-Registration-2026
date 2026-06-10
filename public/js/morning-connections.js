@@ -6,6 +6,15 @@
 
   const ACTIVITIES = [
     {
+      id: 'morningyoga',
+      name: "Morning Yoga",
+      tagline: "Grounding Practice at the Fairmont",
+      time: "7:30 – 8:30 am",
+      description: "Ease into the day with a grounding yoga session right at the Fairmont. Suitable for all levels, this guided practice is a calm, restorative way to stretch out, breathe deep, and show up as your best self. Mats will be provided.",
+      capacity: 60,
+      photo: "https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800&q=80&fit=crop&crop=center"
+    },
+    {
       id: 'yoga1',
       name: "Yoga & Puppies — Session #1",
       tagline: "Stretches, Smiles & Tail Wags",
