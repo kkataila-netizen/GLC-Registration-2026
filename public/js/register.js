@@ -28,19 +28,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
   }
 
-  const headshotCheckbox = document.getElementById('headshotYes');
-  const headshotSelect   = document.getElementById('headshotSlot');
-  const headshotHint     = document.getElementById('headshotHint');
+  const headshotCheckbox     = document.getElementById('headshotYes');
+  const headshotSelect       = document.getElementById('headshotSlot');
+  const headshotHint         = document.getElementById('headshotHint');
+  const headshotQueueCount   = document.getElementById('headshotQueueCount');
+  const headshotQueueCountVal = document.getElementById('headshotQueueCountValue');
 
   async function populateHeadshotSlots(currentSlot = '') {
     let taken = [];
+    let queueCount = 0;
     try {
       const res = await fetch('/api/headshots');
       if (res.ok) {
         const data = await res.json();
         taken = data.taken || [];
+        queueCount = data.queueCount || 0;
       }
     } catch { /* network — fall back to empty taken list */ }
+
+    // Update queue counter
+    headshotQueueCountVal.textContent = queueCount;
 
     // Clear existing options (keep the placeholder)
     headshotSelect.innerHTML = '<option value="">-- Select a time slot --</option>';
@@ -74,8 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleHeadshotVisibility() {
     const checked = headshotCheckbox.checked;
-    headshotSelect.style.display = checked ? '' : 'none';
-    headshotHint.style.display   = checked ? '' : 'none';
+    headshotSelect.style.display     = checked ? '' : 'none';
+    headshotHint.style.display       = checked ? '' : 'none';
+    headshotQueueCount.style.display = checked ? '' : 'none';
     if (!checked) headshotSelect.value = '';
   }
 
