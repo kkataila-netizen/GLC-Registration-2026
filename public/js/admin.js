@@ -236,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editSessionBOS').checked = Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop');
       document.getElementById('editWelcomeReception').checked = !!reg.welcomeReception;
       document.getElementById('editMorningConnection').value = reg.morningConnection || '';
+      document.getElementById('editDineAround').value = reg.dineAround || '';
       populateAdminHeadshotSlots(reg.headshotSlot || '');
       editError.hidden = true;
       editModal.hidden = false;
@@ -263,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessions: document.getElementById('editSessionBOS').checked ? ['Tue: Banyan Fundamentals Workshop'] : [],
         welcomeReception: document.getElementById('editWelcomeReception').checked,
         morningConnection: document.getElementById('editMorningConnection').value,
+        dineAround: document.getElementById('editDineAround').value,
         headshotSlot: document.getElementById('editHeadshotSlot').value,
       };
 
