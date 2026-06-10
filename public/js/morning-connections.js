@@ -18,7 +18,7 @@
       id: 'yoga2',
       name: "Yoga & Puppies — Session #2",
       tagline: "Stretches, Smiles & Tail Wags",
-      time: "9:30 – 9:00 am",
+      time: "8:30 – 9:00 am",
       description: "Start your morning with stretches, smiles, and a whole lot of tail wags. Join a guided yoga session alongside adorable rescue puppies for a truly one-of-a-kind way to set the tone for the day ahead.",
       capacity: 22,
       photo: "/images/puppy_yoga.webp"
