@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Queue / waitlist option at the top — always available, no capacity limit
     const queueOpt = document.createElement('option');
     queueOpt.value = 'queue';
-    queueOpt.textContent = '📋 We are extending more time spots for Headshots — check here to book your spot in Queue';
+    queueOpt.textContent = '📋 We are extending more time spots for Headshots — click here to book your spot in Queue';
     if (currentSlot === 'queue') queueOpt.selected = true;
     headshotSelect.appendChild(queueOpt);
 
