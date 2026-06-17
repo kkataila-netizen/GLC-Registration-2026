@@ -200,6 +200,9 @@
     // Derive the "other" participant from each DM conversation (server-sorted
     // by recency) and look up their profile for name/org/photo.
     const myDms = dmConvs
+      // Only DMs with actual message history — skip ones that were opened but
+      // never messaged. Always keep the currently-open DM visible.
+      .filter(c => c.lastMessage || c.id === activeConvId)
       .map(c => {
         const otherEmail = c.members.find(m => m !== me.email);
         if (!otherEmail) return null;
