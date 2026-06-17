@@ -929,6 +929,23 @@ tr:hover td {
   box-shadow: 0 0 0 3px rgba(57, 85, 66, 0.15);
 }
 
+.people-chats-pill {
+  flex-shrink: 0;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--primary);
+  border-radius: 9999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.people-chats-pill:hover { background: #2d4435; }
+.people-chats-pill[hidden] { display: none; }
+
 .people-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

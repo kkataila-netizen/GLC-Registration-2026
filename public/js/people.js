@@ -3,6 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyState = document.getElementById('peopleEmpty');
   const countBadge = document.getElementById('attendeeCount');
   const searchInput = document.getElementById('peopleSearch');
+  const myChatsBtn = document.getElementById('myChatsBtn');
+
+  // Show "My Chats" pill only for logged-in users; opens the full chat window
+  // (no dm/conv param) so all existing conversations are listed in the sidebar.
+  (function initMyChats() {
+    let user = null;
+    try { user = JSON.parse(localStorage.getItem('glc-user')); } catch { /* ignore */ }
+    if (!user) return;
+    myChatsBtn.hidden = false;
+    myChatsBtn.addEventListener('click', () => {
+      window.open('/chat.html', 'glc-chat', 'width=960,height=700');
+    });
+  })();
 
   const AVATAR_COLORS = [
     '#2563eb', '#7c3aed', '#059669', '#dc2626', '#d97706',
