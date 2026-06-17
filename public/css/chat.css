@@ -65,6 +65,11 @@ body {
   padding: .625rem .75rem .25rem;
 }
 
+.sidebar__empty {
+  padding: 1.25rem .9rem; color: var(--text-muted);
+  font-size: .8125rem; line-height: 1.5; text-align: center;
+}
+
 /* User list item */
 .user-item {
   display: flex; align-items: center; gap: .625rem;

@@ -13,6 +13,7 @@
   let me = null;
   let users = [];
   let groups = [];  // group conversations the user belongs to
+  let dmConvs = []; // DM conversations the user is part of (server-sorted by recency)
   let unreadCounts = {};  // convId → unread count
   let activeConvId = null;
   let activeConvType = "dm"; // "dm" or "group"
@@ -89,7 +90,9 @@
     try {
       // Re-fetch the full conversation list so member counts stay current
       const convData = await api(`/conversations?user=${encodeURIComponent(me.email)}`);
-      groups = (convData.conversations || []).filter(c => c.type === "group");
+      const all = convData.conversations || [];
+      groups = all.filter(c => c.type === "group");
+      dmConvs = all.filter(c => c.type === "dm");
     } catch {}
     try {
       const data = await api(`/unread-per-conv?user=${encodeURIComponent(me.email)}`);
@@ -121,12 +124,15 @@
       return;
     }
 
-    // Load group conversations + unread counts
+    // Load group + DM conversations + unread counts
     try {
       const convData = await api(`/conversations?user=${encodeURIComponent(me.email)}`);
-      groups = (convData.conversations || []).filter(c => c.type === "group");
+      const all = convData.conversations || [];
+      groups = all.filter(c => c.type === "group");
+      dmConvs = all.filter(c => c.type === "dm");
     } catch {
       groups = [];
+      dmConvs = [];
     }
     await loadUnreadCounts();
 
@@ -190,31 +196,49 @@
       }).join("");
     }
 
-    // People section
-    const others = users.filter(u =>
-      u.email !== me.email &&
-      (u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term))
-    );
-    if (others.length) {
+    // People section — only DM conversations the user actually has.
+    // Derive the "other" participant from each DM conversation (server-sorted
+    // by recency) and look up their profile for name/org/photo.
+    const myDms = dmConvs
+      .map(c => {
+        const otherEmail = c.members.find(m => m !== me.email);
+        if (!otherEmail) return null;
+        const u = users.find(x => x.email === otherEmail);
+        return {
+          convId: c.id,
+          email: otherEmail,
+          name: u ? u.name : otherEmail,
+          organization: u ? u.organization : ""
+        };
+      })
+      .filter(Boolean)
+      .filter(d =>
+        d.name.toLowerCase().includes(term) || d.email.toLowerCase().includes(term)
+      );
+
+    if (myDms.length) {
       if (matchingGroups.length) {
         html += `<div class="sidebar__section-label">People</div>`;
       }
-      html += others.map(u => {
-        const convId = dmIdFor(u.email);
-        const active = activeConvId && activeConvId === convId ? "user-item--active" : "";
-        const unread = unreadCounts[convId] || 0;
+      html += myDms.map(d => {
+        const active = activeConvId && activeConvId === d.convId ? "user-item--active" : "";
+        const unread = unreadCounts[d.convId] || 0;
         const badgeHtml = unread > 0 ? `<span class="user-item__badge">${unread > 99 ? "99+" : unread}</span>` : "";
         return `
-          <div class="user-item ${active}" data-email="${esc(u.email)}">
-            <div class="user-item__avatar" style="background:${colorFor(u.name)}">${initials(u.name)}</div>
+          <div class="user-item ${active}" data-email="${esc(d.email)}">
+            <div class="user-item__avatar" style="background:${colorFor(d.name)}">${initials(d.name)}</div>
             <div class="user-item__info">
-              <div class="user-item__name">${esc(u.name)}</div>
-              ${u.organization ? `<div class="user-item__org">${esc(u.organization)}</div>` : ""}
+              <div class="user-item__name">${esc(d.name)}</div>
+              ${d.organization ? `<div class="user-item__org">${esc(d.organization)}</div>` : ""}
             </div>
             ${badgeHtml}
           </div>
         `;
       }).join("");
+    }
+
+    if (!html) {
+      html = `<div class="sidebar__empty">No conversations yet. Start one from the People page.</div>`;
     }
 
     userList.innerHTML = html;
@@ -294,10 +318,14 @@
     const sorted = [me.email, targetEmail].sort();
     const convId = `dm:${sorted[0]}:${sorted[1]}`;
 
-    await api("/conversations", {
+    const res = await api("/conversations", {
       method: "POST",
       body: { type: "dm", members: [me.email, targetEmail] }
     });
+
+    // Make sure this DM shows in the sidebar immediately (before the next poll)
+    const conv = (res && res.conversation) || { id: convId, type: "dm", members: sorted };
+    if (!dmConvs.some(c => c.id === conv.id)) dmConvs.unshift(conv);
 
     const target = users.find(u => u.email === targetEmail);
     await openConversation(convId, target ? target.name : targetEmail, "dm");
