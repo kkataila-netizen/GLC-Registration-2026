@@ -6,6 +6,15 @@
 
   const ACTIVITIES = [
     {
+      id: 'bustour',
+      name: "Hop-On City Sightseeing Bus Tour",
+      tagline: "Private Open-Top Double Decker",
+      time: "7:00 – 8:30 am",
+      description: "See Toronto from the top down. Climb aboard a private open-top double decker and take in the city's landmarks, neighbourhoods, and waterfront views as a local guide brings it all to life. Sit back, soak up the skyline, and let the city roll by before the day begins.",
+      capacity: 80,
+      photo: "https://images.unsplash.com/photo-1569949381669-ecf31ae8e613?w=800&q=80&fit=crop&crop=center"
+    },
+    {
       id: 'morningyoga',
       name: "Morning Yoga",
       tagline: "Grounding Practice at the Fairmont",

@@ -286,6 +286,7 @@ export default async (req, context) => {
     }
     const registrations = await getRegistrations();
     const MC_LABELS = {
+      bustour: "Hop-On City Sightseeing Bus Tour",
       morningyoga: "Morning Yoga",
       yoga1: "Yoga & Puppies — Session #1",
       yoga2: "Yoga & Puppies — Session #2",
@@ -363,12 +364,13 @@ export default async (req, context) => {
   // GET /api/morning-connections — public availability counts, no PII
   if (method === "GET" && (path === "/morning-connections" || path === "/morning-connections/")) {
     const registrations = await getRegistrations();
-    const counts = { morningyoga: 0, yoga1: 0, yoga2: 0, walking: 0, canoeing: 0, taichi: 0, paddleboard: 0 };
+    const counts = { bustour: 0, morningyoga: 0, yoga1: 0, yoga2: 0, walking: 0, canoeing: 0, taichi: 0, paddleboard: 0 };
     for (const r of registrations) {
       if (r.morningConnection && counts[r.morningConnection] !== undefined) counts[r.morningConnection]++;
     }
     return json({
       availability: {
+        bustour:     { taken: counts.bustour,     capacity: 80 },
         morningyoga: { taken: counts.morningyoga, capacity: 60 },
         yoga1:       { taken: counts.yoga1,       capacity: 22 },
         yoga2:       { taken: counts.yoga2,       capacity: 22 },
@@ -518,7 +520,7 @@ export default async (req, context) => {
       reg.dineAround = body.dineAround || '';
     }
     if (body.morningConnection !== undefined) {
-      const VALID_MC = ['morningyoga', 'yoga1', 'yoga2', 'walking', 'canoeing', 'taichi', 'paddleboard', ''];
+      const VALID_MC = ['bustour', 'morningyoga', 'yoga1', 'yoga2', 'walking', 'canoeing', 'taichi', 'paddleboard', ''];
       if (!VALID_MC.includes(body.morningConnection)) {
         return json({ error: "Invalid Morning Connections selection." }, 400);
       }
@@ -759,6 +761,7 @@ export default async (req, context) => {
       '': ''
     };
     const MC_MAP = {
+      "hop-on city sightseeing bus tour": 'bustour',
       "morning yoga": 'morningyoga',
       "yoga & puppies — session #1": 'yoga1',
       "yoga & puppies - session #1": 'yoga1',
