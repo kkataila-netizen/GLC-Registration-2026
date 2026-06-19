@@ -12,7 +12,7 @@
       time: "7:00 – 8:30 am",
       description: "See Toronto from the top down. Climb aboard a private open-top double decker and take in the city's landmarks, neighbourhoods, and waterfront views as a local guide brings it all to life. Sit back, soak up the skyline, and let the city roll by before the day begins.",
       capacity: 80,
-      photo: "https://images.unsplash.com/photo-1517935706615-2717063c2225?w=800&q=80&fit=crop&crop=center"
+      photo: "https://images.unsplash.com/photo-1776625723470-711a3543a71d?w=800&q=80&fit=crop&crop=center"
     },
     {
       id: 'morningyoga',
