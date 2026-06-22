@@ -4,12 +4,11 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 const VALID_DIETARY = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Halal', 'Kosher', 'Other'];
 const VALID_TSHIRT = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-// 10-minute headshot slots from 10:00 AM to 2:50 PM on Wednesday July 15, 2026
+// 5-minute headshot slots from 9:00 AM to 3:55 PM (session ends 4:00 PM) on Wednesday July 15, 2026
 function buildHeadshotSlots() {
   const out = [];
-  for (let h = 10; h < 15; h++) {
-    for (let m = 0; m < 60; m += 10) {
-      if (h === 14 && m === 60) continue;
+  for (let h = 9; h < 16; h++) {
+    for (let m = 0; m < 60; m += 5) {
       out.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
   }
@@ -359,6 +358,43 @@ export default async (req, context) => {
       .map(r => r.headshotSlot);
     const queueCount = registrations.filter(r => r.headshotSlot === HEADSHOT_QUEUE).length;
     return json({ slots: VALID_HEADSHOT_SLOTS, taken, queueCount });
+  }
+
+  // POST /api/headshots/assign-queue  ★ ADMIN ONLY
+  // Assigns every queued attendee the earliest free time slot (first-come,
+  // first-served by registration time). Idempotent: no-op once queue is empty.
+  if (method === "POST" && (path === "/headshots/assign-queue" || path === "/headshots/assign-queue/")) {
+    if (!(await validateAdminToken(req))) return json({ error: "Unauthorized" }, 401);
+
+    const registrations = await getRegistrations();
+    const allSlots = buildHeadshotSlots();
+    const taken = new Set(
+      registrations
+        .filter(r => r.headshotSlot && r.headshotSlot !== HEADSHOT_QUEUE)
+        .map(r => r.headshotSlot)
+    );
+    const freeSlots = allSlots.filter(s => !taken.has(s));
+
+    const queued = registrations
+      .filter(r => r.headshotSlot === HEADSHOT_QUEUE)
+      .sort((a, b) => new Date(a.registeredAt || 0) - new Date(b.registeredAt || 0));
+
+    const assignments = [];
+    let i = 0;
+    for (const r of queued) {
+      if (i >= freeSlots.length) break;
+      r.headshotSlot = freeSlots[i++];
+      assignments.push({ email: r.email, name: r.name, slot: r.headshotSlot });
+    }
+
+    await saveRegistrations(registrations);
+    return json({
+      success: true,
+      queued: queued.length,
+      assigned: assignments.length,
+      unassigned: queued.length - assignments.length,
+      assignments
+    });
   }
 
   // GET /api/morning-connections — public availability counts, no PII

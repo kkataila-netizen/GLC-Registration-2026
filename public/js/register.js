@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ── headshot slot helpers ──────────────────────── */
   function buildHeadshotSlots() {
     const out = [];
-    for (let h = 10; h < 15; h++) {
-      for (let m = 0; m < 60; m += 10) {
+    for (let h = 9; h < 16; h++) {
+      for (let m = 0; m < 60; m += 5) {
         out.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
       }
     }
