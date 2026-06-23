@@ -15,15 +15,6 @@
       photo: "https://images.unsplash.com/photo-1776625723470-711a3543a71d?w=800&q=80&fit=crop&crop=center"
     },
     {
-      id: 'morningyoga',
-      name: "Morning Yoga",
-      tagline: "Grounding Practice at the Fairmont",
-      time: "7:30 – 8:30 am",
-      description: "Ease into the day with a grounding yoga session right at the Fairmont. Suitable for all levels, this guided practice is a calm, restorative way to stretch out, breathe deep, and show up as your best self. Mats will be provided.",
-      capacity: 60,
-      photo: "https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800&q=80&fit=crop&crop=center"
-    },
-    {
       id: 'yoga1',
       name: "Yoga & Puppies — Session #1",
       tagline: "Stretches, Smiles & Tail Wags",
@@ -58,15 +49,6 @@
       description: "Hit the water before the day hits you. Meet your guide at Harbourfront for a group canoe experience on Lake Ontario that's equal parts adventure and fresh air. No experience needed, just show up ready to paddle.",
       capacity: 45,
       photo: "/images/canoe.jpg"
-    },
-    {
-      id: 'taichi',
-      name: "Tai Chi in the Park",
-      tagline: "Gentle, Grounding Movement",
-      time: "7:00 – 8:00 am",
-      description: "Find your centre in one of Toronto's charming green spaces. This gentle, meditative movement practice is accessible to all levels and offers a grounding start to a full day of ideas and conversation.",
-      capacity: 25,
-      photo: "/images/Tai.png"
     },
     {
       id: 'paddleboard',

@@ -400,22 +400,42 @@ export default async (req, context) => {
   // GET /api/morning-connections — public availability counts, no PII
   if (method === "GET" && (path === "/morning-connections" || path === "/morning-connections/")) {
     const registrations = await getRegistrations();
-    const counts = { bustour: 0, morningyoga: 0, yoga1: 0, yoga2: 0, walking: 0, canoeing: 0, taichi: 0, paddleboard: 0 };
+    const counts = { bustour: 0, yoga1: 0, yoga2: 0, walking: 0, canoeing: 0, paddleboard: 0 };
     for (const r of registrations) {
       if (r.morningConnection && counts[r.morningConnection] !== undefined) counts[r.morningConnection]++;
     }
     return json({
       availability: {
         bustour:     { taken: counts.bustour,     capacity: 80 },
-        morningyoga: { taken: counts.morningyoga, capacity: 60 },
         yoga1:       { taken: counts.yoga1,       capacity: 22 },
         yoga2:       { taken: counts.yoga2,       capacity: 22 },
         walking:     { taken: counts.walking,     capacity: 35 },
         canoeing:    { taken: counts.canoeing,    capacity: 45 },
-        taichi:      { taken: counts.taichi,      capacity: 25 },
         paddleboard: { taken: counts.paddleboard, capacity: 41 }
       }
     });
+  }
+
+  // POST /api/morning-connections/clear  ★ ADMIN ONLY
+  // Clears morningConnection for everyone holding one of the given activity ids
+  // (used when an activity is removed from the offering). Body: { ids: [...] }
+  if (method === "POST" && (path === "/morning-connections/clear" || path === "/morning-connections/clear/")) {
+    if (!(await validateAdminToken(req))) return json({ error: "Unauthorized" }, 401);
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400); }
+    const ids = Array.isArray(body.ids) ? body.ids : [];
+    if (!ids.length) return json({ error: "ids array required." }, 400);
+
+    const registrations = await getRegistrations();
+    const cleared = [];
+    for (const r of registrations) {
+      if (r.morningConnection && ids.includes(r.morningConnection)) {
+        cleared.push({ email: r.email, name: r.name, was: r.morningConnection });
+        r.morningConnection = '';
+      }
+    }
+    await saveRegistrations(registrations);
+    return json({ success: true, cleared: cleared.length, details: cleared });
   }
 
   // GET /api/registrations/count (public — just a count, no PII)
@@ -556,7 +576,7 @@ export default async (req, context) => {
       reg.dineAround = body.dineAround || '';
     }
     if (body.morningConnection !== undefined) {
-      const VALID_MC = ['bustour', 'morningyoga', 'yoga1', 'yoga2', 'walking', 'canoeing', 'taichi', 'paddleboard', ''];
+      const VALID_MC = ['bustour', 'yoga1', 'yoga2', 'walking', 'canoeing', 'paddleboard', ''];
       if (!VALID_MC.includes(body.morningConnection)) {
         return json({ error: "Invalid Morning Connections selection." }, 400);
       }
