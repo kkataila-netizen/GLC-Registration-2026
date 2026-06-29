@@ -72,6 +72,10 @@
     return localStorage.getItem('glc-user-token') || '';
   }
 
+  // Only these activities are still open for new selections. Existing
+  // bookings for other activities are kept, but can't be newly chosen.
+  const OPEN_ACTIVITY_IDS = ['bustour'];
+
   // Cached after first fetch
   let cachedRegId = null;
 
@@ -109,6 +113,7 @@
       const remaining = Math.max(0, a.capacity - taken);
       const isFull     = remaining === 0;
       const isChosen   = userSelection === a.id;
+      const isClosed   = !OPEN_ACTIVITY_IDS.includes(a.id);
       const fillPct    = Math.min(100, (taken / a.capacity) * 100).toFixed(1);
       const capClass   = capacityClass(taken, a.capacity);
 
@@ -116,14 +121,20 @@
       card.className = [
         'mc-card',
         isChosen ? 'mc-card--selected' : '',
-        isFull && !isChosen ? 'mc-card--full' : ''
+        (isFull || isClosed) && !isChosen ? 'mc-card--full' : ''
       ].filter(Boolean).join(' ');
 
       let btnLabel, btnClass, btnDisabled;
       if (isChosen) {
+        // Keep showing the user's existing selection; if it's a closed
+        // activity it's display-only (they can still switch to an open one).
         btnLabel    = '✓ Your Selection';
         btnClass    = 'mc-card__select mc-card__select--chosen';
-        btnDisabled = false;
+        btnDisabled = isClosed;
+      } else if (isClosed) {
+        btnLabel    = 'Selection Closed';
+        btnClass    = 'mc-card__select';
+        btnDisabled = true;
       } else if (isFull) {
         btnLabel    = 'Fully Booked';
         btnClass    = 'mc-card__select';

@@ -580,6 +580,13 @@ export default async (req, context) => {
       if (!VALID_MC.includes(body.morningConnection)) {
         return json({ error: "Invalid Morning Connections selection." }, 400);
       }
+      // Selection is closed for all morning activities except the bus tour.
+      // Non-admins may only newly choose 'bustour' or clear (''); admins can
+      // still set any value. Existing bookings are left untouched.
+      const MC_OPEN_FOR_SELF = ['bustour', ''];
+      if (!isAdmin && !MC_OPEN_FOR_SELF.includes(body.morningConnection)) {
+        return json({ error: "Selection for this activity is now closed." }, 403);
+      }
       reg.morningConnection = body.morningConnection || '';
     }
     if (body.headshotSlot !== undefined) {
