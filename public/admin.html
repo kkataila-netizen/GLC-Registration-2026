@@ -103,6 +103,9 @@
       <h2 style="margin-bottom:1rem">Edit Registration</h2>
       <form id="editForm">
         <input type="hidden" id="editId">
+        <p style="font-size:.8125rem;color:var(--text-muted);margin-bottom:1rem">Fields are ordered to match the CSV export. Internal / HR fields are admin-only and not shown on the registration page.</p>
+
+        <div class="form-group"><label>Employee #</label><input type="text" id="editEmployeeNumber"></div>
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="editName">
@@ -111,6 +114,24 @@
           <label>Title</label>
           <input type="text" id="editTitle">
         </div>
+        <div class="form-group">
+          <label>Organization</label>
+          <input type="text" id="editOrg">
+        </div>
+        <div class="form-group"><label>People Leader</label><input type="text" id="editPeopleLeader"></div>
+        <div class="form-group"><label>ELT Member</label><input type="text" id="editEltMember"></div>
+        <div class="form-group"><label>Location</label><input type="text" id="editLocation"></div>
+        <div class="form-group"><label>Operating Group</label><input type="text" id="editOperatingGroup"></div>
+        <div class="form-group"><label>Department</label><input type="text" id="editDepartment"></div>
+        <div class="form-group"><label>Reporting to</label><input type="text" id="editReportingTo"></div>
+        <div class="form-group"><label>GLC Invite</label><input type="text" id="editGlcInvite"></div>
+        <div class="form-group"><label>Hotel Eligible</label><input type="text" id="editHotelEligible"></div>
+        <div class="form-group"><label>Hotel Booked?</label><input type="text" id="editHotelBooked"></div>
+        <div class="form-group"><label>AI Native Track (Tues Morning)</label><input type="text" id="editTrackAINative"></div>
+        <div class="form-group"><label>ELP Track (Tues am)</label><input type="text" id="editTrackELP"></div>
+        <div class="form-group"><label>Operating Leader Track (Tue am)</label><input type="text" id="editTrackOperatingLeader"></div>
+        <div class="form-group"><label>HQ Functional Sessions (Tues Afternoon)</label><input type="text" id="editTrackHQFunctional"></div>
+        <div class="form-group"><label>New CEO Session</label><input type="text" id="editTrackNewCEO"></div>
         <div class="form-group">
           <label>Email Address</label>
           <input type="email" id="editEmail">
@@ -132,10 +153,6 @@
           <input type="tel" id="editPhone">
         </div>
         <div class="form-group">
-          <label>Organization</label>
-          <input type="text" id="editOrg">
-        </div>
-        <div class="form-group">
           <label>Dietary Preferences</label>
           <select id="editDietary">
             <option value="None">None</option>
@@ -147,6 +164,51 @@
             <option value="Other">Other</option>
           </select>
           <input type="text" id="editDietaryOther" placeholder="If Other, please specify..." style="margin-top:.5rem">
+        </div>
+        <div class="form-group">
+          <label>Sessions / Workshops</label>
+          <div class="checkbox-group">
+            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
+              <input type="checkbox" id="editSessionBOS" style="margin-top:.2rem">
+              <span>Attending Tuesday's "Banyan Fundamentals" workshop?</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Welcome Reception</label>
+          <div class="checkbox-group">
+            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
+              <input type="checkbox" id="editWelcomeReception" style="margin-top:.2rem">
+              <span>Attending the Welcome Reception Tuesday evening?</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Dine Around (Thu July 16)</label>
+          <select id="editDineAround">
+            <option value="">-- None --</option>
+            <option value="biffs">Biff's Bistro</option>
+            <option value="jump">Jump Restaurant</option>
+            <option value="joneses">The Joneses</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Morning Connection</label>
+          <select id="editMorningConnection">
+            <option value="">-- None --</option>
+            <option value="bustour">Hop-On City Sightseeing Bus Tour</option>
+            <option value="yoga1">Yoga &amp; Puppies — Session #1</option>
+            <option value="yoga2">Yoga &amp; Puppies — Session #2</option>
+            <option value="walking">Downtown Toronto Walking Tour</option>
+            <option value="canoeing">Canoeing Toronto</option>
+            <option value="paddleboard">Stand-Up Paddleboarding</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Headshot Slot (Wed July 15)</label>
+          <select id="editHeadshotSlot">
+            <option value="">-- None --</option>
+          </select>
         </div>
         <div class="form-group">
           <label>T-Shirt Fit</label>
@@ -169,51 +231,6 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Sessions / Workshops</label>
-          <div class="checkbox-group">
-            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
-              <input type="checkbox" id="editSessionBOS" style="margin-top:.2rem">
-              <span>Attending Tuesday's "Banyan Fundamentals" workshop?</span>
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Welcome Reception</label>
-          <div class="checkbox-group">
-            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
-              <input type="checkbox" id="editWelcomeReception" style="margin-top:.2rem">
-              <span>Attending the Welcome Reception Tuesday evening?</span>
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Headshot Slot (Wed July 15)</label>
-          <select id="editHeadshotSlot">
-            <option value="">-- None --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Morning Connection</label>
-          <select id="editMorningConnection">
-            <option value="">-- None --</option>
-            <option value="bustour">Hop-On City Sightseeing Bus Tour</option>
-            <option value="yoga1">Yoga &amp; Puppies — Session #1</option>
-            <option value="yoga2">Yoga &amp; Puppies — Session #2</option>
-            <option value="walking">Downtown Toronto Walking Tour</option>
-            <option value="canoeing">Canoeing Toronto</option>
-            <option value="paddleboard">Stand-Up Paddleboarding</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Dine Around (Thu July 16)</label>
-          <select id="editDineAround">
-            <option value="">-- None --</option>
-            <option value="biffs">Biff's Bistro</option>
-            <option value="jump">Jump Restaurant</option>
-            <option value="joneses">The Joneses</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>Check-In Status</label>
           <div class="checkbox-group">
             <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
@@ -226,26 +243,6 @@
           <label>Registered</label>
           <input type="text" id="editRegisteredAt" disabled style="background:#f3f4f6;color:var(--text-muted)">
         </div>
-
-        <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0 1rem">
-        <h3 style="font-size:1rem;margin-bottom:.25rem">Internal / HR</h3>
-        <p style="font-size:.8125rem;color:var(--text-muted);margin-bottom:1rem">Admin-only fields. Not shown on the registration page.</p>
-
-        <div class="form-group"><label>Employee #</label><input type="text" id="editEmployeeNumber"></div>
-        <div class="form-group"><label>People Leader</label><input type="text" id="editPeopleLeader"></div>
-        <div class="form-group"><label>ELT Member</label><input type="text" id="editEltMember"></div>
-        <div class="form-group"><label>Location</label><input type="text" id="editLocation"></div>
-        <div class="form-group"><label>Operating Group</label><input type="text" id="editOperatingGroup"></div>
-        <div class="form-group"><label>Department</label><input type="text" id="editDepartment"></div>
-        <div class="form-group"><label>Reporting to</label><input type="text" id="editReportingTo"></div>
-        <div class="form-group"><label>GLC Invite</label><input type="text" id="editGlcInvite"></div>
-        <div class="form-group"><label>Hotel Eligible</label><input type="text" id="editHotelEligible"></div>
-        <div class="form-group"><label>Hotel Booked?</label><input type="text" id="editHotelBooked"></div>
-        <div class="form-group"><label>AI Native Track (Tues Morning)</label><input type="text" id="editTrackAINative"></div>
-        <div class="form-group"><label>ELP Track (Tues am)</label><input type="text" id="editTrackELP"></div>
-        <div class="form-group"><label>Operating Leader Track (Tue am)</label><input type="text" id="editTrackOperatingLeader"></div>
-        <div class="form-group"><label>HQ Functional Sessions (Tues Afternoon)</label><input type="text" id="editTrackHQFunctional"></div>
-        <div class="form-group"><label>New CEO Session</label><input type="text" id="editTrackNewCEO"></div>
 
         <div id="editError" class="message message--error" hidden></div>
         <div style="display:flex;gap:.75rem;margin-top:1rem">
