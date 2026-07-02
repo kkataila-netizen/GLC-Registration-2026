@@ -330,18 +330,20 @@ export default async (req, context) => {
       const ampm = h >= 12 ? 'PM' : 'AM';
       return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
-    // Employee # leads (column A); People Leader follows Organization;
-    // remaining internal fields are appended at the end
+    // Column order: Employee #, Name, Title, Organization, People Leader, then
+    // the remaining internal/HR fields, then the event/logistics fields.
     const inlineKeys = ['employeeNumber', 'peopleLeader'];
     const otherInternal = INTERNAL_FIELD_HEADERS.filter(([key]) => !inlineKeys.includes(key));
-    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'People Leader', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
-      ...otherInternal.map(([, header]) => header)];
+    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'People Leader',
+      ...otherInternal.map(([, header]) => header),
+      'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
     const rows = registrations.map(r => [
       escapeCSV(r.employeeNumber),
       escapeCSV(r.name),
       escapeCSV(r.title),
       escapeCSV(r.organization),
       escapeCSV(r.peopleLeader),
+      ...otherInternal.map(([key]) => escapeCSV(r[key])),
       escapeCSV(r.email),
       escapeCSV(r.arrivalDate),
       escapeCSV(r.departureDate),
@@ -355,8 +357,7 @@ export default async (req, context) => {
       escapeCSV(formatHeadshotSlot(r.headshotSlot || '')),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
-      escapeCSV(r.registeredAt),
-      ...otherInternal.map(([key]) => escapeCSV(r[key]))
+      escapeCSV(r.registeredAt)
     ].join(','));
 
     const csv = [headers.join(','), ...rows].join('\n');
