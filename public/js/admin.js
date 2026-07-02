@@ -225,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEditModal(reg) {
       document.getElementById('editId').value = reg.id;
       document.getElementById('editName').value = reg.name || '';
+      document.getElementById('editTitle').value = reg.title || '';
       document.getElementById('editEmail').value = reg.email || '';
       document.getElementById('editPassword').value = '';
       document.getElementById('editArrival').value = reg.arrivalDate || '';
@@ -232,11 +233,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editPhone').value = reg.phone || '';
       document.getElementById('editOrg').value = reg.organization || '';
       document.getElementById('editDietary').value = reg.dietary || 'None';
+      document.getElementById('editDietaryOther').value = reg.dietaryOther || '';
+      document.getElementById('editTshirtFit').value = reg.tshirtFit || '';
       document.getElementById('editTshirt').value = reg.tshirt || '';
       document.getElementById('editSessionBOS').checked = Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop');
       document.getElementById('editWelcomeReception').checked = !!reg.welcomeReception;
       document.getElementById('editMorningConnection').value = reg.morningConnection || '';
       document.getElementById('editDineAround').value = reg.dineAround || '';
+      document.getElementById('editCheckedIn').checked = !!reg.checkedIn;
+      document.getElementById('editRegisteredAt').value = reg.registeredAt ? formatDate(reg.registeredAt) : '—';
       populateAdminHeadshotSlots(reg.headshotSlot || '');
       editError.hidden = true;
       editModal.hidden = false;
@@ -254,18 +259,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = document.getElementById('editId').value;
       const body = {
         name: document.getElementById('editName').value,
+        title: document.getElementById('editTitle').value,
         email: document.getElementById('editEmail').value,
         arrivalDate: document.getElementById('editArrival').value,
         departureDate: document.getElementById('editDeparture').value,
         phone: document.getElementById('editPhone').value,
         organization: document.getElementById('editOrg').value,
         dietary: document.getElementById('editDietary').value,
+        dietaryOther: document.getElementById('editDietaryOther').value,
+        tshirtFit: document.getElementById('editTshirtFit').value,
         tshirt: document.getElementById('editTshirt').value,
         sessions: document.getElementById('editSessionBOS').checked ? ['Tue: Banyan Fundamentals Workshop'] : [],
         welcomeReception: document.getElementById('editWelcomeReception').checked,
         morningConnection: document.getElementById('editMorningConnection').value,
         dineAround: document.getElementById('editDineAround').value,
         headshotSlot: document.getElementById('editHeadshotSlot').value,
+        checkedIn: document.getElementById('editCheckedIn').checked,
       };
 
       const pw = document.getElementById('editPassword').value;

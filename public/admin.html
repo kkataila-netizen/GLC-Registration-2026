@@ -108,6 +108,10 @@
           <input type="text" id="editName">
         </div>
         <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="editTitle">
+        </div>
+        <div class="form-group">
           <label>Email Address</label>
           <input type="email" id="editEmail">
         </div>
@@ -141,6 +145,15 @@
             <option value="Halal">Halal</option>
             <option value="Kosher">Kosher</option>
             <option value="Other">Other</option>
+          </select>
+          <input type="text" id="editDietaryOther" placeholder="If Other, please specify..." style="margin-top:.5rem">
+        </div>
+        <div class="form-group">
+          <label>T-Shirt Fit</label>
+          <select id="editTshirtFit">
+            <option value="">-- Select fit --</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
           </select>
         </div>
         <div class="form-group">
@@ -199,6 +212,19 @@
             <option value="jump">Jump Restaurant</option>
             <option value="joneses">The Joneses</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Check-In Status</label>
+          <div class="checkbox-group">
+            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer">
+              <input type="checkbox" id="editCheckedIn" style="margin-top:.2rem">
+              <span>Checked in on-site</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Registered</label>
+          <input type="text" id="editRegisteredAt" disabled style="background:#f3f4f6;color:var(--text-muted)">
         </div>
         <div id="editError" class="message message--error" hidden></div>
         <div style="display:flex;gap:.75rem;margin-top:1rem">
