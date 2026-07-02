@@ -330,15 +330,18 @@ export default async (req, context) => {
       const ampm = h >= 12 ? 'PM' : 'AM';
       return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
-    // Employee # leads (column A); remaining internal fields are appended at the end
-    const otherInternal = INTERNAL_FIELD_HEADERS.filter(([key]) => key !== 'employeeNumber');
-    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
+    // Employee # leads (column A); People Leader follows Organization;
+    // remaining internal fields are appended at the end
+    const inlineKeys = ['employeeNumber', 'peopleLeader'];
+    const otherInternal = INTERNAL_FIELD_HEADERS.filter(([key]) => !inlineKeys.includes(key));
+    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'People Leader', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
       ...otherInternal.map(([, header]) => header)];
     const rows = registrations.map(r => [
       escapeCSV(r.employeeNumber),
       escapeCSV(r.name),
       escapeCSV(r.title),
       escapeCSV(r.organization),
+      escapeCSV(r.peopleLeader),
       escapeCSV(r.email),
       escapeCSV(r.arrivalDate),
       escapeCSV(r.departureDate),
