@@ -330,9 +330,12 @@ export default async (req, context) => {
       const ampm = h >= 12 ? 'PM' : 'AM';
       return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
-      ...INTERNAL_FIELD_HEADERS.map(([, header]) => header)];
+    // Employee # leads (column A); remaining internal fields are appended at the end
+    const otherInternal = INTERNAL_FIELD_HEADERS.filter(([key]) => key !== 'employeeNumber');
+    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
+      ...otherInternal.map(([, header]) => header)];
     const rows = registrations.map(r => [
+      escapeCSV(r.employeeNumber),
       escapeCSV(r.name),
       escapeCSV(r.title),
       escapeCSV(r.organization),
@@ -350,7 +353,7 @@ export default async (req, context) => {
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
       escapeCSV(r.registeredAt),
-      ...INTERNAL_FIELD_HEADERS.map(([key]) => escapeCSV(r[key]))
+      ...otherInternal.map(([key]) => escapeCSV(r[key]))
     ].join(','));
 
     const csv = [headers.join(','), ...rows].join('\n');
