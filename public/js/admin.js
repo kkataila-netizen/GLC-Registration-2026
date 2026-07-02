@@ -222,6 +222,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // Internal / HR fields: [modal element id, registration key]
+    const INTERNAL_EDIT = [
+      ['editEmployeeNumber', 'employeeNumber'], ['editPeopleLeader', 'peopleLeader'],
+      ['editEltMember', 'eltMember'], ['editLocation', 'location'],
+      ['editOperatingGroup', 'operatingGroup'], ['editDepartment', 'department'],
+      ['editReportingTo', 'reportingTo'], ['editGlcInvite', 'glcInvite'],
+      ['editHotelEligible', 'hotelEligible'], ['editHotelBooked', 'hotelBooked'],
+      ['editTrackAINative', 'trackAINative'], ['editTrackELP', 'trackELP'],
+      ['editTrackOperatingLeader', 'trackOperatingLeader'],
+      ['editTrackHQFunctional', 'trackHQFunctional'], ['editTrackNewCEO', 'trackNewCEO']
+    ];
+
     function openEditModal(reg) {
       document.getElementById('editId').value = reg.id;
       document.getElementById('editName').value = reg.name || '';
@@ -242,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editDineAround').value = reg.dineAround || '';
       document.getElementById('editCheckedIn').checked = !!reg.checkedIn;
       document.getElementById('editRegisteredAt').value = reg.registeredAt ? formatDate(reg.registeredAt) : '—';
+      INTERNAL_EDIT.forEach(([elId, key]) => { document.getElementById(elId).value = reg[key] || ''; });
       populateAdminHeadshotSlots(reg.headshotSlot || '');
       editError.hidden = true;
       editModal.hidden = false;
@@ -276,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headshotSlot: document.getElementById('editHeadshotSlot').value,
         checkedIn: document.getElementById('editCheckedIn').checked,
       };
+      INTERNAL_EDIT.forEach(([elId, key]) => { body[key] = document.getElementById(elId).value; });
 
       const pw = document.getElementById('editPassword').value;
       if (pw) body.password = pw;
@@ -600,7 +614,20 @@ document.addEventListener('DOMContentLoaded', () => {
         'dine around': 'dineAround', 'morning connection': 'morningConnection',
         'headshot slot': 'headshotSlot',
         't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
-        'registered': 'registeredAt'
+        'registered': 'registeredAt',
+        // Internal / HR columns
+        'employee #': 'employeeNumber', 'employee number': 'employeeNumber',
+        'people leader': 'peopleLeader', 'elt member': 'eltMember',
+        'location': 'location', 'operating group': 'operatingGroup',
+        'department': 'department', 'reporting to': 'reportingTo',
+        'glc invite': 'glcInvite', 'hotel eligible': 'hotelEligible',
+        'hotel booked?': 'hotelBooked', 'hotel booked': 'hotelBooked',
+        'ai native track (tues morning)': 'trackAINative',
+        'elp track (tues am)': 'trackELP',
+        'operating leader track (tue am)': 'trackOperatingLeader',
+        'hq functional sessions (tues afternoon)': 'trackHQFunctional',
+        'hq functional sesssions (tues afternoon)': 'trackHQFunctional',
+        'new ceo session': 'trackNewCEO'
       };
       const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());
       return lines.slice(1)

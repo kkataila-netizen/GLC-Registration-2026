@@ -15,6 +15,32 @@ function buildHeadshotSlots() {
   return out;
 }
 const VALID_HEADSHOT_SLOTS = buildHeadshotSlots();
+
+// Internal / HR fields — managed by admin + CSV import only, never shown on
+// the public registration form. Stored as free-text strings.
+const INTERNAL_FIELDS = [
+  'employeeNumber', 'peopleLeader', 'eltMember', 'location', 'operatingGroup',
+  'department', 'reportingTo', 'glcInvite', 'hotelEligible', 'hotelBooked',
+  'trackAINative', 'trackELP', 'trackOperatingLeader', 'trackHQFunctional', 'trackNewCEO'
+];
+// Maps each internal field to its CSV column header (used for export order)
+const INTERNAL_FIELD_HEADERS = [
+  ['employeeNumber', 'Employee #'],
+  ['peopleLeader', 'People Leader'],
+  ['eltMember', 'ELT Member'],
+  ['location', 'Location'],
+  ['operatingGroup', 'Operating Group'],
+  ['department', 'Department'],
+  ['reportingTo', 'Reporting to'],
+  ['glcInvite', 'GLC Invite'],
+  ['hotelEligible', 'Hotel Eligible'],
+  ['hotelBooked', 'Hotel Booked?'],
+  ['trackAINative', 'AI Native Track (Tues Morning)'],
+  ['trackELP', 'ELP Track (Tues am)'],
+  ['trackOperatingLeader', 'Operating Leader Track (Tue am)'],
+  ['trackHQFunctional', 'HQ Functional Sessions (Tues Afternoon)'],
+  ['trackNewCEO', 'New CEO Session']
+];
 // Special non-exclusive value — multiple users can hold "queue" simultaneously,
 // it's a waitlist for additional slots being added.
 const HEADSHOT_QUEUE = 'queue';
@@ -229,6 +255,8 @@ export default async (req, context) => {
       headshotSlot,
       registeredAt: new Date().toISOString()
     };
+    // Internal/HR fields default empty (not collected on the registration form)
+    for (const f of INTERNAL_FIELDS) registration[f] = '';
 
     registrations.push(registration);
     await saveRegistrations(registrations);
@@ -302,7 +330,8 @@ export default async (req, context) => {
       const ampm = h >= 12 ? 'PM' : 'AM';
       return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
-    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    const headers = ['Name', 'Title', 'Organization', 'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
+      ...INTERNAL_FIELD_HEADERS.map(([, header]) => header)];
     const rows = registrations.map(r => [
       escapeCSV(r.name),
       escapeCSV(r.title),
@@ -320,7 +349,8 @@ export default async (req, context) => {
       escapeCSV(formatHeadshotSlot(r.headshotSlot || '')),
       escapeCSV(r.tshirtFit),
       escapeCSV(r.tshirt),
-      escapeCSV(r.registeredAt)
+      escapeCSV(r.registeredAt),
+      ...INTERNAL_FIELD_HEADERS.map(([key]) => escapeCSV(r[key]))
     ].join(','));
 
     const csv = [headers.join(','), ...rows].join('\n');
@@ -610,6 +640,10 @@ export default async (req, context) => {
       if (reg.checkedIn && !reg.checkedInAt) reg.checkedInAt = new Date().toISOString();
       if (!reg.checkedIn) reg.checkedInAt = '';
     }
+    // Internal / HR fields (admin + CSV import only)
+    for (const f of INTERNAL_FIELDS) {
+      if (body[f] !== undefined) reg[f] = (body[f] == null ? '' : String(body[f])).trim();
+    }
     if (body.password) {
       if (body.password.length < 4) {
         return json({ error: "Password must be at least 4 characters." }, 400);
@@ -893,6 +927,10 @@ export default async (req, context) => {
       }
       if (rec.tshirtFit !== undefined) reg.tshirtFit = (rec.tshirtFit || '').trim();
       if (rec.tshirt !== undefined && (VALID_TSHIRT.includes(rec.tshirt) || rec.tshirt === '')) reg.tshirt = rec.tshirt;
+      // Internal / HR fields
+      for (const f of INTERNAL_FIELDS) {
+        if (rec[f] !== undefined) reg[f] = (rec[f] == null ? '' : String(rec[f])).trim();
+      }
 
       registrations[index] = reg;
       updated++;
