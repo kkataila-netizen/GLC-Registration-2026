@@ -80,18 +80,19 @@
     tue.sort((a, b) => (a.rank || 99) - (b.rank || 99));
 
     // Wednesday, July 15
-    if (reg.morningConnection && MC_LABELS[reg.morningConnection]) {
-      wed.push({ tag: 'Morning Activity', time: MC_TIMES[reg.morningConnection] || 'Morning', title: MC_LABELS[reg.morningConnection] });
-    }
     const hs = formatHeadshot(reg.headshotSlot);
     if (hs) {
       wed.push({ tag: 'Headshot', time: hs, title: 'Professional Headshot' });
     }
 
     // Thursday, July 16
-    if (reg.dineAround && DINE_LABELS[reg.dineAround]) {
-      thu.push({ tag: 'Dine Around', time: 'Evening', title: DINE_LABELS[reg.dineAround] });
+    if (reg.morningConnection && MC_LABELS[reg.morningConnection]) {
+      thu.push({ tag: 'Morning Activity', time: MC_TIMES[reg.morningConnection] || 'Morning', title: MC_LABELS[reg.morningConnection], rank: 1 });
     }
+    if (reg.dineAround && DINE_LABELS[reg.dineAround]) {
+      thu.push({ tag: 'Dine Around', time: 'Evening', title: DINE_LABELS[reg.dineAround], rank: 5 });
+    }
+    thu.sort((a, b) => (a.rank || 99) - (b.rank || 99));
 
     return [
       { day: 'Tuesday, July 14', events: tue },
