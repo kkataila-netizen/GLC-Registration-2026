@@ -25,13 +25,13 @@
   // Tuesday track/session assignments come from the HR/admin fields. A person
   // is attending when the field has any non-empty, non-negative value.
   const TUESDAY_TRACKS = [
-    { key: 'trackAINative',        tag: 'Track',   title: 'AI Native Track',              time: 'Morning',           rank: 1 },
-    { key: 'trackELP',             tag: 'Track',   title: 'ELP Track',                    time: 'Morning',           rank: 1 },
-    { key: 'trackOperatingLeader', tag: 'Track',   title: 'Operating Leader Track',       time: 'Morning',           rank: 1 },
-    { key: 'trackHQFunctional',    tag: 'Session', title: 'HQ Functional Sessions',       time: 'Afternoon',         rank: 3 },
-    { key: 'trackNewCEO',          tag: 'Session', title: 'New CEO Session',              time: 'Afternoon',         rank: 3 },
-    { key: 'trackHQEvening',       tag: 'Event',   title: 'HQ Evening Event',             time: 'Evening',           rank: 5 },
-    { key: 'ceoWelcome',           tag: 'Event',   title: 'CEO Welcome Event & Dinner',   time: 'Evening',           rank: 5 }
+    { key: 'trackAINative',        tag: 'Track',   title: 'AI Native Track',            time: '9:00 AM – 12:00 PM', loc: 'Tudor 7 & 8',        rank: 1 },
+    { key: 'trackELP',             tag: 'Track',   title: 'ELP Track',                  time: '9:00 AM – 12:00 PM', loc: 'York',               rank: 1 },
+    { key: 'trackOperatingLeader', tag: 'Track',   title: 'Operating Leader Track',     time: '9:00 AM – 12:00 PM', loc: 'Library',            rank: 1 },
+    { key: 'trackHQFunctional',    tag: 'Session', title: 'HQ Functional Sessions',     time: '1:00 – 5:00 PM',     loc: 'Confederation Rooms', rank: 3 },
+    { key: 'trackNewCEO',          tag: 'Session', title: 'New CEO Session',            time: 'Afternoon',          loc: '',                   rank: 3 },
+    { key: 'trackHQEvening',       tag: 'Event',   title: 'HQ Evening Event',           time: '6:00 – 9:00 PM',     loc: '',                   rank: 5 },
+    { key: 'ceoWelcome',           tag: 'Event',   title: 'CEO Welcome Event & Dinner', time: '6:00 – 9:00 PM',     loc: '',                   rank: 5 }
   ];
 
   function isAffirmative(v) {
@@ -68,29 +68,29 @@
     // Tuesday, July 14 — track/session assignments from HR fields
     TUESDAY_TRACKS.forEach(t => {
       if (isAffirmative(reg[t.key])) {
-        tue.push({ tag: t.tag, time: t.time, title: t.title, rank: t.rank });
+        tue.push({ tag: t.tag, time: t.time, title: t.title, loc: t.loc, rank: t.rank });
       }
     });
     if (Array.isArray(reg.sessions) && reg.sessions.includes('Tue: Banyan Fundamentals Workshop')) {
-      tue.push({ tag: 'Session', time: '12:00 – 5:00 PM', title: 'Banyan Operating System (BOS) Fundamentals', rank: 2 });
+      tue.push({ tag: 'Session', time: '12:00 – 5:00 PM', title: 'Banyan Operating System (BOS) Fundamentals', loc: 'Concert Hall', rank: 2 });
     }
     if (reg.welcomeReception) {
-      tue.push({ tag: 'Reception', time: '6:00 – 9:00 PM', title: 'Welcome Reception', rank: 4 });
+      tue.push({ tag: 'Reception', time: '6:00 – 9:00 PM', title: 'Welcome Reception', loc: '', rank: 4 });
     }
     tue.sort((a, b) => (a.rank || 99) - (b.rank || 99));
 
     // Wednesday, July 15
     const hs = formatHeadshot(reg.headshotSlot);
     if (hs) {
-      wed.push({ tag: 'Headshot', time: hs, title: 'Professional Headshot' });
+      wed.push({ tag: 'Headshot', time: hs, title: 'Professional Headshot', loc: '' });
     }
 
     // Thursday, July 16
     if (reg.morningConnection && MC_LABELS[reg.morningConnection]) {
-      thu.push({ tag: 'Morning Activity', time: MC_TIMES[reg.morningConnection] || 'Morning', title: MC_LABELS[reg.morningConnection], rank: 1 });
+      thu.push({ tag: 'Morning Activity', time: MC_TIMES[reg.morningConnection] || 'Morning', title: MC_LABELS[reg.morningConnection], loc: 'Meet at Tudor 7 & 8', rank: 1 });
     }
     if (reg.dineAround && DINE_LABELS[reg.dineAround]) {
-      thu.push({ tag: 'Dine Around', time: 'Evening', title: DINE_LABELS[reg.dineAround], rank: 5 });
+      thu.push({ tag: 'Dine Around', time: '6:00 – 10:00 PM', title: DINE_LABELS[reg.dineAround], loc: '', rank: 5 });
     }
     thu.sort((a, b) => (a.rank || 99) - (b.rank || 99));
 
@@ -122,6 +122,7 @@
           <span class="event-row__tag">${esc(e.tag)}</span>
           <div class="event-row__time">${esc(e.time)}</div>
           <div class="event-row__title">${esc(e.title)}</div>
+          ${e.loc ? `<div class="event-row__loc">📍 ${esc(e.loc)}</div>` : ''}
         </div>
       `).join('');
       return `
