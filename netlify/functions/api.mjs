@@ -21,7 +21,8 @@ const VALID_HEADSHOT_SLOTS = buildHeadshotSlots();
 const INTERNAL_FIELDS = [
   'employeeNumber', 'peopleLeader', 'eltMember', 'location', 'operatingGroup',
   'department', 'reportingTo', 'glcInvite', 'hotelEligible', 'hotelBooked',
-  'trackAINative', 'trackELP', 'trackOperatingLeader', 'trackHQFunctional', 'trackNewCEO'
+  'trackAINative', 'trackELP', 'trackOperatingLeader', 'trackHQFunctional',
+  'trackHQEvening', 'trackNewCEO', 'ceoWelcome'
 ];
 // Maps each internal field to its CSV column header (used for export order)
 const INTERNAL_FIELD_HEADERS = [
@@ -39,7 +40,9 @@ const INTERNAL_FIELD_HEADERS = [
   ['trackELP', 'ELP Track (Tues am)'],
   ['trackOperatingLeader', 'Operating Leader Track (Tue am)'],
   ['trackHQFunctional', 'HQ Functional Sessions (Tues Afternoon)'],
-  ['trackNewCEO', 'New CEO Session']
+  ['trackHQEvening', 'HQ Evening Event'],
+  ['trackNewCEO', 'New CEO Session'],
+  ['ceoWelcome', 'CEO Welcome Event and dinner']
 ];
 // Special non-exclusive value — multiple users can hold "queue" simultaneously,
 // it's a waitlist for additional slots being added.

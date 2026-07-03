@@ -231,7 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['editHotelEligible', 'hotelEligible'], ['editHotelBooked', 'hotelBooked'],
       ['editTrackAINative', 'trackAINative'], ['editTrackELP', 'trackELP'],
       ['editTrackOperatingLeader', 'trackOperatingLeader'],
-      ['editTrackHQFunctional', 'trackHQFunctional'], ['editTrackNewCEO', 'trackNewCEO']
+      ['editTrackHQFunctional', 'trackHQFunctional'], ['editTrackHQEvening', 'trackHQEvening'],
+      ['editTrackNewCEO', 'trackNewCEO'], ['editCeoWelcome', 'ceoWelcome']
     ];
 
     function openEditModal(reg) {
@@ -627,7 +628,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'operating leader track (tue am)': 'trackOperatingLeader',
         'hq functional sessions (tues afternoon)': 'trackHQFunctional',
         'hq functional sesssions (tues afternoon)': 'trackHQFunctional',
-        'new ceo session': 'trackNewCEO'
+        'hq evening event': 'trackHQEvening',
+        'new ceo session': 'trackNewCEO',
+        'ceo welcome event and dinner': 'ceoWelcome'
       };
       const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());
       return lines.slice(1)
