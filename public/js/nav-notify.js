@@ -176,9 +176,10 @@
     const links = document.querySelectorAll(".top-nav__links a");
     for (const a of links) {
       const href = (a.getAttribute("href") || "").replace(/\/$/, "");
-      const isAdminLink   = href === "/admin.html"  || href === "/admin";
-      const isCheckinLink = href === "/checkin.html" || href === "/checkin";
-      if ((isAdminLink || isCheckinLink) && isAdmin) {
+      const isAdminLink     = href === "/admin.html"       || href === "/admin";
+      const isCheckinLink   = href === "/checkin.html"      || href === "/checkin";
+      const isMySessionLink = href === "/my-sessions.html"  || href === "/my-sessions";
+      if ((isAdminLink || isCheckinLink || isMySessionLink) && isAdmin) {
         a.closest("li").style.display = "";
       }
     }

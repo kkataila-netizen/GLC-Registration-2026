@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Sessions - GLC Conference</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Admin-only gate: redirect non-admins immediately -->
+  <script>
+    (() => {
+      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
+      try {
+        const u = JSON.parse(localStorage.getItem("glc-user"));
+        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); return; }
+      } catch { window.location.replace("/home.html"); }
+    })();
+  </script>
+  <style>
+    .agenda { display: flex; flex-direction: column; gap: 2rem; }
+
+    .agenda__day {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .track-block {
+      display: flex;
+      gap: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+    .track-block + .track-block { margin-top: 0.75rem; }
+
+    .track-block__bar { width: 6px; flex-shrink: 0; }
+
+    .track-block__label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      rotate: 180deg;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 0.35rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      min-width: 28px;
+      flex-shrink: 0;
+      background: #395542; color: #fff;
+    }
+
+    .track-block__content {
+      flex: 1;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .event-row__time {
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #1a1a1a;
+      margin-bottom: 0.125rem;
+    }
+    .event-row__title { font-size: 0.9375rem; color: #1a1a1a; line-height: 1.5; }
+    .event-row__tag {
+      display: inline-block;
+      font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #395542; background: #f0f7f2;
+      padding: 0.1rem 0.5rem; border-radius: 99px; margin-bottom: 0.35rem;
+    }
+
+    .ms-empty {
+      background: #f8f9fa; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; color: #555;
+    }
+    .ms-empty a { color: #395542; font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .track-block__content { padding: 1rem; }
+      .track-block__label { padding: 0.5rem 0.25rem; font-size: 0.625rem; min-width: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/home.html" class="top-nav__brand">
+      <img src="/images/glc-white.png" alt="GLC" class="top-nav__logo">
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/home.html">Home</a></li>
+      <li><a href="/info.html">Info</a></li>
+      <li><a href="/sessions.html">Sessions</a></li>
+      <li style="display:none"><a href="/my-sessions.html" class="active">My Sessions</a></li>
+      <li><a href="/people.html">People</a></li>
+      <li><a href="/activities.html">Activities</a></li>
+      <li style="display:none"><a href="/checkin.html">Check In</a></li>
+      <li><a href="/register.html">Register</a></li>
+      <li style="display:none"><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1>My Sessions</h1>
+      <p id="msSubtitle">Your personal schedule for GLC 2026</p>
+    </header>
+
+    <div id="msAgenda" class="agenda"></div>
+  </div>
+
+  <script src="/js/my-sessions.js"></script>
+  <script src="/js/nav-notify.js"></script>
+</body>
+</html>
