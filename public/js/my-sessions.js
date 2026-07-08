@@ -52,7 +52,11 @@
     return 'generic'; // affirmative but not a specific function
   }
 
+  // Breakout assignment: the explicit "Operating Group Breakout Session"
+  // field wins; falls back to matching the Operating Group field.
   function inOpGroup(reg, leader) {
+    const explicit = String(reg.opGroupBreakout || '').trim().toLowerCase();
+    if (explicit) return explicit.includes(leader.toLowerCase());
     const og = String(reg.operatingGroup || '').toLowerCase();
     return og.includes(leader.toLowerCase());
   }
@@ -64,6 +68,7 @@
   const AGENDA = [
     /* ── Tuesday, July 14 ─────────────────────────── */
     { day: 0, sort: 450,  tag: 'Registration', time: '7:30 AM – 1:00 PM', title: 'Registration', loc: 'Concert Hall Foyer · Convention Floor', audience: all },
+    { day: 0, sort: 450,  tag: 'Event', time: '7:30 – 9:00 AM', title: 'Huddle Event', loc: 'Confederation 5 & 6 · Mezzanine Floor', audience: r => yes(r.huddleEvent) },
     { day: 0, sort: 450,  tag: 'Meal', time: '7:30 – 9:00 AM', title: 'Breakfast — OL & ELP Tracks', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) || yes(r.trackELP) },
     { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'OL Track: Driving OpCo Performance — The OL Playbook', loc: 'Library · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) },
     { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'ELP Track Sessions', loc: 'York · Mezzanine Floor', audience: r => yes(r.trackELP) },
@@ -137,10 +142,10 @@
       details: 'Meeting time: 6:30 PM · Host: Emily Campbell 905-325-2660', audience: r => r.dineAround === 'joneses' },
     { day: 2, sort: 1260, tag: 'Event', time: '9:00 PM', title: 'After Party', loc: "Kelly's Landing · 123 Front St W, Toronto", audience: all },
 
-    /* ── Friday, July 17 (ELT / OP Partners) ──────── */
-    { day: 3, sort: 480,  tag: 'Meal', time: '8:00 – 9:00 AM', title: 'Breakfast', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.eltMember) },
-    { day: 3, sort: 540,  tag: 'Session', time: '9:00 AM – 12:00 PM', title: 'Strategy Session: David & Tonya', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.eltMember) },
-    { day: 3, sort: 720,  tag: 'Meal', time: '12:00 PM', title: 'Take-Away Lunch', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.eltMember) }
+    /* ── Friday, July 17 (Friday OP Strategy Session field) ── */
+    { day: 3, sort: 480,  tag: 'Meal', time: '8:00 – 9:00 AM', title: 'Breakfast', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.fridayStrategy) },
+    { day: 3, sort: 540,  tag: 'Session', time: '9:00 AM – 12:00 PM', title: 'Strategy Session: David & Tonya', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.fridayStrategy) },
+    { day: 3, sort: 720,  tag: 'Meal', time: '12:00 PM', title: 'Take-Away Lunch', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.fridayStrategy) }
   ];
 
   /* ── personal headshot (Wednesday) ───────────────── */

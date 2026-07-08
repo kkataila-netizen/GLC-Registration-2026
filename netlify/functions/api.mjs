@@ -22,7 +22,8 @@ const INTERNAL_FIELDS = [
   'employeeNumber', 'peopleLeader', 'eltMember', 'location', 'operatingGroup',
   'department', 'reportingTo', 'glcInvite', 'hotelEligible', 'hotelBooked',
   'trackAINative', 'trackELP', 'trackOperatingLeader', 'trackHQFunctional',
-  'trackHQEvening', 'trackNewCEO', 'ceoWelcome'
+  'trackHQEvening', 'trackNewCEO', 'ceoWelcome',
+  'huddleEvent', 'fridayStrategy', 'opGroupBreakout'
 ];
 // Maps each internal field to its CSV column header (used for export order)
 const INTERNAL_FIELD_HEADERS = [
@@ -42,7 +43,10 @@ const INTERNAL_FIELD_HEADERS = [
   ['trackHQFunctional', 'HQ Functional Sessions (Tues Afternoon)'],
   ['trackHQEvening', 'HQ Evening Event'],
   ['trackNewCEO', 'New CEO Session'],
-  ['ceoWelcome', 'CEO Welcome Event and dinner']
+  ['ceoWelcome', 'CEO Welcome Event and dinner'],
+  ['huddleEvent', 'Huddle Event'],
+  ['fridayStrategy', 'Friday OP Strategy Session'],
+  ['opGroupBreakout', 'Operating Group Breakout Session']
 ];
 // Special non-exclusive value — multiple users can hold "queue" simultaneously,
 // it's a waitlist for additional slots being added.

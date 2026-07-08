@@ -232,7 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ['editTrackAINative', 'trackAINative'], ['editTrackELP', 'trackELP'],
       ['editTrackOperatingLeader', 'trackOperatingLeader'],
       ['editTrackHQFunctional', 'trackHQFunctional'], ['editTrackHQEvening', 'trackHQEvening'],
-      ['editTrackNewCEO', 'trackNewCEO'], ['editCeoWelcome', 'ceoWelcome']
+      ['editTrackNewCEO', 'trackNewCEO'], ['editCeoWelcome', 'ceoWelcome'],
+      ['editHuddleEvent', 'huddleEvent'], ['editFridayStrategy', 'fridayStrategy'],
+      ['editOpGroupBreakout', 'opGroupBreakout']
     ];
 
     function openEditModal(reg) {
@@ -630,7 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'hq functional sesssions (tues afternoon)': 'trackHQFunctional',
         'hq evening event': 'trackHQEvening',
         'new ceo session': 'trackNewCEO',
-        'ceo welcome event and dinner': 'ceoWelcome'
+        'ceo welcome event and dinner': 'ceoWelcome',
+        'huddle event': 'huddleEvent',
+        'friday op strategy session': 'fridayStrategy',
+        'operating group breakout session': 'opGroupBreakout'
       };
       const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());
       return lines.slice(1)
