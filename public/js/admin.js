@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Internal / HR fields: [modal element id, registration key]
     const INTERNAL_EDIT = [
       ['editEmployeeNumber', 'employeeNumber'], ['editPeopleLeader', 'peopleLeader'],
-      ['editEltMember', 'eltMember'], ['editLocation', 'location'],
+      ['editSltMember', 'sltMember'], ['editLocation', 'location'],
       ['editOperatingGroup', 'operatingGroup'], ['editDepartment', 'department'],
       ['editReportingTo', 'reportingTo'], ['editGlcInvite', 'glcInvite'],
       ['editHotelEligible', 'hotelEligible'], ['editHotelBooked', 'hotelBooked'],
@@ -234,7 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ['editTrackHQFunctional', 'trackHQFunctional'], ['editTrackHQEvening', 'trackHQEvening'],
       ['editTrackNewCEO', 'trackNewCEO'], ['editCeoWelcome', 'ceoWelcome'],
       ['editHuddleEvent', 'huddleEvent'], ['editFridayStrategy', 'fridayStrategy'],
-      ['editOpGroupBreakout', 'opGroupBreakout']
+      ['editOpGroupBreakout', 'opGroupBreakout'],
+      ['editAttendeeClassification', 'attendeeClassification'],
+      ['editComments', 'comments'], ['editRegisteredFlag', 'registeredFlag']
     ];
 
     function openEditModal(reg) {
@@ -618,9 +620,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'headshot slot': 'headshotSlot',
         't-shirt fit': 'tshirtFit', 't-shirt size': 'tshirt',
         'registered': 'registeredAt',
+        // Alternate header spellings from the invite-list workbook
+        'morning connections': 'morningConnection',
+        'headshot': 'headshotSlot',
         // Internal / HR columns
         'employee #': 'employeeNumber', 'employee number': 'employeeNumber',
-        'people leader': 'peopleLeader', 'elt member': 'eltMember',
+        'people leader': 'peopleLeader',
+        'slt member': 'sltMember', 'elt member': 'sltMember',
         'location': 'location', 'operating group': 'operatingGroup',
         'department': 'department', 'reporting to': 'reportingTo',
         'glc invite': 'glcInvite', 'hotel eligible': 'hotelEligible',
@@ -635,7 +641,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'ceo welcome event and dinner': 'ceoWelcome',
         'huddle event': 'huddleEvent',
         'friday op strategy session': 'fridayStrategy',
-        'operating group breakout session': 'opGroupBreakout'
+        'operating group breakout session': 'opGroupBreakout',
+        'attendee classification hq or opco': 'attendeeClassification',
+        'comments': 'comments',
+        'registered?': 'registeredFlag'
       };
       const keys = headers.map(h => KEY_MAP[h.toLowerCase().trim()] || h.toLowerCase().trim());
       return lines.slice(1)

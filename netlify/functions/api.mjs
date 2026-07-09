@@ -19,17 +19,18 @@ const VALID_HEADSHOT_SLOTS = buildHeadshotSlots();
 // Internal / HR fields — managed by admin + CSV import only, never shown on
 // the public registration form. Stored as free-text strings.
 const INTERNAL_FIELDS = [
-  'employeeNumber', 'peopleLeader', 'eltMember', 'location', 'operatingGroup',
+  'employeeNumber', 'peopleLeader', 'sltMember', 'location', 'operatingGroup',
   'department', 'reportingTo', 'glcInvite', 'hotelEligible', 'hotelBooked',
   'trackAINative', 'trackELP', 'trackOperatingLeader', 'trackHQFunctional',
   'trackHQEvening', 'trackNewCEO', 'ceoWelcome',
-  'huddleEvent', 'fridayStrategy', 'opGroupBreakout'
+  'huddleEvent', 'fridayStrategy', 'opGroupBreakout',
+  'attendeeClassification', 'comments', 'registeredFlag'
 ];
-// Maps each internal field to its CSV column header (used for export order)
+// Maps each internal field to its CSV column header
 const INTERNAL_FIELD_HEADERS = [
   ['employeeNumber', 'Employee #'],
   ['peopleLeader', 'People Leader'],
-  ['eltMember', 'ELT Member'],
+  ['sltMember', 'SLT Member'],
   ['location', 'Location'],
   ['operatingGroup', 'Operating Group'],
   ['department', 'Department'],
@@ -46,7 +47,10 @@ const INTERNAL_FIELD_HEADERS = [
   ['ceoWelcome', 'CEO Welcome Event and dinner'],
   ['huddleEvent', 'Huddle Event'],
   ['fridayStrategy', 'Friday OP Strategy Session'],
-  ['opGroupBreakout', 'Operating Group Breakout Session']
+  ['opGroupBreakout', 'Operating Group Breakout Session'],
+  ['attendeeClassification', 'Attendee Classification HQ or OpCo'],
+  ['comments', 'Comments'],
+  ['registeredFlag', 'Registered?']
 ];
 // Special non-exclusive value — multiple users can hold "queue" simultaneously,
 // it's a waitlist for additional slots being added.
@@ -337,35 +341,32 @@ export default async (req, context) => {
       const ampm = h >= 12 ? 'PM' : 'AM';
       return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
-    // Column order: Employee #, Name, Title, Organization, People Leader, then
-    // the remaining internal/HR fields, then the event/logistics fields.
-    const inlineKeys = ['employeeNumber', 'peopleLeader'];
-    const otherInternal = INTERNAL_FIELD_HEADERS.filter(([key]) => !inlineKeys.includes(key));
-    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'People Leader',
-      ...otherInternal.map(([, header]) => header),
-      'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other', 'Sessions', 'Welcome Reception', 'Dine Around', 'Morning Connection', 'Headshot Slot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered'];
+    // Column structure mirrors the Banyan GLC Invite List workbook
+    const headers = ['Employee #', 'Name', 'Title', 'Organization', 'People Leader', 'SLT Member',
+      'Location', 'Operating Group', 'Department', 'Reporting to', 'GLC Invite',
+      'Hotel Eligible', 'Hotel Booked?',
+      'AI Native Track (Tues Morning)', 'ELP Track (Tues am)', 'Operating Leader Track (Tue am)',
+      'HQ Functional Sessions (Tues Afternoon)', 'HQ Evening Event', 'New CEO Session',
+      'CEO Welcome Event and dinner',
+      'Email', 'Arrival Date', 'Departure Date', 'Phone', 'Dietary', 'Dietary Other',
+      'Dine Around', 'Morning Connections', 'Headshot', 'T-Shirt Fit', 'T-Shirt Size', 'Registered',
+      'Huddle Event', 'Friday OP Strategy Session', 'Operating Group Breakout Session',
+      'Attendee Classification HQ or OpCo', 'Comments', 'Registered?'];
     const rows = registrations.map(r => [
-      escapeCSV(r.employeeNumber),
-      escapeCSV(r.name),
-      escapeCSV(r.title),
-      escapeCSV(r.organization),
-      escapeCSV(r.peopleLeader),
-      ...otherInternal.map(([key]) => escapeCSV(r[key])),
-      escapeCSV(r.email),
-      escapeCSV(r.arrivalDate),
-      escapeCSV(r.departureDate),
-      escapeCSV(r.phone),
-      escapeCSV(r.dietary),
-      escapeCSV(r.dietaryOther),
-      escapeCSV(Array.isArray(r.sessions) ? r.sessions.join('; ') : ''),
-      escapeCSV(r.welcomeReception ? 'Yes' : 'No'),
-      escapeCSV(r.dineAround === 'biffs' ? "Biff's Bistro" : r.dineAround === 'jump' ? 'Jump Restaurant' : r.dineAround === 'joneses' ? 'The Joneses' : ''),
-      escapeCSV(MC_LABELS[r.morningConnection] || ''),
-      escapeCSV(formatHeadshotSlot(r.headshotSlot || '')),
-      escapeCSV(r.tshirtFit),
-      escapeCSV(r.tshirt),
-      escapeCSV(r.registeredAt)
-    ].join(','));
+      r.employeeNumber, r.name, r.title, r.organization, r.peopleLeader, r.sltMember,
+      r.location, r.operatingGroup, r.department, r.reportingTo, r.glcInvite,
+      r.hotelEligible, r.hotelBooked,
+      r.trackAINative, r.trackELP, r.trackOperatingLeader,
+      r.trackHQFunctional, r.trackHQEvening, r.trackNewCEO,
+      r.ceoWelcome,
+      r.email, r.arrivalDate, r.departureDate, r.phone, r.dietary, r.dietaryOther,
+      (r.dineAround === 'biffs' ? "Biff's Bistro" : r.dineAround === 'jump' ? 'Jump Restaurant' : r.dineAround === 'joneses' ? 'The Joneses' : ''),
+      MC_LABELS[r.morningConnection] || '',
+      formatHeadshotSlot(r.headshotSlot || ''),
+      r.tshirtFit, r.tshirt, r.registeredAt,
+      r.huddleEvent, r.fridayStrategy, r.opGroupBreakout,
+      r.attendeeClassification, r.comments, r.registeredFlag
+    ].map(escapeCSV).join(','));
 
     const csv = [headers.join(','), ...rows].join('\n');
 
@@ -865,25 +866,28 @@ export default async (req, context) => {
       return json({ error: "No records provided." }, 400);
     }
 
-    const DINE_MAP = {
-      "biff's bistro": 'biffs',
-      "jump restaurant": 'jump',
-      "the joneses": 'joneses',
-      '': ''
-    };
-    const MC_MAP = {
-      "hop-on city sightseeing bus tour": 'bustour',
-      "morning yoga": 'morningyoga',
-      "yoga & puppies — session #1": 'yoga1',
-      "yoga & puppies - session #1": 'yoga1',
-      "yoga & puppies — session #2": 'yoga2',
-      "yoga & puppies - session #2": 'yoga2',
-      "downtown toronto walking tour": 'walking',
-      "canoeing toronto": 'canoeing',
-      "tai chi in the park": 'taichi',
-      "stand-up paddleboarding": 'paddleboard',
-      '': ''
-    };
+    // Fuzzy mappers tolerate the shorthand used in the invite-list workbook
+    // ("Jump", "Biffs", "Paddle Boarding", "City Bus", "No"…)
+    function mapDine(raw) {
+      const v = String(raw || '').trim().toLowerCase();
+      if (!v || /^no(ne)?$/.test(v)) return '';
+      if (v.includes('biff')) return 'biffs';
+      if (v.includes('jump')) return 'jump';
+      if (v.includes('jones')) return 'joneses';
+      return undefined; // unrecognized — leave existing value
+    }
+    function mapMorningConnection(raw) {
+      const v = String(raw || '').trim().toLowerCase();
+      if (!v || /^no(ne)?$/.test(v)) return '';
+      if (v.includes('#1') || /session\s*1/.test(v)) return 'yoga1';
+      if (v.includes('#2') || /session\s*2/.test(v)) return 'yoga2';
+      if (v.includes('bus')) return 'bustour';
+      if (v.includes('paddle')) return 'paddleboard';
+      if (v.includes('walk')) return 'walking';
+      if (v.includes('canoe')) return 'canoeing';
+      if (v.includes('yoga')) return 'yoga1';
+      return undefined; // unrecognized — leave existing value
+    }
 
     const registrations = await getRegistrations();
     let updated = 0;
@@ -904,23 +908,36 @@ export default async (req, context) => {
       if (rec.arrivalDate   !== undefined)  reg.arrivalDate    = (rec.arrivalDate || '').trim();
       if (rec.departureDate !== undefined)  reg.departureDate  = (rec.departureDate || '').trim();
       if (rec.phone         !== undefined)  reg.phone          = (rec.phone || '').trim();
-      if (rec.dietary !== undefined && VALID_DIETARY.includes(rec.dietary)) reg.dietary = rec.dietary;
-      if (rec.dietaryOther  !== undefined)  reg.dietaryOther   = (rec.dietaryOther || '').trim();
+      if (rec.dietary !== undefined) {
+        // Free-text tolerant: canonical values map directly; "No"/"None" →
+        // None; anything else becomes Other with the text preserved.
+        const rawDiet = String(rec.dietary || '').trim();
+        const canon = VALID_DIETARY.find(d => d.toLowerCase() === rawDiet.toLowerCase());
+        if (canon) {
+          reg.dietary = canon;
+        } else if (!rawDiet || /^no(ne)?$/i.test(rawDiet)) {
+          reg.dietary = 'None';
+        } else {
+          reg.dietary = 'Other';
+          if (rec.dietaryOther === undefined || !String(rec.dietaryOther).trim()) reg.dietaryOther = rawDiet;
+        }
+      }
+      if (rec.dietaryOther !== undefined && String(rec.dietaryOther).trim()) reg.dietaryOther = String(rec.dietaryOther).trim();
       if (rec.sessions      !== undefined)  reg.sessions       = rec.sessions ? rec.sessions.split('; ').filter(s => s.trim()) : [];
-      if (rec.welcomeReception !== undefined) reg.welcomeReception = rec.welcomeReception.toLowerCase() === 'yes';
+      if (rec.welcomeReception !== undefined) reg.welcomeReception = String(rec.welcomeReception).toLowerCase() === 'yes';
       if (rec.dineAround !== undefined) {
-        const dineKey = (rec.dineAround || '').toLowerCase();
-        if (DINE_MAP[dineKey] !== undefined) reg.dineAround = DINE_MAP[dineKey];
+        const mapped = mapDine(rec.dineAround);
+        if (mapped !== undefined) reg.dineAround = mapped;
       }
       if (rec.morningConnection !== undefined) {
-        const mcKey = (rec.morningConnection || '').toLowerCase();
-        if (MC_MAP[mcKey] !== undefined) reg.morningConnection = MC_MAP[mcKey];
+        const mapped = mapMorningConnection(rec.morningConnection);
+        if (mapped !== undefined) reg.morningConnection = mapped;
       }
       if (rec.headshotSlot !== undefined) {
         const raw = (rec.headshotSlot || '').trim();
         if (!raw) {
           reg.headshotSlot = '';
-        } else if (/^queue/i.test(raw)) {
+        } else if (/^queue|^yes$/i.test(raw)) {
           reg.headshotSlot = HEADSHOT_QUEUE;
         } else {
           // Accept either "HH:MM" or "H:MM AM/PM"
