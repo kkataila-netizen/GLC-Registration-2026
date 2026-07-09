@@ -53,6 +53,16 @@
     return 'generic'; // affirmative but not a specific function
   }
 
+  // Which Tuesday HQ evening dinner, from the free-text trackHQEvening value
+  // (imported values look like "Medieval Times" or "M&A/BD")
+  function hqEvening(reg) {
+    const v = String(reg.trackHQEvening || '').trim().toLowerCase();
+    if (!v || ['no', 'n', '0', 'false', '-', 'none', 'n/a', 'na'].includes(v)) return null;
+    if (/mediev/.test(v)) return 'medieval';
+    if (/m\s*&\s*a|m&a|\bbd\b/.test(v)) return 'bdma';
+    return 'generic';
+  }
+
   // Breakout assignment: the explicit "Operating Group Breakout Session"
   // field wins; falls back to matching the Operating Group field.
   function inOpGroup(reg, leader) {
@@ -87,6 +97,10 @@
     { day: 0, sort: 960,  tag: 'Session', time: '4:00 – 5:15 PM', title: 'Grow the Top Line — Four Levers to Grow Revenue', who: 'Reed & Luke', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
     { day: 0, sort: 1035, tag: 'Session', time: '5:15 – 5:30 PM', title: 'Closing', who: 'Darren & David', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
     { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'Welcome Reception & Dinner', loc: 'SixtyEight at Scotia Plaza · 68th Floor, 40 King St W, Toronto', audience: r => r.welcomeReception || yes(r.ceoWelcome) },
+    { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'HQ Evening Event: Medieval Times', loc: 'Medieval Times · 10 Dufferin St, Toronto, ON M6K 3C3',
+      details: 'Getting there: subway to St Clair West, then a 5-minute walk', audience: r => hqEvening(r) === 'medieval' },
+    { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'M&A & BD Dinner', loc: "Max Risen's House · 50 Glenayr Road, Toronto, ON M5P 3B8", audience: r => hqEvening(r) === 'bdma' },
+    { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'HQ Evening Event', loc: '', audience: r => hqEvening(r) === 'generic' },
 
     /* ── Day 1 · Wednesday, July 15 ───────────────── */
     { day: 1, sort: 420,  tag: 'Meal', time: '7:00 – 8:30 AM', title: 'Registration & Breakfast', loc: 'Concert Hall · Convention Floor', audience: all },
