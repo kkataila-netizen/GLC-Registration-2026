@@ -169,6 +169,13 @@
     } catch { /* network error – skip */ }
   }
 
+  /* ── Auth-gated tabs: hidden by default, shown once logged in ── */
+  function enforceAuthVisibility(user) {
+    document.querySelectorAll(".top-nav__links li[data-auth-tab]").forEach(li => {
+      li.style.display = user ? "" : "none";
+    });
+  }
+
   /* ── Admin + Dine Around tab visibility (hidden by default in HTML) ── */
   function enforceAdminVisibility(user) {
     const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
@@ -200,9 +207,18 @@
   function init() {
     const user = getUser();
 
-    // Always enforce admin visibility (even if not logged in)
+    // Always enforce tab visibility (even if not logged in)
+    enforceAuthVisibility(user);
     enforceAdminVisibility(user);
     renameRegisterTab(user);
+
+    // Let pages refresh the nav after login/logout without a reload
+    window.glcNavRefresh = () => {
+      const u = getUser();
+      enforceAuthVisibility(u);
+      enforceAdminVisibility(u);
+      renameRegisterTab(u);
+    };
 
     if (!user) return;
     currentUser = user;

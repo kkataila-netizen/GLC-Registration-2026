@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('glc-chat-user', JSON.stringify(user));
     if (token) localStorage.setItem('glc-user-token', token);
     updateAuthUI();
+    if (window.glcNavRefresh) window.glcNavRefresh(); // reveal nav tabs
   }
 
   function clearUser() {
@@ -114,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('glc-chat-user');
     localStorage.removeItem('glc-user-token');
     updateAuthUI();
+    if (window.glcNavRefresh) window.glcNavRefresh(); // hide nav tabs
   }
 
   function getUserToken() {
