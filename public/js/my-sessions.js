@@ -163,19 +163,6 @@
     { day: 3, sort: 720,  tag: 'Meal', time: '12:00 PM', title: 'Take-Away Lunch', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.fridayStrategy) }
   ];
 
-  /* ── HQ evening event (Tuesday) — the field's value names the
-     event ("Medieval Times", "M&A/BD", …), so build it dynamically ── */
-  function hqEveningEvent(reg) {
-    const v = String(reg.trackHQEvening || '').trim();
-    if (!yes(v)) return null;
-    const generic = ['yes', 'y', 'x', 'true', '1'].includes(v.toLowerCase());
-    return {
-      day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM',
-      title: generic ? 'HQ Evening Event' : `HQ Evening Event: ${v}`,
-      loc: /mediev/i.test(v) ? 'Medieval Times · 10 Dufferin St, Toronto' : ''
-    };
-  }
-
   /* ── personal headshot (Wednesday) ───────────────── */
   function headshotEvent(reg) {
     const slot = reg.headshotSlot;
@@ -194,8 +181,6 @@
     const events = AGENDA.filter(item => item.audience(reg));
     const hs = headshotEvent(reg);
     if (hs) events.push(hs);
-    const hqEve = hqEveningEvent(reg);
-    if (hqEve) events.push(hqEve);
 
     return DAYS.map((day, i) => ({
       day,
