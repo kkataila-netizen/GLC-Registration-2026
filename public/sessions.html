@@ -18,6 +18,12 @@
       padding-bottom: 0.5rem;
       border-bottom: 2px solid var(--primary);
     }
+    .agenda__theme {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #5b8bb5;
+      margin-top: 0.15rem;
+    }
 
     /* Track blocks */
     .track-block {
@@ -27,17 +33,9 @@
       overflow: hidden;
       background: var(--card-bg);
       border: 1px solid var(--border);
+      margin-top: 1rem;
     }
     .track-block + .track-block { margin-top: 0.75rem; }
-
-    /* Colored side bar */
-    .track-block__bar {
-      width: 6px;
-      flex-shrink: 0;
-    }
-    .track-block__bar--hq       { background: #93c5fd; }
-    .track-block__bar--ceos     { background: #f59e0b; }
-    .track-block__bar--combined { background: #395542; }
 
     /* Track label (rotated text on the bar) */
     .track-block__label {
@@ -52,13 +50,12 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #fff;
       min-width: 28px;
       flex-shrink: 0;
     }
-    .track-block__label--hq       { background: #93c5fd; color: #1e3a5f; }
-    .track-block__label--ceos     { background: #f59e0b; color: #78350f; }
-    .track-block__label--combined { background: #395542; color: #fff; }
+    .track-block__label--tracks { background: #93c5fd; color: #1e3a5f; }
+    .track-block__label--ceos   { background: #f59e0b; color: #78350f; }
+    .track-block__label--all    { background: #395542; color: #fff; }
 
     /* Content area */
     .track-block__content {
@@ -70,7 +67,6 @@
     }
 
     /* Individual event row */
-    .event-row { }
     .event-row__time {
       font-weight: 700;
       font-size: 0.9375rem;
@@ -82,13 +78,48 @@
       color: #1a1a1a;
       line-height: 1.5;
     }
+    .event-row__title strong { font-weight: 700; }
+    .event-row__meta {
+      font-size: 0.8125rem;
+      color: #888;
+      margin-top: 0.125rem;
+    }
 
-    /* Footnote */
+    /* Social & meals — blue tick before title (matches printed agenda) */
+    .event-row--social .event-row__title {
+      border-left: 4px solid #93c5fd;
+      padding-left: 0.6rem;
+      font-weight: 600;
+    }
+
+    /* Breaks & transitions — italic, muted */
+    .event-row--break .event-row__time,
+    .event-row--break .event-row__title {
+      color: #999;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* Legend + footnote */
+    .agenda__legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      font-size: 0.8125rem;
+      color: #555;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .agenda__legend .lg-social {
+      border-left: 4px solid #93c5fd;
+      padding-left: 0.4rem;
+    }
+    .agenda__legend .lg-break { font-style: italic; color: #999; }
     .agenda__footnote {
       font-size: 0.8125rem;
-      color: #000000;
+      color: #888;
       font-style: italic;
-      margin-top: -0.5rem;
     }
 
     @media (max-width: 640px) {
@@ -120,77 +151,304 @@
   <div class="container">
     <header class="page-header">
       <h1>Sessions</h1>
-      <p>July 14 &ndash; 16, 2026 &middot; Fairmont Royal York, Toronto</p>
+      <p>Agenda at a glance &middot; July 14 &ndash; 16, 2026 &middot; Fairmont Royal York, Toronto</p>
     </header>
 
     <div class="agenda">
 
-      <!-- ── Tuesday, July 14 ────────────────────── -->
-      <div class="agenda__day">Tuesday, July 14</div>
+      <!-- ── Day 0 · Tuesday, July 14 ────────────────── -->
+      <div>
+        <div class="agenda__day">Day 0 &middot; Tuesday, July 14
+          <div class="agenda__theme">Learning the Banyan Way</div>
+        </div>
 
-      <div class="track-block">
-        <div class="track-block__label track-block__label--hq">HQ</div>
-        <div class="track-block__content">
-          <div class="event-row">
-            <div class="event-row__time">8:30 AM &ndash; 5:00 PM</div>
-            <div class="event-row__title">Team Sessions</div>
+        <div class="track-block">
+          <div class="track-block__label track-block__label--tracks">Morning Tracks</div>
+          <div class="track-block__content">
+            <div class="event-row event-row--break">
+              <div class="event-row__time">7:30 &ndash; 9:00</div>
+              <div class="event-row__title">Huddle Event</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">7:30 &ndash; 9:00</div>
+              <div class="event-row__title">Registration &amp; Breakfast (OL Track)</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">9:00 &ndash; 12:00</div>
+              <div class="event-row__title"><strong>Morning Track 1</strong> &mdash; Driving OpCo Performance &mdash; The OL Playbook</div>
+              <div class="event-row__meta">David / Darren &middot; Library</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">9:00 &ndash; 12:00</div>
+              <div class="event-row__title"><strong>Morning Track 2</strong> &mdash; ELP Track Sessions</div>
+              <div class="event-row__meta">Ryan &middot; York</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">9:00 &ndash; 12:00</div>
+              <div class="event-row__title"><strong>Morning Track 3</strong> &mdash; Becoming an AI-Native HQ</div>
+              <div class="event-row__meta">Kaz &amp; Kristian &middot; Tudor 7&amp;8</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">11:30 &ndash; 12:00</div>
+              <div class="event-row__title">Break</div>
+            </div>
           </div>
-          <div class="event-row">
-            <div class="event-row__time">6:00 PM &ndash; 10:00 PM</div>
-            <div class="event-row__title">Team Dinners</div>
+        </div>
+
+        <div class="track-block">
+          <div class="track-block__label track-block__label--ceos">New CEO Session</div>
+          <div class="track-block__content">
+            <div class="event-row event-row--social">
+              <div class="event-row__time">11:45 &ndash; 1:00</div>
+              <div class="event-row__title">Registration &amp; Lunch (New CEOs + OLs + ELPs)</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">11:45 &ndash; 1:00</div>
+              <div class="event-row__title">HQ Lunch</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:00 &ndash; 1:15</div>
+              <div class="event-row__title"><strong>Setting the Stage</strong> &mdash; Driving Performance with the BOS</div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:15 &ndash; 1:30</div>
+              <div class="event-row__title"><strong>Ice Breaker</strong></div>
+              <div class="event-row__meta">Darren</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:30 &ndash; 2:15</div>
+              <div class="event-row__title"><strong>Know Your Numbers</strong> &mdash; Four Metrics That Matter</div>
+              <div class="event-row__meta">Darren</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">2:15 &ndash; 2:30</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">2:30 &ndash; 3:45</div>
+              <div class="event-row__title"><strong>Get Traction</strong> &mdash; The EOS Method to Focus &amp; Scale</div>
+              <div class="event-row__meta">Tristan</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">3:45 &ndash; 4:00</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">4:00 &ndash; 5:15</div>
+              <div class="event-row__title"><strong>Grow the Top Line</strong> &mdash; Four Levers to Grow Revenue</div>
+              <div class="event-row__meta">Reed &amp; Luke</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">5:15 &ndash; 5:30</div>
+              <div class="event-row__title"><strong>Closing</strong></div>
+              <div class="event-row__meta">Darren &amp; David</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">5:30 &ndash; 6:00</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">6:00 &ndash; 9:00</div>
+              <div class="event-row__title">Welcome Reception &amp; Dinner</div>
+              <div class="event-row__meta">CEOs + OLs + David</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="track-block">
-        <div class="track-block__label track-block__label--ceos">CEOs</div>
-        <div class="track-block__content">
-          <div class="event-row">
-            <div class="event-row__time">12:00 PM &ndash; 5:00 PM</div>
-            <div class="event-row__title">Banyan Operating System (BOS) Fundamentals</div>
-          </div>
-          <div class="event-row">
-            <div class="event-row__time">6:00 PM &ndash; 9:00 PM</div>
-            <div class="event-row__title">Welcome Reception for all CEOs and Operating Leaders</div>
+      <!-- ── Day 1 · Wednesday, July 15 ──────────────── -->
+      <div>
+        <div class="agenda__day">Day 1 &middot; Wednesday, July 15
+          <div class="agenda__theme">Accelerating through Talent, Product &amp; Velocity</div>
+        </div>
+
+        <div class="track-block">
+          <div class="track-block__label track-block__label--all">All Attendees</div>
+          <div class="track-block__content">
+            <div class="event-row event-row--social">
+              <div class="event-row__time">7:00 &ndash; 8:30</div>
+              <div class="event-row__title">Registration &amp; Breakfast</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">8:30 &ndash; 9:00</div>
+              <div class="event-row__title"><strong>Welcome &amp; Ice Breaker</strong></div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">9:00 &ndash; 10:00</div>
+              <div class="event-row__title"><strong>Build the Next Version</strong> &mdash; Our Re-Founding Moment</div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">10:00 &ndash; 10:15</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">10:15 &ndash; 11:00</div>
+              <div class="event-row__title"><strong>Pivotal Decisions</strong> &mdash; CEO Decisions That Changed the Trajectory</div>
+              <div class="event-row__meta">Bricey</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">11:00 &ndash; 11:30</div>
+              <div class="event-row__title"><strong>Bold Moves</strong> &mdash; Resetting Your Dev Org for Innovation</div>
+              <div class="event-row__meta">Kay &middot; Fireside Chat</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">11:30 &ndash; 12:00</div>
+              <div class="event-row__title"><strong>One Seat Away</strong> &mdash; Raise the Talent Bar, Unlock Your Business</div>
+              <div class="event-row__meta">Tonya</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">12:00 &ndash; 1:00</div>
+              <div class="event-row__title">Lunch</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:00 &ndash; 2:00</div>
+              <div class="event-row__title"><strong>Price Like You Mean It</strong> &mdash; Strategies That Accelerate Growth</div>
+              <div class="event-row__meta">Claire</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">2:00 &ndash; 2:45</div>
+              <div class="event-row__title"><strong>From the Board Room</strong> &mdash; How Boards Think About Growth</div>
+              <div class="event-row__meta">David &middot; Panel</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">2:45 &ndash; 3:15</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">3:15 &ndash; 4:00</div>
+              <div class="event-row__title"><strong>Birds of a Feather</strong> &mdash; Peer Problem Solving</div>
+              <div class="event-row__meta">Table discussions</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">4:00 &ndash; 4:15</div>
+              <div class="event-row__title"><strong>Closing</strong></div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">4:15 &ndash; 4:30</div>
+              <div class="event-row__title">Transition to Breakout Rooms</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">4:30 &ndash; 5:30</div>
+              <div class="event-row__title"><strong>Operating Group Breakout Sessions</strong></div>
+              <div class="event-row__meta">OPs</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">5:30 &ndash; 6:15</div>
+              <div class="event-row__title">Get Ready for Dinner</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">6:15</div>
+              <div class="event-row__title">Awards Dinner</div>
+              <div class="event-row__meta">Steam Whistle</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <p class="agenda__footnote">*All welcome to attend but content is targeted to those who have joined since the 2025 CEO Summit.</p>
+      <!-- ── Day 2 · Thursday, July 16 ───────────────── -->
+      <div>
+        <div class="agenda__day">Day 2 &middot; Thursday, July 16
+          <div class="agenda__theme">Leveraging AI to Accelerate Product &amp; Velocity</div>
+        </div>
 
-      <!-- ── Wednesday, July 15 ──────────────────── -->
-      <div class="agenda__day">Wednesday, July 15</div>
-
-      <div class="track-block">
-        <div class="track-block__label track-block__label--combined">HQ + CEOs</div>
-        <div class="track-block__content">
-          <div class="event-row">
-            <div class="event-row__time">8:30 AM &ndash; 5:00 PM</div>
-            <div class="event-row__title">Sessions &amp; Breakouts</div>
-          </div>
-          <div class="event-row">
-            <div class="event-row__time">6:00 PM &ndash; 10:00 PM</div>
-            <div class="event-row__title">Awards Dinner</div>
+        <div class="track-block">
+          <div class="track-block__label track-block__label--all">All Attendees</div>
+          <div class="track-block__content">
+            <div class="event-row event-row--social">
+              <div class="event-row__time">6:00 &ndash; 8:00</div>
+              <div class="event-row__title">Breakfast</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">7:00 &ndash; 9:30</div>
+              <div class="event-row__title">Morning Activity</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">9:30 &ndash; 10:00</div>
+              <div class="event-row__title">Get Ready for the Day</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">10:00 &ndash; 10:10</div>
+              <div class="event-row__title"><strong>Welcome to Day 2</strong></div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">10:10 &ndash; 11:05</div>
+              <div class="event-row__title"><strong>Keynote</strong> &mdash; AI Disruption in Action</div>
+              <div class="event-row__meta">Mike Murchison</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">11:05 &ndash; 12:00</div>
+              <div class="event-row__title"><strong>Modern Product Management</strong> &mdash; From Feature Factory to Future Forward</div>
+              <div class="event-row__meta">Arun &amp; Xavi</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">12:00 &ndash; 1:00</div>
+              <div class="event-row__title">Lunch</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:00 &ndash; 1:30</div>
+              <div class="event-row__title"><strong>Opex &amp; AI Challenge</strong> &mdash; Real Outcomes</div>
+              <div class="event-row__meta">Claire &amp; Ryan</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">1:30 &ndash; 2:45</div>
+              <div class="event-row__title"><strong>Golden Age of Vertical SaaS</strong></div>
+              <div class="event-row__meta">Kaz</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">2:45 &ndash; 3:00</div>
+              <div class="event-row__title"><strong>Banyan Foundation Updates</strong></div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">3:00 &ndash; 3:30</div>
+              <div class="event-row__title">Break</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">3:30 &ndash; 4:15</div>
+              <div class="event-row__title"><strong>Reaching Buyers in the AI Era</strong> &mdash; Win the AI-Assisted Journey</div>
+              <div class="event-row__meta">Luke &amp; Tristan</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">4:15 &ndash; 4:35</div>
+              <div class="event-row__title"><strong>Bringing It All Together</strong> &mdash; Reflections on the GLC</div>
+            </div>
+            <div class="event-row">
+              <div class="event-row__time">4:35 &ndash; 4:45</div>
+              <div class="event-row__title"><strong>Closing</strong></div>
+              <div class="event-row__meta">David</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">4:45 &ndash; 5:00</div>
+              <div class="event-row__title">Group Photo</div>
+            </div>
+            <div class="event-row event-row--break">
+              <div class="event-row__time">5:00 &ndash; 6:30</div>
+              <div class="event-row__title">Networking &amp; Get Ready for Dinner</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">6:30</div>
+              <div class="event-row__title">Dine-Around Dinners</div>
+            </div>
+            <div class="event-row event-row--social">
+              <div class="event-row__time">Late</div>
+              <div class="event-row__title">After Party</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ── Thursday, July 16 ───────────────────── -->
-      <div class="agenda__day">Thursday, July 16</div>
-
-      <div class="track-block">
-        <div class="track-block__label track-block__label--combined">HQ + CEOs</div>
-        <div class="track-block__content">
-          <div class="event-row">
-            <div class="event-row__time">8:30 AM &ndash; 5:00 PM</div>
-            <div class="event-row__title">Sessions &amp; Breakouts</div>
-          </div>
-          <div class="event-row">
-            <div class="event-row__time">6:00 PM &ndash; 10:00 PM</div>
-            <div class="event-row__title">Dine Around Event</div>
-          </div>
-        </div>
+      <div class="agenda__legend">
+        <span><strong>Legend</strong></span>
+        <span><strong>Bold</strong> Program session</span>
+        <span class="lg-social">Social &amp; meals</span>
+        <span class="lg-break">Breaks &amp; transitions</span>
       </div>
+      <p class="agenda__footnote">Times subject to change &middot; GLC 2026</p>
 
     </div>
   </div>
