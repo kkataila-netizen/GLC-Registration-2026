@@ -1,6 +1,7 @@
 /* ============================================================
-   My Sessions — personalized agenda built from the GLC App
-   Agenda workbook (source of truth) + the user's selections.
+   My Sessions — personalized agenda synced to the GLC 2026
+   Agenda v3 (titles / times / speakers) plus per-person detail
+   from the planning workbook (rooms, meeting instructions).
 
    Each agenda item has an `audience` predicate deciding whether
    it appears on this person's schedule. Items are sorted by
@@ -61,45 +62,45 @@
     return og.includes(leader.toLowerCase());
   }
 
-  /* ── the agenda (from the GLC App Agenda workbook) ── */
+  /* ── the agenda (Agenda v3 + workbook detail) ────── */
 
   const DAYS = ['Tuesday, July 14', 'Wednesday, July 15', 'Thursday, July 16', 'Friday, July 17'];
 
   const AGENDA = [
-    /* ── Tuesday, July 14 ─────────────────────────── */
-    { day: 0, sort: 450,  tag: 'Registration', time: '7:30 AM – 1:00 PM', title: 'Registration', loc: 'Concert Hall Foyer · Convention Floor', audience: all },
+    /* ── Day 0 · Tuesday, July 14 ─────────────────── */
     { day: 0, sort: 450,  tag: 'Event', time: '7:30 – 9:00 AM', title: 'Huddle Event', loc: 'Confederation 5 & 6 · Mezzanine Floor', audience: r => yes(r.huddleEvent) },
-    { day: 0, sort: 450,  tag: 'Meal', time: '7:30 – 9:00 AM', title: 'Breakfast — OL & ELP Tracks', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) || yes(r.trackELP) },
-    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'OL Track: Driving OpCo Performance — The OL Playbook', loc: 'Library · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) },
-    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'ELP Track Sessions', loc: 'York · Mezzanine Floor', audience: r => yes(r.trackELP) },
-    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'HQ Functional Track: Becoming an AI Native HQ', loc: 'Tudor 7 & 8 · Mezzanine Floor', audience: r => yes(r.trackAINative) },
+    { day: 0, sort: 450,  tag: 'Meal', time: '7:30 – 9:00 AM', title: 'Registration & Breakfast', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) || yes(r.trackELP) },
+    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'Morning Track 1: Driving OpCo Performance — The OL Playbook', who: 'David / Darren', loc: 'Library · Mezzanine Floor', audience: r => yes(r.trackOperatingLeader) },
+    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'Morning Track 2: ELP Track Sessions', who: 'Ryan', loc: 'York · Mezzanine Floor', audience: r => yes(r.trackELP) },
+    { day: 0, sort: 540,  tag: 'Track', time: '9:00 AM – 12:00 PM', title: 'Morning Track 3: Becoming an AI-Native HQ', who: 'Kaz & Kristian', loc: 'Tudor 7 & 8 · Mezzanine Floor', audience: r => yes(r.trackAINative) },
+    { day: 0, sort: 705,  tag: 'Meal', time: '11:45 AM – 1:00 PM', title: 'Registration & Lunch (New CEOs + OLs + ELPs)', loc: 'Concert Hall · Convention Floor', audience: r => isNewCEO(r) || yes(r.trackOperatingLeader) || yes(r.trackELP) },
     { day: 0, sort: 705,  tag: 'Meal', time: '11:45 AM – 1:00 PM', title: 'HQ Lunch', loc: 'Manitoba · Mezzanine Floor', audience: isHQ },
     { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 5:00 PM', title: 'HQ Functional Leadership: Business Development (BD) & M&A', loc: 'Tudor 7 & 8 · Mezzanine Floor', audience: r => hqFunction(r) === 'bdma' },
     { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 5:00 PM', title: 'HQ Functional Leadership: Finance', loc: 'Confederation 5 · Mezzanine Floor', audience: r => hqFunction(r) === 'finance' },
     { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 5:00 PM', title: 'HQ Functional Leadership: Legal', loc: 'Confederation 3 · Mezzanine Floor', audience: r => hqFunction(r) === 'legal' },
     { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 5:00 PM', title: 'HQ Functional Leadership: Internal Ops (HR, TA, IT)', loc: 'Confederation 6 · Mezzanine Floor', audience: r => hqFunction(r) === 'internalops' },
     { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 5:00 PM', title: 'HQ Functional Leadership Sessions', loc: 'See your functional room · Mezzanine Floor', audience: r => hqFunction(r) === 'generic' },
-    { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 1:15 PM', title: 'Setting the Stage: Driving performance with the Banyan Operating System', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
-    { day: 0, sort: 795,  tag: 'Session', time: '1:15 – 1:30 PM', title: 'Ice Breaker', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
-    { day: 0, sort: 810,  tag: 'Session', time: '1:30 – 2:15 PM', title: 'Know Your Numbers: The four metrics that can accelerate your business', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
-    { day: 0, sort: 870,  tag: 'Session', time: '2:30 – 3:45 PM', title: 'Get Traction: The EOS method to get focused, build traction and scale your business', loc: 'Concert Hall · Convention Floor', details: 'Please bring your laptop', audience: isNewCEO },
-    { day: 0, sort: 960,  tag: 'Session', time: '4:00 – 5:15 PM', title: 'Grow the Top Line: Four levers to grow revenue', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 780,  tag: 'Session', time: '1:00 – 1:15 PM', title: 'Setting the Stage — Driving Performance with the BOS', who: 'David', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 795,  tag: 'Session', time: '1:15 – 1:30 PM', title: 'Ice Breaker', who: 'Darren', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 810,  tag: 'Session', time: '1:30 – 2:15 PM', title: 'Know Your Numbers — Four Metrics That Matter', who: 'Darren', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 870,  tag: 'Session', time: '2:30 – 3:45 PM', title: 'Get Traction — The EOS Method to Focus & Scale', who: 'Tristan', loc: 'Concert Hall · Convention Floor', details: 'Please bring your laptop', audience: isNewCEO },
+    { day: 0, sort: 960,  tag: 'Session', time: '4:00 – 5:15 PM', title: 'Grow the Top Line — Four Levers to Grow Revenue', who: 'Reed & Luke', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 1035, tag: 'Session', time: '5:15 – 5:30 PM', title: 'Closing', who: 'Darren & David', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
     { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'Welcome Reception & Dinner', loc: 'SixtyEight at Scotia Plaza · 68th Floor, 40 King St W, Toronto', audience: r => r.welcomeReception || yes(r.ceoWelcome) },
     { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'HQ Evening Event: Medieval Times', loc: 'Medieval Times · 10 Dufferin St, Toronto', audience: r => yes(r.trackHQEvening) },
 
-    /* ── Wednesday, July 15 ───────────────────────── */
-    { day: 1, sort: 420,  tag: 'Registration', time: '7:00 AM – 1:00 PM', title: 'Registration', loc: 'Concert Hall Foyer · Convention Floor', audience: all },
-    { day: 1, sort: 420,  tag: 'Meal', time: '7:00 – 8:30 AM', title: 'Breakfast', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 510,  tag: 'Session', time: '8:30 – 9:00 AM', title: 'Welcome & Ice Breaker', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 540,  tag: 'Session', time: '9:00 – 10:00 AM', title: 'Build the Next Version: Our re-founding moment', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 615,  tag: 'Session', time: '10:15 – 11:00 AM', title: 'Pivotal Decisions: CEO decisions that changed the business trajectory', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 660,  tag: 'Session', time: '11:00 – 11:30 AM', title: 'Bold Moves: Resetting your development organization to accelerate innovation', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 690,  tag: 'Session', time: '11:30 AM – 12:00 PM', title: 'One Seat Away: Raise the talent bar. Unlock your business.', loc: 'Concert Hall · Convention Floor', audience: all },
+    /* ── Day 1 · Wednesday, July 15 ───────────────── */
+    { day: 1, sort: 420,  tag: 'Meal', time: '7:00 – 8:30 AM', title: 'Registration & Breakfast', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 510,  tag: 'Session', time: '8:30 – 9:00 AM', title: 'Welcome & Ice Breaker', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 540,  tag: 'Session', time: '9:00 – 10:00 AM', title: 'Build the Next Version — Our Re-Founding Moment', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 615,  tag: 'Session', time: '10:15 – 11:00 AM', title: 'Pivotal Decisions — CEO Decisions That Changed the Trajectory', who: 'Bricey', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 660,  tag: 'Session', time: '11:00 – 11:30 AM', title: 'Bold Moves — Resetting Your Dev Org for Innovation', who: 'Kay · Fireside Chat', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 690,  tag: 'Session', time: '11:30 AM – 12:00 PM', title: 'One Seat Away — Raise the Talent Bar, Unlock Your Business', who: 'Tonya', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 1, sort: 720,  tag: 'Meal', time: '12:00 – 1:00 PM', title: 'Lunch', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 780,  tag: 'Session', time: '1:00 – 2:00 PM', title: 'Price Like You Mean It: Pricing strategies that accelerate growth', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 840,  tag: 'Session', time: '2:00 – 2:45 PM', title: 'From the Board Room: How boards are thinking about growth', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 915,  tag: 'Session', time: '3:15 – 4:00 PM', title: 'Birds of a Feather: Peer problem solving', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 1, sort: 960,  tag: 'Session', time: '4:00 – 4:15 PM', title: 'Closing', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 780,  tag: 'Session', time: '1:00 – 2:00 PM', title: 'Price Like You Mean It — Strategies That Accelerate Growth', who: 'Claire', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 840,  tag: 'Session', time: '2:00 – 2:45 PM', title: 'From the Board Room — How Boards Think About Growth', who: 'David · Panel', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 915,  tag: 'Session', time: '3:15 – 4:00 PM', title: 'Birds of a Feather — Peer Problem Solving', who: 'Table discussions', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 1, sort: 960,  tag: 'Session', time: '4:00 – 4:15 PM', title: 'Closing', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 1, sort: 990,  tag: 'Breakout', time: '4:30 – 5:30 PM', title: 'Operating Group Breakout: Darren', loc: 'Confederation 5 · Mezzanine Floor', audience: r => inOpGroup(r, 'Darren') },
     { day: 1, sort: 990,  tag: 'Breakout', time: '4:30 – 5:30 PM', title: 'Operating Group Breakout: Arun', loc: 'Tudor 7 · Mezzanine Floor', audience: r => inOpGroup(r, 'Arun') },
     { day: 1, sort: 990,  tag: 'Breakout', time: '4:30 – 5:30 PM', title: 'Operating Group Breakout: Tristan', loc: 'Tudor 8 · Mezzanine Floor', audience: r => inOpGroup(r, 'Tristan') },
@@ -109,7 +110,7 @@
     { day: 1, sort: 990,  tag: 'Breakout', time: '4:30 – 5:30 PM', title: 'Operating Group Breakout: EMEA', loc: 'Concert Hall · Convention Floor', audience: r => inOpGroup(r, 'EMEA') },
     { day: 1, sort: 1095, tag: 'Event', time: '6:15 – 11:00 PM', title: 'GLC Awards Dinner', loc: 'Steam Whistle Brewing, Locomotive Hall · 255 Bremner Blvd, Toronto', audience: all },
 
-    /* ── Thursday, July 16 ────────────────────────── */
+    /* ── Day 2 · Thursday, July 16 ────────────────── */
     { day: 2, sort: 360,  tag: 'Meal', time: '6:00 – 8:00 AM', title: 'Breakfast', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 420,  tag: 'Activity', time: '7:00 – 8:30 AM', title: 'Hop-On City Sightseeing Bus Tour', loc: 'Meeting spot: Avenues Floor (lower level) — "A" on elevator',
       details: 'Meeting time: 6:50 AM · Host: Emily Campbell 905-325-2660 · Attire: casual and comfortable', audience: r => r.morningConnection === 'bustour' },
@@ -124,16 +125,17 @@
       details: 'Meeting time: 7:55 AM · Host: Zuzu Wilson 416-356-2642 · Attire: yoga clothes / activewear', audience: r => r.morningConnection === 'yoga1' },
     { day: 2, sort: 510,  tag: 'Activity', time: '8:30 – 9:00 AM', title: 'Yoga & Puppies — Session #2', loc: 'Tudor 7 · Mezzanine Floor',
       details: 'Meeting time: 8:30 AM · Host: Zuzu Wilson 416-356-2642 · Attire: yoga clothes / activewear', audience: r => r.morningConnection === 'yoga2' },
-    { day: 2, sort: 600,  tag: 'Session', time: '10:00 – 10:10 AM', title: 'Welcome to Day 2/3', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 610,  tag: 'Session', time: '10:10 – 11:05 AM', title: 'Keynote: AI Disruption in Action', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 665,  tag: 'Session', time: '11:05 AM – 12:00 PM', title: 'Modern Product Management: From feature factory to future forward', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 600,  tag: 'Session', time: '10:00 – 10:10 AM', title: 'Welcome to Day 2', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 610,  tag: 'Session', time: '10:10 – 11:05 AM', title: 'Keynote — AI Disruption in Action', who: 'Mike Murchison', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 665,  tag: 'Session', time: '11:05 AM – 12:00 PM', title: 'Modern Product Management — From Feature Factory to Future Forward', who: 'Arun & Xavi', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 720,  tag: 'Meal', time: '12:00 – 1:00 PM', title: 'Lunch', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 780,  tag: 'Session', time: '1:00 – 1:30 PM', title: 'OpEx & AI Challenge: Real outcomes', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 810,  tag: 'Session', time: '1:30 – 2:45 PM', title: 'Golden Age of Vertical SaaS', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 885,  tag: 'Session', time: '2:45 – 3:00 PM', title: 'Banyan Foundation Updates', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 930,  tag: 'Session', time: '3:30 – 4:15 PM', title: 'From the Board Room: How boards are thinking about growth', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 975,  tag: 'Session', time: '4:15 – 4:35 PM', title: 'Bringing It All Together: Reflections on the GLC', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 995,  tag: 'Session', time: '4:35 – 4:45 PM', title: 'Closing', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 780,  tag: 'Session', time: '1:00 – 1:30 PM', title: 'Opex & AI Challenge — Real Outcomes', who: 'Claire & Ryan', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 810,  tag: 'Session', time: '1:30 – 2:45 PM', title: 'Golden Age of Vertical SaaS', who: 'Kaz', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 885,  tag: 'Session', time: '2:45 – 3:00 PM', title: 'Banyan Foundation Updates', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 930,  tag: 'Session', time: '3:30 – 4:15 PM', title: 'Reaching Buyers in the AI Era — Win the AI-Assisted Journey', who: 'Luke & Tristan', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 975,  tag: 'Session', time: '4:15 – 4:35 PM', title: 'Bringing It All Together — Reflections on the GLC', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 995,  tag: 'Session', time: '4:35 – 4:45 PM', title: 'Closing', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 1005, tag: 'Event', time: '4:45 – 5:00 PM', title: 'Group Photo', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 1110, tag: 'Dinner', time: '6:30 – 9:00 PM', title: "Dine-Around Dinner: Biff's Bistro", loc: 'Meeting spot: Avenues Floor (lower level) — "A" on elevator · 2 Front St E, Toronto',
       details: 'Meeting time: 6:30 PM · Host: Zuzu Wilson 416-356-2642', audience: r => r.dineAround === 'biffs' },
     { day: 2, sort: 1110, tag: 'Dinner', time: '6:30 – 9:00 PM', title: 'Dine-Around Dinner: Jump Restaurant', loc: 'Meeting spot: Avenues Floor (lower level) — "A" on elevator · 18 Wellington St W, Toronto',
@@ -194,6 +196,7 @@
           <span class="event-row__tag">${esc(e.tag)}</span>
           <div class="event-row__time">${esc(e.time)}</div>
           <div class="event-row__title">${esc(e.title)}</div>
+          ${e.who ? `<div class="event-row__details">${esc(e.who)}</div>` : ''}
           ${e.loc ? `<div class="event-row__loc">📍 ${esc(e.loc)}</div>` : ''}
           ${e.details ? `<div class="event-row__details">${esc(e.details)}</div>` : ''}
           ${e.link ? `<div class="event-row__details"><a href="${esc(e.link.href)}" target="_blank" rel="noopener">${esc(e.link.label)} ↗</a></div>` : ''}
