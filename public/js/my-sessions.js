@@ -234,7 +234,10 @@
   /* ── admin impersonation (kkataila only) ─────────── */
   const IMPERSONATOR = 'kkataila@banyansoftware.com';
 
+  let impersonationReady = false;
+
   async function setupImpersonation(user, ownReg) {
+    if (impersonationReady) return; // init() can re-run on tab restore
     if (!user || (user.email || '').toLowerCase() !== IMPERSONATOR) return;
     const adminToken = localStorage.getItem('glc-admin-token') || '';
     if (!adminToken) return; // requires an active admin session
@@ -260,6 +263,7 @@
       sel.appendChild(o);
     }
     bar.hidden = false;
+    impersonationReady = true;
 
     sel.addEventListener('change', () => {
       const email = sel.value;
@@ -318,4 +322,18 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
+
+  // Stale-tab protection: mobile browsers restore pages from the
+  // back-forward cache without any network request, so a long-lived
+  // tab can show an outdated schedule. Re-fetch on restore/refocus —
+  // unless an admin is actively previewing someone else's schedule.
+  function refreshUnlessImpersonating() {
+    const sel = document.getElementById('impersonateSelect');
+    if (sel && sel.value) return;
+    init();
+  }
+  window.addEventListener('pageshow', (e) => { if (e.persisted) refreshUnlessImpersonating(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshUnlessImpersonating();
+  });
 })();
