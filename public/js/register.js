@@ -143,6 +143,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init auth UI
   updateAuthUI();
 
+  // ?login=1 (e.g. arriving from an expired-session prompt): surface the
+  // login card at the top of the page instead of below the registration form
+  if (new URLSearchParams(location.search).get('login') === '1' && !getUser()) {
+    const regCard = form.closest('.card');
+    if (loginSection && regCard && regCard.parentNode) {
+      regCard.parentNode.insertBefore(loginSection, regCard);
+      loginSection.style.marginTop = '0';
+      regCard.style.marginTop = '1.5rem';
+    }
+    const loginEmail = document.getElementById('loginEmail');
+    if (loginEmail) loginEmail.focus();
+  }
+
   /* ── profile mode (logged-in user) ─────────────── */
   async function loadProfile() {
     const user = getUser();

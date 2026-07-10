@@ -286,7 +286,7 @@
     const container = document.getElementById('msAgenda');
 
     if (!user || !token) {
-      container.innerHTML = `<div class="ms-empty"><p>Please <a href="/register.html">log in</a> to view your schedule.</p></div>`;
+      container.innerHTML = `<div class="ms-empty"><p>Please <a href="/register.html?login=1">log in</a> to view your schedule.</p></div>`;
       return;
     }
 
@@ -304,7 +304,7 @@
         localStorage.removeItem('glc-user-token');
         if (window.glcNavRefresh) window.glcNavRefresh();
         subtitle.textContent = 'Your personal schedule for GLC 2026';
-        container.innerHTML = `<div class="ms-empty"><p>Your session has expired &mdash; this can happen after a password change.</p><p style="margin-top:.5rem">Please <a href="/register.html">log in again</a> to view your schedule.</p></div>`;
+        container.innerHTML = `<div class="ms-empty"><p>Your session has expired &mdash; this can happen after a password change.</p><p style="margin-top:.5rem">Please <a href="/register.html?login=1">log in again</a> to view your schedule.</p></div>`;
         return;
       }
       if (!res.ok) throw new Error('HTTP ' + res.status);
