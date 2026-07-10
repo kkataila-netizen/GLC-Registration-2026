@@ -155,7 +155,7 @@
       details: 'Meeting time: 6:30 PM · Host: Kiara 647-573-1369', audience: r => r.dineAround === 'jump' },
     { day: 2, sort: 1110, tag: 'Dinner', time: '6:30 – 9:00 PM', title: 'Dine-Around Dinner: The Joneses', loc: 'Meeting spot: Avenues Floor (lower level) — "A" on elevator · 33 Yonge St #100, Toronto',
       details: 'Meeting time: 6:30 PM · Host: Emily Campbell 905-325-2660', audience: r => r.dineAround === 'joneses' },
-    { day: 2, sort: 1260, tag: 'Event', time: '9:00 PM', title: 'After Party', loc: "Kelly's Landing · 123 Front St W, Toronto", audience: all },
+    { day: 2, sort: 1290, tag: 'Event', time: '9:30 PM', title: 'After Party', loc: "Kelly's Landing · 123 Front St W, Toronto", audience: all },
 
     /* ── Friday, July 17 (Friday OP Strategy Session field) ── */
     { day: 3, sort: 480,  tag: 'Meal', time: '8:00 – 9:00 AM', title: 'Breakfast', loc: 'Manitoba · Mezzanine Floor', audience: r => yes(r.fridayStrategy) },
