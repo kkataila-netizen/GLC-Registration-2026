@@ -95,7 +95,7 @@
     { day: 0, sort: 810,  tag: 'Session', time: '1:30 – 2:15 PM', title: 'Know Your Numbers — Four Metrics That Matter', who: 'Darren', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
     { day: 0, sort: 870,  tag: 'Session', time: '2:30 – 3:45 PM', title: 'Get Traction — The EOS Method to Focus & Scale', who: 'Tristan', loc: 'Concert Hall · Convention Floor', details: 'Please bring your laptop', audience: isNewCEO },
     { day: 0, sort: 960,  tag: 'Session', time: '4:00 – 5:15 PM', title: 'Grow the Top Line — Four Levers to Grow Revenue', who: 'Reed & Luke', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
-    { day: 0, sort: 1035, tag: 'Session', time: '5:15 – 5:30 PM', title: 'Closing', who: 'Darren & David', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
+    { day: 0, sort: 1035, tag: 'Session', time: '5:15 – 5:30 PM', title: 'Closing', who: 'David', loc: 'Concert Hall · Convention Floor', audience: isNewCEO },
     { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'Welcome Reception & Dinner', loc: 'SixtyEight at Scotia Plaza · 68th Floor, 40 King St W, Toronto', audience: r => r.welcomeReception || yes(r.ceoWelcome) },
     { day: 0, sort: 1080, tag: 'Event', time: '6:00 – 9:00 PM', title: 'HQ Evening Event: Medieval Times', loc: 'Medieval Times · 10 Dufferin St, Toronto, ON M6K 3C3',
       details: 'Getting there: subway to St Clair West, then a 5-minute walk', audience: r => hqEvening(r) === 'medieval' },
