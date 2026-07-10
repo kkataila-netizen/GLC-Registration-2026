@@ -226,6 +226,50 @@
     }).join('');
   }
 
+  /* ── admin impersonation (kkataila only) ─────────── */
+  const IMPERSONATOR = 'kkataila@banyansoftware.com';
+
+  async function setupImpersonation(user, ownReg) {
+    if (!user || (user.email || '').toLowerCase() !== IMPERSONATOR) return;
+    const adminToken = localStorage.getItem('glc-admin-token') || '';
+    if (!adminToken) return; // requires an active admin session
+
+    let regs;
+    try {
+      const res = await fetch('/api/registrations', {
+        headers: { 'Authorization': 'Bearer ' + adminToken }
+      });
+      if (!res.ok) return;
+      regs = (await res.json()).registrations || [];
+    } catch { return; }
+
+    const bar = document.getElementById('impersonateBar');
+    const sel = document.getElementById('impersonateSelect');
+    const subtitle = document.getElementById('msSubtitle');
+
+    regs.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+    for (const r of regs) {
+      const o = document.createElement('option');
+      o.value = r.email;
+      o.textContent = `${r.name} (${r.email})`;
+      sel.appendChild(o);
+    }
+    bar.hidden = false;
+
+    sel.addEventListener('change', () => {
+      const email = sel.value;
+      if (!email) {
+        subtitle.textContent = `${user.name}'s personal schedule for GLC 2026`;
+        renderAgenda(buildAgenda(ownReg));
+        return;
+      }
+      const target = regs.find(r => r.email === email);
+      if (!target) return;
+      subtitle.textContent = `Viewing ${target.name}'s schedule (admin preview)`;
+      renderAgenda(buildAgenda(target));
+    });
+  }
+
   async function init() {
     const user = getUser();
     const token = getUserToken();
@@ -251,6 +295,7 @@
         return;
       }
       renderAgenda(buildAgenda(reg));
+      setupImpersonation(user, reg);
     } catch {
       container.innerHTML = `<div class="ms-empty"><p>Could not load your schedule. Please try again later.</p></div>`;
     }

@@ -87,6 +87,20 @@
     }
     .ms-empty a { color: #395542; font-weight: 600; }
 
+    /* Admin impersonation bar */
+    .ms-impersonate {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+      background: #fff7ed; border: 1px solid #fdba74; border-radius: var(--radius);
+      padding: 0.7rem 1rem; margin-bottom: 1.25rem;
+      font-size: 0.875rem; color: #7c2d12;
+    }
+    .ms-impersonate label { font-weight: 600; }
+    .ms-impersonate select {
+      flex: 1; min-width: 220px; padding: 0.45rem 0.6rem;
+      border: 1px solid #fdba74; border-radius: var(--radius);
+      font-family: inherit; font-size: 0.875rem; background: #fff;
+    }
+
     @media (max-width: 640px) {
       .track-block__content { padding: 1rem; }
       .track-block__label { padding: 0.5rem 0.25rem; font-size: 0.625rem; min-width: 24px; }
@@ -117,6 +131,13 @@
       <h1>My Sessions</h1>
       <p id="msSubtitle">Your personal schedule for GLC 2026</p>
     </header>
+
+    <div id="impersonateBar" class="ms-impersonate" hidden>
+      <label for="impersonateSelect">&#128065; Admin preview &mdash; view schedule as:</label>
+      <select id="impersonateSelect">
+        <option value="">&mdash; My own schedule &mdash;</option>
+      </select>
+    </div>
 
     <div id="msAgenda" class="agenda"></div>
   </div>
