@@ -170,7 +170,12 @@
     if (slot === 'queue') {
       return { day: 1, sort: 540, tag: 'Headshot', time: 'Waitlist (time to be assigned)', title: 'Professional Headshot', loc: '' };
     }
-    const [h, m] = slot.split(':').map(Number);
+    const m24 = /^(\d{1,2}):(\d{2})$/.exec(String(slot));
+    if (!m24) {
+      // Unrecognized slot format — show it verbatim rather than failing
+      return { day: 1, sort: 540, tag: 'Headshot', time: String(slot), title: 'Professional Headshot', loc: '' };
+    }
+    const h = parseInt(m24[1], 10), m = parseInt(m24[2], 10);
     const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
     const ampm = h >= 12 ? 'PM' : 'AM';
     return { day: 1, sort: h * 60 + m, tag: 'Headshot', time: `${h12}:${String(m).padStart(2, '0')} ${ampm}`, title: 'Professional Headshot', loc: '' };
@@ -287,7 +292,18 @@
       const res = await fetch(`/api/registrations?search=${encodeURIComponent(user.email)}`, {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (!res.ok) throw new Error();
+      if (res.status === 401) {
+        // Stale session — e.g. the password changed after this login.
+        // Clear the dead credentials and ask the user to sign in again.
+        localStorage.removeItem('glc-user');
+        localStorage.removeItem('glc-chat-user');
+        localStorage.removeItem('glc-user-token');
+        if (window.glcNavRefresh) window.glcNavRefresh();
+        subtitle.textContent = 'Your personal schedule for GLC 2026';
+        container.innerHTML = `<div class="ms-empty"><p>Your session has expired &mdash; this can happen after a password change.</p><p style="margin-top:.5rem">Please <a href="/register.html">log in again</a> to view your schedule.</p></div>`;
+        return;
+      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       const reg = (data.registrations || []).find(r => r.email === user.email.toLowerCase());
       if (!reg) {
@@ -296,8 +312,8 @@
       }
       renderAgenda(buildAgenda(reg));
       setupImpersonation(user, reg);
-    } catch {
-      container.innerHTML = `<div class="ms-empty"><p>Could not load your schedule. Please try again later.</p></div>`;
+    } catch (err) {
+      container.innerHTML = `<div class="ms-empty"><p>Could not load your schedule. Please try again later.</p><p style="margin-top:.5rem;font-size:.78rem;color:#999">(${esc(err && err.message ? err.message : 'network error')})</p></div>`;
     }
   }
 
