@@ -20,6 +20,7 @@
       tagline: "Stretches, Smiles & Tail Wags",
       time: "8:00 – 8:25 am",
       description: "Start your morning with stretches, smiles, and a whole lot of tail wags. Join a guided yoga session alongside adorable rescue puppies for a truly one-of-a-kind way to set the tone for the day ahead.",
+      note: "Please wear socks for the puppy yoga sessions",
       capacity: 22,
       photo: "/images/puppy_yoga.webp"
     },
@@ -29,6 +30,7 @@
       tagline: "Stretches, Smiles & Tail Wags",
       time: "8:30 – 9:00 am",
       description: "Start your morning with stretches, smiles, and a whole lot of tail wags. Join a guided yoga session alongside adorable rescue puppies for a truly one-of-a-kind way to set the tone for the day ahead.",
+      note: "Please wear socks for the puppy yoga sessions",
       capacity: 22,
       photo: "/images/puppy_yoga.webp"
     },
@@ -155,7 +157,7 @@
           <div class="mc-card__tagline">${esc(a.tagline)}</div>
           <div class="mc-card__name">${esc(a.name)}</div>
           <span class="mc-card__time">🕒 ${esc(a.time)}</span>
-          <div class="mc-card__desc">${esc(a.description)}</div>
+          <div class="mc-card__desc">${esc(a.description)}${a.note ? `<div style="margin-top:.5rem;font-weight:600;color:#395542">${esc(a.note)}</div>` : ''}</div>
           <div class="mc-card__capacity">
             <div class="mc-card__capacity-label">
               <span>Capacity: ${a.capacity}</span>
