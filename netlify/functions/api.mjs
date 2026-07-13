@@ -853,6 +853,56 @@ export default async (req, context) => {
     return json({ success: true });
   }
 
+  /* ── GET /api/admin/backup  ★ ADMIN ONLY ─────────────
+     Full-fidelity snapshot: raw registrations (incl. password hashes),
+     chat conversations and message threads. ?light=1 strips chat file
+     attachments to keep the payload small. */
+  if (method === "GET" && (path === "/admin/backup" || path === "/admin/backup/")) {
+    if (!(await validateAdminToken(req))) return json({ error: "Unauthorized" }, 401);
+    const light = url.searchParams.get("light") === "1";
+    const registrations = await getRegistrations();
+    const convStore = getStore("chat-conversations");
+    const msgStore = getStore("chat-messages");
+    const conversations = (await convStore.get("all", { type: "json" })) || [];
+    const messages = {};
+    for (const c of conversations) {
+      try {
+        let msgs = (await msgStore.get(c.id, { type: "json" })) || [];
+        if (light) msgs = msgs.map(m => m.fileData ? { ...m, fileData: "" } : m);
+        messages[c.id] = msgs;
+      } catch { messages[c.id] = []; }
+    }
+    return json({ createdAt: new Date().toISOString(), light, registrations, conversations, messages });
+  }
+
+  /* ── POST /api/admin/restore  ★ ADMIN ONLY ───────────
+     Overwrites the stores with a previously downloaded backup.
+     Body: { registrations?, conversations?, messages? } — only the
+     keys present are restored. */
+  if (method === "POST" && (path === "/admin/restore" || path === "/admin/restore/")) {
+    if (!(await validateAdminToken(req))) return json({ error: "Unauthorized" }, 401);
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400); }
+    const out = {};
+    if (Array.isArray(body.registrations)) {
+      await saveRegistrations(body.registrations);
+      out.registrations = body.registrations.length;
+    }
+    if (Array.isArray(body.conversations)) {
+      await getStore("chat-conversations").setJSON("all", body.conversations);
+      out.conversations = body.conversations.length;
+    }
+    if (body.messages && typeof body.messages === "object") {
+      const msgStore = getStore("chat-messages");
+      let n = 0;
+      for (const [id, msgs] of Object.entries(body.messages)) {
+        if (Array.isArray(msgs)) { await msgStore.setJSON(id, msgs); n++; }
+      }
+      out.messageThreads = n;
+    }
+    return json({ success: true, restored: out });
+  }
+
   /* ── POST /api/registrations/import  ★ ADMIN ONLY ── */
   if (method === "POST" && (path === "/registrations/import" || path === "/registrations/import/")) {
     if (!(await validateAdminToken(req))) {
