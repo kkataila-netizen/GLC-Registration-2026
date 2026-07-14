@@ -234,20 +234,19 @@
       <li style="display:none" data-auth-tab><a href="/people.html">People</a></li>
       <li style="display:none" data-auth-tab><a href="/activities.html">Activities</a></li>
       <li><a href="/register.html">Register</a></li>
-      <li style="display:none"><a href="/checkin.html" class="active">Check In</a></li>
+      <li style="display:none" data-auth-tab><a href="/checkin.html" class="active">Check In</a></li>
       <li style="display:none"><a href="/admin.html">Admin</a></li>
     </ul>
   </nav>
 
-  <!-- Admin guard: must be admin AND have admin token -->
+  <!-- Requires login: admins with an admin session get the full kiosk,
+       everyone else gets self-check-in for their own record -->
   <script>
     (() => {
-      const ADMIN_EMAILS = ["kkataila@banyansoftware.com","gretchen@theexperienceagency.ca","nkotyk@banyansoftware.com","tcross@banyansoftware.com","dreimer@banyansoftware.com"];
       try {
         const u = JSON.parse(localStorage.getItem("glc-user"));
-        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); return; }
-      } catch { window.location.replace("/home.html"); return; }
-      if (!localStorage.getItem("glc-admin-token")) { window.location.replace("/admin.html"); }
+        if (!u) { window.location.replace("/home.html"); }
+      } catch { window.location.replace("/home.html"); }
     })();
   </script>
 

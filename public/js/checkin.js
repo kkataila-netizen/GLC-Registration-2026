@@ -5,8 +5,13 @@
   'use strict';
 
   function getAdminToken() { return localStorage.getItem('glc-admin-token') || ''; }
-  function adminHeaders() {
-    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getAdminToken() };
+  function getUserToken() { return localStorage.getItem('glc-user-token') || ''; }
+  // Kiosk mode (admins with an admin session) sees everyone; otherwise a
+  // logged-in attendee gets self-check-in with just their own card.
+  function isKiosk() { return !!getAdminToken(); }
+  function authToken() { return getAdminToken() || getUserToken(); }
+  function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken() };
   }
   function esc(s) {
     const d = document.createElement('div');
@@ -61,16 +66,25 @@
   const checkOutBtn = document.getElementById('checkOutBtn');
 
   // ── Load registrations ────────────────────────────
+  // Kiosk (admin token) gets the full list; a regular logged-in user
+  // gets only their own record back from the same endpoint.
   async function loadAttendees() {
     try {
       const res = await fetch('/api/registrations', {
-        headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+        headers: { 'Authorization': 'Bearer ' + authToken() }
       });
-      if (res.status === 401) { location.replace('/admin.html'); return; }
+      if (res.status === 401) {
+        location.replace(isKiosk() ? '/admin.html' : '/register.html?login=1');
+        return;
+      }
       const data = await res.json();
       allAttendees = (data.registrations || []).slice().sort((a, b) =>
         (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
       );
+      if (!isKiosk()) {
+        // Self-check-in: hide the search bar, single personal card
+        searchInput.style.display = 'none';
+      }
       filterAndRender('');
     } catch {
       statsEl.textContent = 'Error loading attendees';
@@ -89,8 +103,13 @@
   }
 
   function renderGrid(attendees) {
-    const checkedInCount = allAttendees.filter(a => a.checkedIn).length;
-    statsEl.innerHTML = `<strong>${checkedInCount}</strong> / ${allAttendees.length} checked in`;
+    if (isKiosk()) {
+      const checkedInCount = allAttendees.filter(a => a.checkedIn).length;
+      statsEl.innerHTML = `<strong>${checkedInCount}</strong> / ${allAttendees.length} checked in`;
+    } else {
+      const me = allAttendees[0];
+      statsEl.innerHTML = me && me.checkedIn ? '<strong>✓ Checked in</strong>' : 'Not checked in yet';
+    }
 
     grid.innerHTML = '';
 
@@ -266,10 +285,14 @@
     try {
       // 1. Upload photo if we have one
       if (withPhoto && capturedPhoto) {
+        // Kiosk uploads on the attendee's behalf; self mode uploads own photo
+        const photoBody = isKiosk()
+          ? { photo: capturedPhoto, email: currentAttendee.email }
+          : { photo: capturedPhoto };
         const pr = await fetch('/api/profile-photo', {
           method: 'POST',
-          headers: adminHeaders(),
-          body: JSON.stringify({ photo: capturedPhoto, email: currentAttendee.email })
+          headers: authHeaders(),
+          body: JSON.stringify(photoBody)
         });
         if (!pr.ok) {
           const d = await pr.json().catch(() => ({}));
@@ -282,7 +305,7 @@
       // 2. Mark checked in
       const cr = await fetch(`/api/registrations/${currentAttendee.id}`, {
         method: 'PUT',
-        headers: adminHeaders(),
+        headers: authHeaders(),
         body: JSON.stringify({ checkedIn: true })
       });
       if (!cr.ok) {
@@ -318,7 +341,7 @@
     try {
       const res = await fetch(`/api/registrations/${currentAttendee.id}`, {
         method: 'PUT',
-        headers: adminHeaders(),
+        headers: authHeaders(),
         body: JSON.stringify({ checkedIn: false })
       });
       if (!res.ok) {
