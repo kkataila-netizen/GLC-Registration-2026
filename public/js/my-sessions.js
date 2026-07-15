@@ -128,7 +128,7 @@
     { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: Tristan', loc: 'Tudor 8 · Mezzanine Floor', audience: r => inOpGroup(r, 'Tristan') },
     { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: Reed', loc: 'Confederation 3 · Mezzanine Floor', audience: r => inOpGroup(r, 'Reed') },
     { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: Bricey', loc: 'Confederation 6 · Mezzanine Floor', audience: r => inOpGroup(r, 'Bricey') },
-    { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: Tobi', loc: 'Salon B · Convention Floor', audience: r => inOpGroup(r, 'Tobi') },
+    { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: Kay', loc: 'Salon B · Convention Floor', audience: r => inOpGroup(r, 'Kay') },
     { day: 1, sort: 1005, tag: 'Breakout', time: '4:45 – 5:45 PM', title: 'Operating Group Breakout: EMEA', loc: 'Concert Hall · Convention Floor', audience: r => inOpGroup(r, 'EMEA') },
     { day: 1, sort: 1095, tag: 'Event', time: '6:15 – 11:00 PM', title: 'GLC Awards Dinner', loc: 'Steam Whistle Brewing, Locomotive Hall · 255 Bremner Blvd, Toronto', audience: all },
 
