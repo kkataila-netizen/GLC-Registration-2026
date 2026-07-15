@@ -75,10 +75,14 @@
   /* ── the agenda (Agenda v3 + workbook detail) ────── */
 
   const DAYS = ['Tuesday, July 14', 'Wednesday, July 15', 'Thursday, July 16', 'Friday, July 17'];
+  const DAY_DATES = ['2026-07-14', '2026-07-15', '2026-07-16', '2026-07-17'];
 
-  // Days that have already passed — hidden from everyone's schedule.
-  // Add 1 here once Wednesday is done, 2 after Thursday, etc.
-  const HIDDEN_DAYS = [0];
+  // Past days auto-hide based on the conference clock (Toronto time).
+  // en-CA formatting yields YYYY-MM-DD, so plain string compare works.
+  function isPastDay(i) {
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date());
+    return DAY_DATES[i] < today;
+  }
 
   const AGENDA = [
     /* ── Day 0 · Tuesday, July 14 ─────────────────── */
@@ -196,7 +200,7 @@
       day,
       dayIndex: i,
       events: events.filter(e => e.day === i).sort((a, b) => a.sort - b.sort)
-    })).filter(d => !HIDDEN_DAYS.includes(d.dayIndex));
+    })).filter(d => !isPastDay(d.dayIndex));
   }
 
   function renderAgenda(agenda) {

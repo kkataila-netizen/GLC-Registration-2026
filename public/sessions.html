@@ -162,7 +162,7 @@
     <div class="agenda">
 
       <!-- ── Day 1 · Wednesday, July 15 ──────────────── -->
-      <div>
+      <div data-day-date="2026-07-15">
         <div class="agenda__day">Day 1 &middot; Wednesday, July 15
           <div class="agenda__theme">Accelerating through Talent, Product &amp; Velocity</div>
         </div>
@@ -276,7 +276,7 @@
       </div>
 
       <!-- ── Day 2 · Thursday, July 16 ───────────────── -->
-      <div>
+      <div data-day-date="2026-07-16">
         <div class="agenda__day">Day 2 &middot; Thursday, July 16
           <div class="agenda__theme">Leveraging AI to Accelerate Product &amp; Velocity</div>
         </div>
@@ -400,6 +400,15 @@
     </div>
   </div>
 
+  <script>
+    // Auto-hide conference days that have passed (Toronto time)
+    (() => {
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date());
+      document.querySelectorAll('[data-day-date]').forEach(el => {
+        if (el.getAttribute('data-day-date') < today) el.style.display = 'none';
+      });
+    })();
+  </script>
   <script src="/js/nav-notify.js"></script>
 </body>
 </html>
