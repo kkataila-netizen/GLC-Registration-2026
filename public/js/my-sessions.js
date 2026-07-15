@@ -76,6 +76,10 @@
 
   const DAYS = ['Tuesday, July 14', 'Wednesday, July 15', 'Thursday, July 16', 'Friday, July 17'];
 
+  // Days that have already passed — hidden from everyone's schedule.
+  // Add 1 here once Wednesday is done, 2 after Thursday, etc.
+  const HIDDEN_DAYS = [0];
+
   const AGENDA = [
     /* ── Day 0 · Tuesday, July 14 ─────────────────── */
     { day: 0, sort: 450,  tag: 'Event', time: '7:30 – 9:00 AM', title: 'Huddle Event', loc: 'Confederation 5 & 6 · Mezzanine Floor', audience: r => yes(r.huddleEvent) },
@@ -190,8 +194,9 @@
 
     return DAYS.map((day, i) => ({
       day,
+      dayIndex: i,
       events: events.filter(e => e.day === i).sort((a, b) => a.sort - b.sort)
-    }));
+    })).filter(d => !HIDDEN_DAYS.includes(d.dayIndex));
   }
 
   function renderAgenda(agenda) {
