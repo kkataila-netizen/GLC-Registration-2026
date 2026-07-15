@@ -155,7 +155,7 @@
     { day: 2, sort: 795,  tag: 'Session', time: '1:15 – 1:45 PM', title: 'Opex & AI Challenge — Real Outcomes', who: 'Claire & Ryan', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 825,  tag: 'Session', time: '1:45 – 3:00 PM', title: 'Golden Age of Vertical SaaS', who: 'Kaz', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 900,  tag: 'Session', time: '3:00 – 3:15 PM', title: 'Banyan Foundation Updates', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 945,  tag: 'Session', time: '3:45 – 4:30 PM', title: 'Reaching Buyers in the AI Era — Win the AI-Assisted Journey', who: 'Luke & Tristan', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 945,  tag: 'Session', time: '3:45 – 4:30 PM', title: 'Reaching Buyers in the AI Era — Win the AI-Assisted Journey', who: 'Luke', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 990,  tag: 'Session', time: '4:30 – 4:50 PM', title: 'Bringing It All Together — Reflections on the GLC', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 1010, tag: 'Session', time: '4:50 – 5:00 PM', title: 'Closing', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 1020, tag: 'Event', time: '5:00 – 5:15 PM', title: 'Group Photo', loc: 'Concert Hall · Convention Floor', audience: all },
