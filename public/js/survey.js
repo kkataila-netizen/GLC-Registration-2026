@@ -56,7 +56,9 @@
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        showMsg('success', 'Thank you! Your survey response has been saved.');
+        showMsg('success', 'Thank you! Your anonymous response has been saved.');
+      } else if (res.status === 409) {
+        showMsg('error', data.error || 'You have already submitted the survey.');
       } else if (res.status === 401) {
         showMsg('error', 'Your session has expired — please log in again and resubmit.');
       } else {

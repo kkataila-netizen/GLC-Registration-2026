@@ -868,9 +868,13 @@ export default async (req, context) => {
   }
 
   /* ── POST /api/survey  ★ USER AUTH REQUIRED ─────────
-     Saves the caller's survey answers (one response per person;
-     resubmitting replaces the earlier answers). Identity comes from
-     the token, never from the request body. */
+     ANONYMOUS by design: the stored response carries no email, name,
+     or precise timestamp, and is inserted at a random position so
+     ordering can't be correlated with anything. A separate
+     participation list (emails only, kept sorted) enforces one
+     response per person without linking anyone to their answers.
+     Because responses are unlinkable, they cannot be edited after
+     submission. */
   if (method === "POST" && (path === "/survey" || path === "/survey/")) {
     const userAuth = await validateUserToken(req);
     if (!userAuth) return json({ error: "Unauthorized" }, 401);
@@ -882,17 +886,28 @@ export default async (req, context) => {
     if (JSON.stringify(body.answers).length > 50000) {
       return json({ error: "Response too large." }, 400);
     }
+
+    const subStore = getStore("survey-submitted");
+    let submitted = [];
+    try { submitted = (await subStore.get("all", { type: "json", consistency: "strong" })) || []; } catch {}
+    if (submitted.includes(userAuth.email)) {
+      return json({ error: "You have already submitted the survey. Responses are anonymous, so they can't be edited after submission." }, 409);
+    }
+
     const responses = await getSurveyResponses();
     const entry = {
-      email: userAuth.email,
-      name: userAuth.name,
-      submittedAt: new Date().toISOString(),
+      id: crypto.randomUUID(),
+      submittedDate: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto" }).format(new Date()),
       answers: body.answers
     };
-    const idx = responses.findIndex(r => r.email === userAuth.email);
-    if (idx === -1) responses.push(entry); else responses[idx] = entry;
+    responses.splice(Math.floor(Math.random() * (responses.length + 1)), 0, entry);
     await saveSurveyResponses(responses);
-    return json({ success: true, total: responses.length }, 201);
+
+    submitted.push(userAuth.email);
+    submitted.sort();
+    await subStore.setJSON("all", submitted);
+
+    return json({ success: true }, 201);
   }
 
   /* ── GET /api/survey/export  ★ ADMIN ONLY ───────────
@@ -910,11 +925,10 @@ export default async (req, context) => {
         if (!answerKeys.includes(k)) answerKeys.push(k);
       }
     }
-    const headers = ["Email", "Name", "Submitted At", ...answerKeys];
+    const headers = ["Response ID", "Submitted Date", ...answerKeys];
     const rows = responses.map(r => [
-      escapeCSV(r.email),
-      escapeCSV(r.name),
-      escapeCSV(r.submittedAt),
+      escapeCSV(r.id),
+      escapeCSV(r.submittedDate),
       ...answerKeys.map(k => {
         const v = (r.answers || {})[k];
         return escapeCSV(v == null ? "" : (typeof v === "object" ? JSON.stringify(v) : String(v)));
@@ -950,7 +964,9 @@ export default async (req, context) => {
       } catch { messages[c.id] = []; }
     }
     const surveyResponses = await getSurveyResponses();
-    return json({ createdAt: new Date().toISOString(), light, registrations, conversations, messages, surveyResponses });
+    let surveySubmitted = [];
+    try { surveySubmitted = (await getStore("survey-submitted").get("all", { type: "json" })) || []; } catch {}
+    return json({ createdAt: new Date().toISOString(), light, registrations, conversations, messages, surveyResponses, surveySubmitted });
   }
 
   /* ── POST /api/admin/restore  ★ ADMIN ONLY ───────────
@@ -977,6 +993,10 @@ export default async (req, context) => {
         if (Array.isArray(msgs)) { await msgStore.setJSON(id, msgs); n++; }
       }
       out.messageThreads = n;
+    }
+    if (Array.isArray(body.surveySubmitted)) {
+      await getStore("survey-submitted").setJSON("all", body.surveySubmitted);
+      out.surveySubmitted = body.surveySubmitted.length;
     }
     if (Array.isArray(body.surveyResponses)) {
       await saveSurveyResponses(body.surveyResponses);
