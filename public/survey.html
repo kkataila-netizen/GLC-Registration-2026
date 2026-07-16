@@ -17,18 +17,100 @@
     })();
   </script>
   <style>
-    .survey-note {
-      background: #fff7ed; border: 1px solid #fdba74; border-radius: var(--radius);
-      padding: 0.7rem 1rem; margin-bottom: 1.25rem;
-      font-size: 0.875rem; color: #7c2d12;
+    .sv-anon {
+      background: #f0f7f2; border: 1px solid #b9d3c2; border-radius: var(--radius);
+      padding: 0.7rem 1rem; margin-bottom: 1.5rem;
+      font-size: 0.875rem; color: #2d4435;
     }
-    .survey-scale { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .survey-scale label {
-      display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-      padding: 0.5rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius);
-      cursor: pointer; font-size: 0.875rem;
+
+    .sv-section { margin-bottom: 1.25rem; }
+    .sv-section__title {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 0.8125rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #395542; margin-bottom: 0.25rem;
     }
-    .survey-scale input { margin: 0; }
+    .sv-section__sub { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+
+    /* Attendee type pills */
+    .sv-pills { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .sv-pill {
+      font-weight: 600; font-size: 0.875rem; padding: 0.6rem 1.4rem;
+      border-radius: 4px; cursor: pointer; font-family: inherit;
+      color: #414141; background: #fff; border: 1px solid #cfcfc8;
+      transition: all 150ms;
+    }
+    .sv-pill--active { color: #fff; background: #395542; border-color: #395542; }
+
+    /* Star rows */
+    .sv-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; padding: 0.85rem 0; border-bottom: 1px solid #f0f0ec;
+    }
+    .sv-row:last-child { border-bottom: none; }
+    .sv-row__text { flex: 1; min-width: 0; }
+    .sv-row__title { font-size: 0.9375rem; color: #1a1a1a; line-height: 1.4; }
+    .sv-row__meta { font-size: 0.78rem; color: #999; margin-top: 0.1rem; }
+    .sv-row__actions { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+
+    .sv-stars { display: inline-flex; gap: 0.15rem; }
+    .sv-star {
+      font-size: 1.35rem; line-height: 1; cursor: pointer; user-select: none;
+      color: #e3e7e3; background: none; border: none; padding: 0.1rem;
+      font-family: inherit;
+    }
+    .sv-star--on { color: #395542; }
+
+    .sv-na {
+      font-weight: 600; font-size: 0.72rem; padding: 0.35rem 0.65rem;
+      border-radius: 4px; cursor: pointer; white-space: nowrap; font-family: inherit;
+      color: #a6a6a2; background: #fff; border: 1px solid #dcdcd5;
+    }
+    .sv-na--on { color: #fff; background: #8a8a86; border-color: #8a8a86; }
+
+    /* Day headers */
+    .sv-day {
+      display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+      padding-bottom: 0.4rem; border-bottom: 2px solid var(--primary);
+      margin-bottom: 0.35rem;
+    }
+    .sv-day__label { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 1rem; color: #1a1a1a; }
+    .sv-day__date { font-size: 0.875rem; color: var(--text-muted); }
+    .sv-day__theme { font-size: 0.8125rem; font-weight: 600; color: #5b8bb5; width: 100%; }
+
+    .sv-group {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #395542; background: #f0f7f2;
+      display: inline-block; padding: 0.15rem 0.55rem; border-radius: 99px;
+      margin-top: 0.85rem;
+    }
+
+    .sv-select {
+      width: 100%; padding: 0.55rem 0.65rem; margin-bottom: 0.6rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.9rem; background: #fff;
+    }
+
+    textarea.sv-text {
+      width: 100%; padding: 0.6rem; border: 1px solid var(--border);
+      border-radius: var(--radius); font: inherit; resize: vertical;
+    }
+
+    /* Sticky progress + submit bar */
+    .sv-footer {
+      position: sticky; bottom: 0; z-index: 40;
+      background: #fff; border-top: 1px solid var(--border);
+      margin: 0 -1.5rem -1.5rem; padding: 0.85rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .sv-progress { flex: 1; min-width: 180px; }
+    .sv-progress__label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .sv-progress__bar { height: 6px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+    .sv-progress__fill { height: 100%; background: #395542; border-radius: 99px; transition: width 0.3s ease; }
+
+    .sv-thanks { text-align: center; padding: 2.5rem 1rem; }
+    .sv-thanks h2 { font-family: 'Libre Franklin', Arial, sans-serif; margin-bottom: 0.6rem; }
+    .sv-thanks p { color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -53,42 +135,84 @@
 
   <div class="container">
     <header class="page-header">
-      <h1>GLC 2026 Survey</h1>
-      <p>Tell us how the conference went</p>
+      <h1>Tell us how it went.</h1>
+      <p>Rate each session from the three days and leave any comments at the end. It takes about two minutes, and your feedback shapes next year's program.</p>
     </header>
 
-    <div class="survey-note">
-      &#128295; Placeholder questions — this form will be replaced with the final survey design.
-      Submissions already save to the survey data store, so the pipeline is testable end-to-end. <strong>Responses are fully anonymous</strong> &mdash; no name, email, or exact time is stored with your answers.
+    <div class="sv-anon">
+      &#128274; <strong>Your responses are anonymous.</strong> No name, email, or exact time is stored with your answers &mdash; which also means they can't be edited after submission. One response per person.
     </div>
 
-    <div class="card">
-      <form id="surveyForm" novalidate>
-        <div class="form-group">
-          <label>How would you rate GLC 2026 overall?</label>
-          <div class="survey-scale">
-            <label><input type="radio" name="overallRating" value="1"><span>1</span></label>
-            <label><input type="radio" name="overallRating" value="2"><span>2</span></label>
-            <label><input type="radio" name="overallRating" value="3"><span>3</span></label>
-            <label><input type="radio" name="overallRating" value="4"><span>4</span></label>
-            <label><input type="radio" name="overallRating" value="5"><span>5</span></label>
-          </div>
-        </div>
+    <!-- Survey form -->
+    <div id="surveyMain" class="card">
+      <div class="sv-section">
+        <div class="sv-section__title">Which best describes you?</div>
+        <div class="sv-pills" id="attendeePills"></div>
+      </div>
 
-        <div class="form-group">
-          <label>What was your favourite session or moment?</label>
-          <input type="text" id="favoriteSession" placeholder="e.g. the keynote, dine-around, puppy yoga...">
-        </div>
+      <div class="sv-section">
+        <div class="sv-section__title">How valuable was GLC 2026 to you?</div>
+        <div class="sv-stars" id="overallStars" style="font-size:0"></div>
+      </div>
 
-        <div class="form-group">
-          <label>Any other comments or suggestions?</label>
-          <textarea id="comments" rows="4" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:var(--radius);font:inherit;resize:vertical"></textarea>
-        </div>
+      <div class="sv-section">
+        <div class="sv-section__title">Your top 3 most valuable sessions</div>
+        <select class="sv-select" id="mvs1"><option value="">1st choice&hellip;</option></select>
+        <select class="sv-select" id="mvs2"><option value="">2nd choice&hellip;</option></select>
+        <select class="sv-select" id="mvs3"><option value="">3rd choice&hellip;</option></select>
+      </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="surveySubmitBtn">Submit Survey</button>
-      </form>
+      <div id="dayBlocks"></div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">Social Events &amp; Activities</div>
+        <div class="sv-section__sub">Rate any you took part in &mdash; skip the rest</div>
+        <div id="eventRows"></div>
+        <div class="sv-group">Morning activities</div>
+        <div class="sv-section__sub" style="margin-top:.35rem">Rate any you joined</div>
+        <div id="morningRows"></div>
+      </div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">Logistics</div>
+        <div class="sv-section__sub">How did the essentials go?</div>
+        <div id="logisticsRows"></div>
+      </div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">In your words</div>
+        <div class="sv-section__sub">A few last thoughts</div>
+        <div class="form-group">
+          <label>What was the one surprise or light-bulb moment for you?</label>
+          <textarea class="sv-text" id="svSurprise" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>What would you change or improve?</label>
+          <textarea class="sv-text" id="svChanges" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>General comments</label>
+          <textarea class="sv-text" id="svComments" rows="3"></textarea>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted)">Your progress saves automatically on this device.</p>
+      </div>
+
       <div id="surveyMessage" class="message" hidden></div>
-      <p style="margin-top:.75rem;font-size:.8125rem;color:var(--text-muted)">One response per person. Your answers are <strong>anonymous</strong> &mdash; they are not linked to your name or email in any way, which also means they cannot be edited after submission.</p>
+
+      <div class="sv-footer">
+        <div class="sv-progress">
+          <div class="sv-progress__label"><span id="progressLabel">0 of 0 items rated</span> &middot; <span id="progressPct">0%</span></div>
+          <div class="sv-progress__bar"><div class="sv-progress__fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <button type="button" class="btn btn-primary" id="surveySubmitBtn">Submit survey</button>
+      </div>
+    </div>
+
+    <!-- Thank-you screen -->
+    <div id="surveyThanks" class="card sv-thanks" hidden>
+      <h2>Thank you.</h2>
+      <p id="thanksSummary">Your feedback goes straight to the team planning next year's GLC.</p>
+      <p style="margin-top:.75rem;font-size:.8125rem">Your response was submitted anonymously.</p>
     </div>
   </div>
 
