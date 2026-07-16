@@ -382,6 +382,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // ── Survey export ─────────────────────────────────
+    const surveyExportBtn = document.getElementById('surveyExportBtn');
+    surveyExportBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/survey/export', {
+          headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+        });
+        if (!res.ok) {
+          alert('Failed to export survey responses. Please try again.');
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'survey-responses.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        alert('Network error. Please try again.');
+      }
+    });
+
     // ── Broadcast / Communication ──────────────────
     const broadcastBtn = document.getElementById('broadcastBtn');
     const broadcastModal = document.getElementById('broadcastModal');

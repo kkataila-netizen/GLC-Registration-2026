@@ -190,6 +190,20 @@ async function saveRegistrations(registrations) {
   await store.setJSON("all", registrations);
 }
 
+/* ── Survey store helpers ─────────────────────────── */
+async function getSurveyResponses() {
+  const store = getStore("survey-responses");
+  try {
+    return (await store.get("all", { type: "json", consistency: "strong" })) || [];
+  } catch {
+    return [];
+  }
+}
+async function saveSurveyResponses(list) {
+  const store = getStore("survey-responses");
+  await store.setJSON("all", list);
+}
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -853,6 +867,69 @@ export default async (req, context) => {
     return json({ success: true });
   }
 
+  /* ── POST /api/survey  ★ USER AUTH REQUIRED ─────────
+     Saves the caller's survey answers (one response per person;
+     resubmitting replaces the earlier answers). Identity comes from
+     the token, never from the request body. */
+  if (method === "POST" && (path === "/survey" || path === "/survey/")) {
+    const userAuth = await validateUserToken(req);
+    if (!userAuth) return json({ error: "Unauthorized" }, 401);
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400); }
+    if (!body.answers || typeof body.answers !== "object" || Array.isArray(body.answers)) {
+      return json({ error: "answers object required." }, 400);
+    }
+    if (JSON.stringify(body.answers).length > 50000) {
+      return json({ error: "Response too large." }, 400);
+    }
+    const responses = await getSurveyResponses();
+    const entry = {
+      email: userAuth.email,
+      name: userAuth.name,
+      submittedAt: new Date().toISOString(),
+      answers: body.answers
+    };
+    const idx = responses.findIndex(r => r.email === userAuth.email);
+    if (idx === -1) responses.push(entry); else responses[idx] = entry;
+    await saveSurveyResponses(responses);
+    return json({ success: true, total: responses.length }, 201);
+  }
+
+  /* ── GET /api/survey/export  ★ ADMIN ONLY ───────────
+     CSV of all responses; answer keys become columns dynamically.
+     ?format=json returns raw JSON instead. */
+  if (method === "GET" && (path === "/survey/export" || path === "/survey/export/")) {
+    if (!(await validateAdminToken(req))) return json({ error: "Unauthorized" }, 401);
+    const responses = await getSurveyResponses();
+    if (url.searchParams.get("format") === "json") {
+      return json({ total: responses.length, responses });
+    }
+    const answerKeys = [];
+    for (const r of responses) {
+      for (const k of Object.keys(r.answers || {})) {
+        if (!answerKeys.includes(k)) answerKeys.push(k);
+      }
+    }
+    const headers = ["Email", "Name", "Submitted At", ...answerKeys];
+    const rows = responses.map(r => [
+      escapeCSV(r.email),
+      escapeCSV(r.name),
+      escapeCSV(r.submittedAt),
+      ...answerKeys.map(k => {
+        const v = (r.answers || {})[k];
+        return escapeCSV(v == null ? "" : (typeof v === "object" ? JSON.stringify(v) : String(v)));
+      })
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    return new Response(csv, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv",
+        "Content-Disposition": 'attachment; filename="survey-responses.csv"'
+      }
+    });
+  }
+
   /* ── GET /api/admin/backup  ★ ADMIN ONLY ─────────────
      Full-fidelity snapshot: raw registrations (incl. password hashes),
      chat conversations and message threads. ?light=1 strips chat file
@@ -872,7 +949,8 @@ export default async (req, context) => {
         messages[c.id] = msgs;
       } catch { messages[c.id] = []; }
     }
-    return json({ createdAt: new Date().toISOString(), light, registrations, conversations, messages });
+    const surveyResponses = await getSurveyResponses();
+    return json({ createdAt: new Date().toISOString(), light, registrations, conversations, messages, surveyResponses });
   }
 
   /* ── POST /api/admin/restore  ★ ADMIN ONLY ───────────
@@ -899,6 +977,10 @@ export default async (req, context) => {
         if (Array.isArray(msgs)) { await msgStore.setJSON(id, msgs); n++; }
       }
       out.messageThreads = n;
+    }
+    if (Array.isArray(body.surveyResponses)) {
+      await saveSurveyResponses(body.surveyResponses);
+      out.surveyResponses = body.surveyResponses.length;
     }
     return json({ success: true, restored: out });
   }

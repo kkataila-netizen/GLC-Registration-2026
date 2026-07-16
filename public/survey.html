@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey - GLC Conference</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Admin-only for now: redirect non-admins immediately -->
+  <script>
+    (() => {
+      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
+      try {
+        const u = JSON.parse(localStorage.getItem("glc-user"));
+        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); }
+      } catch { window.location.replace("/home.html"); }
+    })();
+  </script>
+  <style>
+    .survey-note {
+      background: #fff7ed; border: 1px solid #fdba74; border-radius: var(--radius);
+      padding: 0.7rem 1rem; margin-bottom: 1.25rem;
+      font-size: 0.875rem; color: #7c2d12;
+    }
+    .survey-scale { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .survey-scale label {
+      display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+      padding: 0.5rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; font-size: 0.875rem;
+    }
+    .survey-scale input { margin: 0; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/home.html" class="top-nav__brand">
+      <img src="/images/glc-white.png" alt="GLC" class="top-nav__logo">
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/home.html">Home</a></li>
+      <li style="display:none" data-auth-tab><a href="/info.html">Info</a></li>
+      <li style="display:none" data-auth-tab><a href="/sessions.html">Sessions</a></li>
+      <li style="display:none" data-auth-tab><a href="/my-sessions.html">My Sessions</a></li>
+      <li style="display:none" data-auth-tab><a href="/people.html">People</a></li>
+      <li style="display:none" data-auth-tab><a href="/activities.html">Activities</a></li>
+      <li style="display:none" data-auth-tab><a href="/checkin.html">Check In</a></li>
+      <li style="display:none"><a href="/survey.html" class="active">Survey</a></li>
+      <li><a href="/register.html">Register</a></li>
+      <li style="display:none"><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1>GLC 2026 Survey</h1>
+      <p>Tell us how the conference went</p>
+    </header>
+
+    <div class="survey-note">
+      &#128295; Placeholder questions — this form will be replaced with the final survey design.
+      Submissions already save to the survey data store, so the pipeline is testable end-to-end.
+    </div>
+
+    <div class="card">
+      <form id="surveyForm" novalidate>
+        <div class="form-group">
+          <label>How would you rate GLC 2026 overall?</label>
+          <div class="survey-scale">
+            <label><input type="radio" name="overallRating" value="1"><span>1</span></label>
+            <label><input type="radio" name="overallRating" value="2"><span>2</span></label>
+            <label><input type="radio" name="overallRating" value="3"><span>3</span></label>
+            <label><input type="radio" name="overallRating" value="4"><span>4</span></label>
+            <label><input type="radio" name="overallRating" value="5"><span>5</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>What was your favourite session or moment?</label>
+          <input type="text" id="favoriteSession" placeholder="e.g. the keynote, dine-around, puppy yoga...">
+        </div>
+
+        <div class="form-group">
+          <label>Any other comments or suggestions?</label>
+          <textarea id="comments" rows="4" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:var(--radius);font:inherit;resize:vertical"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="surveySubmitBtn">Submit Survey</button>
+      </form>
+      <div id="surveyMessage" class="message" hidden></div>
+      <p style="margin-top:.75rem;font-size:.8125rem;color:var(--text-muted)">One response per person &mdash; submitting again replaces your earlier answers.</p>
+    </div>
+  </div>
+
+  <script src="/js/survey.js"></script>
+  <script src="/js/nav-notify.js"></script>
+</body>
+</html>
