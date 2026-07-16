@@ -154,7 +154,9 @@
       const rows = d.items.map(it => {
         const groupHeader = (it[2] && it[2] !== prevG) ? it[2] : null;
         prevG = it[2] || prevG;
-        return rowHtml(it[0], it[1], stat(responses, d.label + ' — ' + it[0]), groupHeader);
+        // design renders only the presenter (text after the '·'), never the time
+        const presenter = ((it[1] || '').split('·')[1] || '').trim();
+        return rowHtml(it[0], presenter, stat(responses, d.label + ' — ' + it[0]), groupHeader);
       }).join('');
       return '<div class="sv-section" style="margin-top:1.5rem">' +
         '<div class="sv-day"><span class="sv-day__label">' + esc(d.label) + '</span>' +
@@ -165,7 +167,7 @@
     // Events
     const evHtml = flag => EVENTS
       .filter(e => !!e[2] === flag)
-      .map(e => rowHtml(e[0], e[1], stat(responses, 'Event — ' + e[0]), null))
+      .map(e => rowHtml(e[0], '', stat(responses, 'Event — ' + e[0]), null))
       .join('');
     document.getElementById('eventRows').innerHTML = evHtml(false);
     document.getElementById('morningRows').innerHTML = evHtml(true);

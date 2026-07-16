@@ -153,7 +153,8 @@
       const rows = d.items.map((it, i) => {
         const item = {
           key: d.id + '_' + i, title: it[0],
-          meta: (it[1] || ''), group: it[2] || ''
+          // design renders only the presenter (text after the '·'), never the time
+          meta: ((it[1] || '').split('·')[1] || '').trim(), group: it[2] || ''
         };
         item.groupHeader = (item.group && item.group !== prevG) ? item.group : null;
         prevG = item.group || prevG;
@@ -165,10 +166,10 @@
         '<span class="sv-day__theme">' + esc(d.theme) + '</span></div>' + rows + '</div>';
     }).join('');
 
-    // Events (main + morning)
+    // Events (main + morning) — design shows title + stars only (no day/time, no N/A)
     const evs = eventItems();
-    document.getElementById('eventRows').innerHTML = evs.filter(e => !e.morning).map(e => rowHtml(e, true)).join('');
-    document.getElementById('morningRows').innerHTML = evs.filter(e => e.morning).map(e => rowHtml(e, true)).join('');
+    document.getElementById('eventRows').innerHTML = evs.filter(e => !e.morning).map(e => rowHtml({ key: e.key, title: e.title }, false)).join('');
+    document.getElementById('morningRows').innerHTML = evs.filter(e => e.morning).map(e => rowHtml({ key: e.key, title: e.title }, false)).join('');
 
     // Logistics (no N/A)
     document.getElementById('logisticsRows').innerHTML = logisticItems().map(l => rowHtml(l, false)).join('');
