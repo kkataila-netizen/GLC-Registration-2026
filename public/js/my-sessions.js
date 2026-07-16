@@ -151,7 +151,7 @@
     { day: 2, sort: 610,  tag: 'Session', time: '10:10 – 11:05 AM', title: 'Keynote — AI Disruption in Action', who: 'Mike Murchison', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 665,  tag: 'Session', time: '11:05 AM – 12:00 PM', title: 'Modern Product Management — From Feature Factory to Future Forward', who: 'Arun & Xavi', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 720,  tag: 'Meal', time: '12:00 – 1:00 PM', title: 'Lunch', loc: 'Concert Hall · Convention Floor', audience: all },
-    { day: 2, sort: 780,  tag: 'Event', time: '1:00 – 1:15 PM', title: 'Annual Rock Paper Scissors Competition', who: 'Everyone', loc: 'Concert Hall · Convention Floor', audience: all },
+    { day: 2, sort: 780,  tag: 'Event', time: '1:00 – 1:15 PM', title: 'Afternoon Opener', who: 'Everyone', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 795,  tag: 'Session', time: '1:15 – 1:45 PM', title: 'Opex & AI Challenge — Real Outcomes', who: 'Claire & Ryan', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 825,  tag: 'Session', time: '1:45 – 3:00 PM', title: 'Golden Age of Vertical SaaS', who: 'Kaz', loc: 'Concert Hall · Convention Floor', audience: all },
     { day: 2, sort: 900,  tag: 'Session', time: '3:00 – 3:15 PM', title: 'Banyan Foundation Updates', who: 'David', loc: 'Concert Hall · Convention Floor', audience: all },
