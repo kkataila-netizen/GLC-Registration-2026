@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey Results - GLC Conference</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Admin-only: redirect non-admins immediately -->
+  <script>
+    (() => {
+      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
+      try {
+        const u = JSON.parse(localStorage.getItem("glc-user"));
+        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); return; }
+      } catch { window.location.replace("/home.html"); return; }
+      if (!localStorage.getItem("glc-admin-token")) { window.location.replace("/admin.html"); }
+    })();
+  </script>
+  <style>
+    .sv-section { margin-bottom: 1.25rem; }
+    .sv-section__title {
+      font-family: 'Libre Franklin', Arial, sans-serif;
+      font-size: 0.8125rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #395542; margin-bottom: 0.25rem;
+    }
+    .sv-section__sub { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+
+    .sv-count {
+      background: #f0f7f2; border: 1px solid #b9d3c2; border-radius: var(--radius);
+      padding: 0.7rem 1rem; margin-bottom: 1.5rem;
+      font-size: 0.875rem; color: #2d4435;
+    }
+
+    .sv-pills { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .sv-pill-stat {
+      font-weight: 600; font-size: 0.875rem; padding: 0.6rem 1.4rem;
+      border-radius: 4px; color: #414141; background: #fff; border: 1px solid #cfcfc8;
+    }
+    .sv-pill-stat strong { color: #395542; }
+
+    .sv-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; padding: 0.85rem 0; border-bottom: 1px solid #f0f0ec;
+    }
+    .sv-row:last-child { border-bottom: none; }
+    .sv-row__text { flex: 1; min-width: 0; }
+    .sv-row__title { font-size: 0.9375rem; color: #1a1a1a; line-height: 1.4; }
+    .sv-row__meta { font-size: 0.78rem; color: #999; margin-top: 0.1rem; }
+    .sv-row__score { display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0; }
+
+    .sv-stars { display: inline-flex; gap: 0.15rem; font-size: 1.15rem; line-height: 1; }
+    .sv-star-on  { color: #395542; }
+    .sv-star-off { color: #e3e7e3; }
+    .sv-avg { font-weight: 700; font-size: 0.9375rem; color: #1a1a1a; min-width: 2.2rem; text-align: right; }
+    .sv-n { font-size: 0.75rem; color: #999; min-width: 3.4rem; }
+
+    .sv-day {
+      display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+      padding-bottom: 0.4rem; border-bottom: 2px solid var(--primary);
+      margin-bottom: 0.35rem;
+    }
+    .sv-day__label { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 1rem; color: #1a1a1a; }
+    .sv-day__date { font-size: 0.875rem; color: var(--text-muted); }
+    .sv-day__theme { font-size: 0.8125rem; font-weight: 600; color: #5b8bb5; width: 100%; }
+
+    .sv-group {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #395542; background: #f0f7f2;
+      display: inline-block; padding: 0.15rem 0.55rem; border-radius: 99px;
+      margin-top: 0.85rem;
+    }
+
+    .sv-top3 { display: flex; flex-direction: column; gap: 0.55rem; }
+    .sv-top3__item {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: #f8f9f7; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 0.65rem 0.9rem;
+    }
+    .sv-top3__rank { font-size: 1.3rem; flex-shrink: 0; }
+    .sv-top3__title { flex: 1; font-size: 0.9rem; font-weight: 600; color: #1a1a1a; }
+    .sv-top3__votes { font-size: 0.75rem; color: #999; white-space: nowrap; }
+
+    .sv-quote {
+      border-left: 3px solid #b9d3c2; padding: 0.35rem 0.85rem;
+      margin-bottom: 0.6rem; font-size: 0.9rem; color: #333; line-height: 1.5;
+    }
+    .sv-empty { font-size: 0.85rem; color: #999; font-style: italic; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/home.html" class="top-nav__brand">
+      <img src="/images/glc-white.png" alt="GLC" class="top-nav__logo">
+      <span class="top-nav__title">Global Leadership Conference</span>
+    </a>
+    <ul class="top-nav__links">
+      <li><a href="/home.html">Home</a></li>
+      <li style="display:none" data-auth-tab><a href="/info.html">Info</a></li>
+      <li style="display:none" data-auth-tab><a href="/sessions.html">Sessions</a></li>
+      <li style="display:none" data-auth-tab><a href="/my-sessions.html">My Sessions</a></li>
+      <li style="display:none" data-auth-tab><a href="/people.html">People</a></li>
+      <li style="display:none" data-auth-tab><a href="/activities.html">Activities</a></li>
+      <li style="display:none"><a href="/survey.html">Survey</a></li>
+      <li style="display:none"><a href="/survey-results.html" class="active">Survey Results</a></li>
+      <li><a href="/register.html">Register</a></li>
+      <li style="display:none"><a href="/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <header class="page-header">
+      <h1>Survey Results</h1>
+      <p>Live tabulation &mdash; refreshes automatically as responses arrive</p>
+    </header>
+
+    <div class="sv-count" id="responseCount">Loading responses&hellip;</div>
+
+    <div class="card">
+      <div class="sv-section">
+        <div class="sv-section__title">Which best describes you?</div>
+        <div class="sv-pills" id="attendeeStats"></div>
+      </div>
+
+      <div class="sv-section">
+        <div class="sv-section__title">How valuable was GLC 2026?</div>
+        <div id="overallStat"></div>
+      </div>
+
+      <div class="sv-section">
+        <div class="sv-section__title">Top 3 most valuable sessions</div>
+        <div class="sv-section__sub">Weighted from everyone's 1st / 2nd / 3rd picks</div>
+        <div class="sv-top3" id="top3"></div>
+      </div>
+
+      <div id="dayBlocks"></div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">Social Events &amp; Activities</div>
+        <div id="eventRows"></div>
+        <div class="sv-group">Morning activities</div>
+        <div id="morningRows"></div>
+      </div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">Logistics</div>
+        <div id="logisticsRows"></div>
+      </div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
+        <div class="sv-section__title">In their words</div>
+        <div class="form-group">
+          <label>Surprise / light-bulb moments</label>
+          <div id="quotesSurprise"></div>
+        </div>
+        <div class="form-group">
+          <label>What to change or improve</label>
+          <div id="quotesChanges"></div>
+        </div>
+        <div class="form-group">
+          <label>General comments</label>
+          <div id="quotesComments"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/survey-results.js"></script>
+  <script src="/js/nav-notify.js"></script>
+</body>
+</html>
