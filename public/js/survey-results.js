@@ -55,6 +55,8 @@
   ];
   const LOGISTICS = ['Event Communications', 'GLC Application', 'Hotel', 'Registration & Check-in'];
 
+  const LOCATIONS = ['North America (East Coast)', 'Western Europe', 'Caribbean / Mexico'];
+
   function esc(s) {
     const d = document.createElement('div');
     d.textContent = String(s == null ? '' : s);
@@ -171,6 +173,17 @@
     // Logistics
     document.getElementById('logisticsRows').innerHTML =
       LOGISTICS.map(l => rowHtml(l, '', stat(responses, 'Logistics — ' + l), null)).join('');
+
+    // Preferred region counts
+    const locCounts = {};
+    LOCATIONS.forEach(l => { locCounts[l] = 0; });
+    responses.forEach(r => {
+      const v = (r.answers || {})['Preferred location next year'];
+      if (locCounts[v] !== undefined) locCounts[v]++;
+    });
+    document.getElementById('locationStats').innerHTML = Object.entries(locCounts).map(([label, count]) =>
+      '<span class="sv-pill-stat">' + esc(label) + ': <strong>' + count + '</strong></span>'
+    ).join('');
 
     // Free text
     document.getElementById('quotesSurprise').innerHTML = quotesHtml(responses, 'Surprise / light-bulb moment');

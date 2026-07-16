@@ -60,6 +60,8 @@
 
   const LOGISTICS = ['Event Communications', 'GLC Application', 'Hotel', 'Registration & Check-in'];
 
+  const LOCATIONS = ['North America (East Coast)', 'Western Europe', 'Caribbean / Mexico'];
+
   const DRAFT_KEY = 'glc2026_survey_v1';
 
   /* ── state ─────────────────────────────────────────── */
@@ -68,6 +70,7 @@
     ratings: {}, na: {},
     overallRating: 0,
     mvs1: '', mvs2: '', mvs3: '',
+    nextLocation: '',
     surprise: '', changes: '', comments: ''
   };
 
@@ -180,6 +183,11 @@
       sel.value = state[id] || '';
     });
 
+    // Preferred location pills
+    document.getElementById('locationPills').innerHTML = LOCATIONS.map(label =>
+      '<button type="button" class="sv-pill' + (state.nextLocation === label ? ' sv-pill--active' : '') + '" data-location="' + esc(label) + '">' + esc(label) + '</button>'
+    ).join('');
+
     // Free text
     document.getElementById('svSurprise').value = state.surprise || '';
     document.getElementById('svChanges').value = state.changes || '';
@@ -226,7 +234,8 @@
     }
     const pill = e.target.closest('.sv-pill');
     if (pill) {
-      state.attendeeType = pill.dataset.attendee;
+      if (pill.dataset.location) state.nextLocation = pill.dataset.location;
+      else state.attendeeType = pill.dataset.attendee;
       persist(); render();
     }
   });
@@ -261,6 +270,7 @@
     logisticItems().forEach(l => {
       answers['Logistics — ' + l.title] = state.na[l.key] ? 'N/A' : (state.ratings[l.key] ? String(state.ratings[l.key]) : '');
     });
+    answers['Preferred location next year'] = state.nextLocation || '';
     answers['Surprise / light-bulb moment'] = state.surprise || '';
     answers['What to change'] = state.changes || '';
     answers['General comments'] = state.comments || '';
@@ -281,7 +291,7 @@
     if (!token) { showMsg('error', 'Please log in before submitting the survey.'); return; }
 
     const answers = buildAnswers();
-    const hasContent = state.overallRating || state.attendeeType ||
+    const hasContent = state.overallRating || state.attendeeType || state.nextLocation ||
       Object.keys(state.ratings).length || state.surprise || state.changes || state.comments;
     if (!hasContent) { showMsg('error', 'Please answer at least one question.'); return; }
 
