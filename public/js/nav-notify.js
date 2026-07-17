@@ -184,9 +184,8 @@
     for (const a of links) {
       const href = (a.getAttribute("href") || "").replace(/\/$/, "");
       const isAdminLink   = href === "/admin.html"  || href === "/admin";
-      const isSurveyLink  = href === "/survey.html" || href === "/survey";
       const isResultsLink = href === "/survey-results.html" || href === "/survey-results";
-      if ((isAdminLink || isSurveyLink || isResultsLink) && isAdmin) {
+      if ((isAdminLink || isResultsLink) && isAdmin) {
         a.closest("li").style.display = "";
       }
     }

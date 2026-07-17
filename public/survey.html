@@ -6,13 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Survey - GLC Conference</title>
   <link rel="stylesheet" href="/css/style.css">
-  <!-- Admin-only for now: redirect non-admins immediately -->
+  <!-- Requires login: redirect logged-out visitors home -->
   <script>
     (() => {
-      const ADMIN_EMAILS = ["kkataila@banyansoftware.com", "gretchen@theexperienceagency.ca", "nkotyk@banyansoftware.com", "tcross@banyansoftware.com", "dreimer@banyansoftware.com"];
       try {
         const u = JSON.parse(localStorage.getItem("glc-user"));
-        if (!u || !ADMIN_EMAILS.includes(u.email)) { window.location.replace("/home.html"); }
+        if (!u) { window.location.replace("/home.html"); }
       } catch { window.location.replace("/home.html"); }
     })();
   </script>
@@ -147,7 +146,7 @@
     </a>
     <ul class="top-nav__links">
       <li><a href="/home.html">Home</a></li>
-      <li style="display:none"><a href="/survey.html" class="active">Survey</a></li>
+      <li style="display:none" data-auth-tab><a href="/survey.html" class="active">Survey</a></li>
       <li style="display:none"><a href="/survey-results.html">Survey Results</a></li>
       <li style="display:none" data-auth-tab><a href="/sessions.html">Sessions</a></li>
       <li style="display:none" data-auth-tab><a href="/my-sessions.html">My Sessions</a></li>
