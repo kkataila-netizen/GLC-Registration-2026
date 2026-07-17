@@ -887,10 +887,14 @@ export default async (req, context) => {
       return json({ error: "Response too large." }, 400);
     }
 
+    // TESTING PHASE: multiple submissions allowed. Set to true before go-live
+    // to re-enable the one-response-per-person rule.
+    const SURVEY_ONE_PER_PERSON = false;
+
     const subStore = getStore("survey-submitted");
     let submitted = [];
     try { submitted = (await subStore.get("all", { type: "json", consistency: "strong" })) || []; } catch {}
-    if (submitted.includes(userAuth.email)) {
+    if (SURVEY_ONE_PER_PERSON && submitted.includes(userAuth.email)) {
       return json({ error: "You have already submitted the survey. Responses are anonymous, so they can't be edited after submission." }, 409);
     }
 
@@ -903,9 +907,11 @@ export default async (req, context) => {
     responses.splice(Math.floor(Math.random() * (responses.length + 1)), 0, entry);
     await saveSurveyResponses(responses);
 
-    submitted.push(userAuth.email);
-    submitted.sort();
-    await subStore.setJSON("all", submitted);
+    if (!submitted.includes(userAuth.email)) {
+      submitted.push(userAuth.email);
+      submitted.sort();
+      await subStore.setJSON("all", submitted);
+    }
 
     return json({ success: true }, 201);
   }
