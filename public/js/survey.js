@@ -211,6 +211,37 @@
     document.getElementById('svComments').value = state.comments || '';
 
     updateProgress();
+    updateGate();
+  }
+
+  /* ── submit gate ────────────────────────────────────
+     Required: role, overall 1-10, every day-session row (rating or N/A),
+     all three top-3 picks, every logistics row, preferred region.
+     Social events & morning activities stay optional (rate what you attended). */
+  function getMissing() {
+    const missing = [];
+    if (!state.attendeeType) missing.push('your role (top of the form)');
+    if (!state.overallRating) missing.push('the overall 1–10 rating');
+    DAYS.forEach(d => {
+      let n = 0;
+      d.items.forEach((it, i) => {
+        const k = d.id + '_' + i;
+        if (!state.ratings[k] && !state.na[k]) n++;
+      });
+      if (n) missing.push(n + ' session rating' + (n > 1 ? 's' : '') + ' on ' + d.label + ' (use N/A for any you didn’t attend)');
+    });
+    const picks = [state.mvs1, state.mvs2, state.mvs3].filter(Boolean).length;
+    if (picks < 3) missing.push((3 - picks) + ' more top-3 session pick' + (3 - picks > 1 ? 's' : ''));
+    let ln = 0;
+    logisticItems().forEach(l => { if (!state.ratings[l.key] && !state.na[l.key]) ln++; });
+    if (ln) missing.push(ln + ' logistics rating' + (ln > 1 ? 's' : ''));
+    if (!state.nextLocation) missing.push('your preferred region for next year');
+    return missing;
+  }
+
+  function updateGate() {
+    const btn = document.getElementById('surveySubmitBtn');
+    btn.setAttribute('aria-disabled', getMissing().length ? 'true' : 'false');
   }
 
   function updateProgress() {
@@ -258,12 +289,12 @@
   });
 
   document.getElementById('roleSelect').addEventListener('change', (e) => {
-    state.attendeeType = e.target.value; persist();
+    state.attendeeType = e.target.value; persist(); updateGate();
   });
 
   ['mvs1', 'mvs2', 'mvs3'].forEach(id => {
     document.getElementById(id).addEventListener('change', (e) => {
-      state[id] = e.target.value; persist();
+      state[id] = e.target.value; persist(); updateGate();
     });
   });
   [['svSurprise', 'surprise'], ['svTopics', 'topicsWanted'], ['svOnboarding', 'onboarding'],
@@ -312,14 +343,19 @@
 
   document.getElementById('surveySubmitBtn').addEventListener('click', async () => {
     msg.hidden = true;
+    msg.classList.remove('sv-gate');
     const token = getUserToken();
     if (!token) { showMsg('error', 'Please log in before submitting the survey.'); return; }
 
+    const missing = getMissing();
+    if (missing.length) {
+      showMsg('error', 'Almost there — still needed: ' + missing.join(' · ') + '.');
+      msg.className = 'message sv-gate';
+      msg.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+
     const answers = buildAnswers();
-    const hasContent = state.overallRating || state.attendeeType || state.nextLocation ||
-      Object.keys(state.ratings).length || state.topicsWanted || state.onboarding ||
-      state.formatFeedback || state.surprise || state.changes || state.comments;
-    if (!hasContent) { showMsg('error', 'Please answer at least one question.'); return; }
 
     const btn = document.getElementById('surveySubmitBtn');
     btn.disabled = true;

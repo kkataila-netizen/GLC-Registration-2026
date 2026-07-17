@@ -127,6 +127,13 @@
     .sv-progress__bar { height: 6px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
     .sv-progress__fill { height: 100%; background: #395542; border-radius: 99px; transition: width 0.3s ease; }
 
+    /* Submit gate */
+    #surveySubmitBtn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+    #surveyMessage.sv-gate {
+      border-radius: 14px; background: #fff7ed; border: 1px solid #f0b429;
+      color: #7c4a03; padding: 0.7rem 1.1rem; font-size: 0.875rem; line-height: 1.5;
+    }
+
     .sv-thanks { text-align: center; padding: 2.5rem 1rem; }
     .sv-thanks h2 { font-family: 'Libre Franklin', Arial, sans-serif; margin-bottom: 0.6rem; }
     .sv-thanks p { color: var(--text-muted); }
