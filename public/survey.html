@@ -41,6 +41,21 @@
     }
     .sv-pill--active { color: #fff; background: #395542; border-color: #395542; }
 
+    /* 1-10 overall scale */
+    .sv-scale { display: flex; gap: 6px; max-width: 520px; }
+    .sv-scale__btn {
+      flex: 1 1 0; min-width: 34px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.9375rem; font-family: inherit;
+      color: #414141; background: #fff; border: 1px solid #cfcfc8;
+      border-radius: 4px; cursor: pointer; transition: all 150ms;
+    }
+    .sv-scale__btn--active { color: #fff; background: #395542; border-color: #395542; }
+    .sv-scale__labels {
+      display: flex; justify-content: space-between; max-width: 520px;
+      font-size: 0.72rem; color: #9a9a96; margin-top: 6px;
+    }
+
     /* Star rows */
     .sv-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -145,23 +160,24 @@
     <!-- Survey form -->
     <div id="surveyMain" class="card">
       <div class="sv-section">
-        <div class="sv-section__title">Which best describes you?</div>
-        <div class="sv-pills" id="attendeePills"></div>
+        <div class="sv-section__title">What best represents you?</div>
+        <select class="sv-select" id="roleSelect" style="max-width:340px"><option value="">Select your role&hellip;</option></select>
       </div>
 
       <div class="sv-section">
         <div class="sv-section__title">How valuable was GLC 2026 to you?</div>
-        <div class="sv-stars" id="overallStars" style="font-size:0"></div>
+        <div class="sv-scale" id="overallScale"></div>
+        <div class="sv-scale__labels"><span>Not valuable</span><span>Extremely valuable</span></div>
       </div>
 
-      <div class="sv-section">
+      <div id="dayBlocks"></div>
+
+      <div class="sv-section" style="margin-top:1.5rem">
         <div class="sv-section__title">Your top 3 most valuable sessions</div>
         <select class="sv-select" id="mvs1"><option value="">1st choice&hellip;</option></select>
         <select class="sv-select" id="mvs2"><option value="">2nd choice&hellip;</option></select>
         <select class="sv-select" id="mvs3"><option value="">3rd choice&hellip;</option></select>
       </div>
-
-      <div id="dayBlocks"></div>
 
       <div class="sv-section" style="margin-top:1.5rem">
         <div class="sv-section__title">Social Events &amp; Activities</div>
@@ -188,6 +204,18 @@
         <div class="form-group">
           <label>What was the one surprise or light-bulb moment for you?</label>
           <textarea class="sv-text" id="svSurprise" rows="3" placeholder="Something that shifted your thinking or stuck with you&hellip;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Topics you'd love to see covered next time</label>
+          <textarea class="sv-text" id="svTopics" rows="3" placeholder="Sessions, speakers, or themes you want more of&hellip;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>For new CEOs: would a longer onboarding session on foundational best practices be valuable?</label>
+          <textarea class="sv-text" id="svOnboarding" rows="3" placeholder="Interest level and what you'd want it to cover&hellip;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Any changes you'd make to the format? (&frac12; day of tracks + 2 days together)</label>
+          <textarea class="sv-text" id="svFormat" rows="3" placeholder="What worked, what you'd adjust about the structure&hellip;"></textarea>
         </div>
         <div class="form-group">
           <label>What would you change or improve?</label>

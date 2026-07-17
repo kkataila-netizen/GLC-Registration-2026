@@ -18,10 +18,13 @@
       ['Setting the Stage: Driving Performance with the BOS', '1:00 – 1:15 p.m. · David', 'New CEO Session'],
       ['Know Your Numbers: Four Metrics That Matter', '1:30 – 2:15 p.m. · Darren', 'New CEO Session'],
       ['Get Traction: The EOS Method to Focus & Scale', '2:30 – 3:45 p.m. · Tristan', 'New CEO Session'],
-      ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session']
+      ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session'],
+      ['M&A / BD', '', 'HQ Functional Breakouts'],
+      ['Legal', '', 'HQ Functional Breakouts'],
+      ['Finance', '', 'HQ Functional Breakouts'],
+      ['Ops (HR / TA / IT)', '', 'HQ Functional Breakouts']
     ]},
     { id: 'd1', label: 'DAY 1', date: 'Wednesday, July 15', theme: 'Accelerating through Talent, Product & Velocity', items: [
-      ['Welcome & Ice Breaker', '8:30 – 9:00 a.m. · David', ''],
       ['Build the Next Version: Our Re-Founding Moment', '9:00 – 10:00 a.m. · David', ''],
       ['Pivotal Decisions: CEO Decisions That Changed the Trajectory', '10:15 – 11:00 a.m. · Bricey', ''],
       ['Bold Moves: Resetting Your Dev Org for Innovation', '11:00 – 11:30 a.m. · Kay', ''],
@@ -55,7 +58,12 @@
   ];
   const LOGISTICS = ['Event Communications', 'GLC Application', 'Hotel', 'Registration & Check-in'];
 
-  const LOCATIONS = ['North America (East Coast)', 'Western Europe', 'Caribbean / Mexico'];
+  const LOCATIONS = ['North America (Toronto)', 'North America (Florida)', 'Western Europe', 'Caribbean / Mexico'];
+
+  const ROLES = [
+    'New CEO (joined Banyan in the last 12 months)',
+    'Tenured Banyan CEO', 'OL', 'ELP', 'Finance', 'M&A', 'BD', 'HR / Legal / Other'
+  ];
 
   function esc(s) {
     const d = document.createElement('div');
@@ -111,21 +119,31 @@
     document.getElementById('responseCount').innerHTML =
       '<strong>' + responses.length + '</strong> anonymous response' + (responses.length === 1 ? '' : 's') + ' received';
 
-    // Attendee type counts
-    const typeCounts = { HQ: 0, OpCo: 0, Guest: 0 };
+    // Role counts
+    const roleCounts = {};
+    ROLES.forEach(r => { roleCounts[r] = 0; });
     responses.forEach(r => {
-      const t = (r.answers || {})['Attendee type'];
-      if (typeCounts[t] !== undefined) typeCounts[t]++;
+      const t = (r.answers || {})['Role'];
+      if (roleCounts[t] !== undefined) roleCounts[t]++;
     });
-    document.getElementById('attendeeStats').innerHTML = Object.entries(typeCounts).map(([label, count]) =>
+    document.getElementById('attendeeStats').innerHTML = Object.entries(roleCounts).map(([label, count]) =>
       '<span class="sv-pill-stat">' + esc(label) + ': <strong>' + count + '</strong></span>'
     ).join('');
 
-    // Overall rating
-    const overall = stat(responses, 'How valuable was GLC (1-5)');
+    // Overall rating (1-10 scale)
+    let oSum = 0, oN = 0;
+    responses.forEach(r => {
+      const num = parseInt((r.answers || {})['How valuable was GLC (1-10)'], 10);
+      if (num >= 1 && num <= 10) { oSum += num; oN++; }
+    });
+    const oAvg = oN ? oSum / oN : 0;
+    const oPct = Math.round(oAvg * 10);
     document.getElementById('overallStat').innerHTML =
-      '<div class="sv-row" style="border:none;padding:0.35rem 0">' +
-      '<div class="sv-row__text"></div>' + scoreHtml(overall) + '</div>';
+      '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.35rem 0;max-width:520px">' +
+      '<div style="flex:1;height:10px;background:#e9e9e2;border-radius:99px;overflow:hidden">' +
+      '<div style="height:100%;width:' + oPct + '%;background:#395542;border-radius:99px"></div></div>' +
+      '<span class="sv-avg" style="min-width:4.2rem">' + (oN ? oAvg.toFixed(1) + ' / 10' : '&ndash;') + '</span>' +
+      '<span class="sv-n">' + oN + ' rating' + (oN === 1 ? '' : 's') + '</span></div>';
 
     // Top 3 leaderboard (weighted 3/2/1)
     const points = {}, votes = {};
@@ -189,6 +207,9 @@
 
     // Free text
     document.getElementById('quotesSurprise').innerHTML = quotesHtml(responses, 'Surprise / light-bulb moment');
+    document.getElementById('quotesTopics').innerHTML = quotesHtml(responses, 'Topics to cover next time');
+    document.getElementById('quotesOnboarding').innerHTML = quotesHtml(responses, 'Interest in longer new-CEO onboarding');
+    document.getElementById('quotesFormat').innerHTML = quotesHtml(responses, 'Format feedback (tracks + days together)');
     document.getElementById('quotesChanges').innerHTML = quotesHtml(responses, 'What to change');
     document.getElementById('quotesComments').innerHTML = quotesHtml(responses, 'General comments');
   }

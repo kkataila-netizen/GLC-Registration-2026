@@ -21,10 +21,13 @@
       ['Setting the Stage: Driving Performance with the BOS', '1:00 – 1:15 p.m. · David', 'New CEO Session'],
       ['Know Your Numbers: Four Metrics That Matter', '1:30 – 2:15 p.m. · Darren', 'New CEO Session'],
       ['Get Traction: The EOS Method to Focus & Scale', '2:30 – 3:45 p.m. · Tristan', 'New CEO Session'],
-      ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session']
+      ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session'],
+      ['M&A / BD', '', 'HQ Functional Breakouts'],
+      ['Legal', '', 'HQ Functional Breakouts'],
+      ['Finance', '', 'HQ Functional Breakouts'],
+      ['Ops (HR / TA / IT)', '', 'HQ Functional Breakouts']
     ]},
     { id: 'd1', label: 'DAY 1', date: 'Wednesday, July 15', theme: 'Accelerating through Talent, Product & Velocity', items: [
-      ['Welcome & Ice Breaker', '8:30 – 9:00 a.m. · David', ''],
       ['Build the Next Version: Our Re-Founding Moment', '9:00 – 10:00 a.m. · David', ''],
       ['Pivotal Decisions: CEO Decisions That Changed the Trajectory', '10:15 – 11:00 a.m. · Bricey', ''],
       ['Bold Moves: Resetting Your Dev Org for Innovation', '11:00 – 11:30 a.m. · Kay', ''],
@@ -60,7 +63,12 @@
 
   const LOGISTICS = ['Event Communications', 'GLC Application', 'Hotel', 'Registration & Check-in'];
 
-  const LOCATIONS = ['North America (East Coast)', 'Western Europe', 'Caribbean / Mexico'];
+  const LOCATIONS = ['North America (Toronto)', 'North America (Florida)', 'Western Europe', 'Caribbean / Mexico'];
+
+  const ROLES = [
+    'New CEO (joined Banyan in the last 12 months)',
+    'Tenured Banyan CEO', 'OL', 'ELP', 'Finance', 'M&A', 'BD', 'HR / Legal / Other'
+  ];
 
   const DRAFT_KEY = 'glc2026_survey_v1';
 
@@ -71,6 +79,7 @@
     overallRating: 0,
     mvs1: '', mvs2: '', mvs3: '',
     nextLocation: '',
+    topicsWanted: '', onboarding: '', formatFeedback: '',
     surprise: '', changes: '', comments: ''
   };
 
@@ -132,17 +141,18 @@
   }
 
   function render() {
-    // Attendee pills
-    document.getElementById('attendeePills').innerHTML = ['HQ', 'OpCo', 'Guest'].map(label =>
-      '<button type="button" class="sv-pill' + (state.attendeeType === label ? ' sv-pill--active' : '') + '" data-attendee="' + label + '">' + label + '</button>'
-    ).join('');
+    // Role dropdown
+    const roleSel = document.getElementById('roleSelect');
+    roleSel.innerHTML = '<option value="">Select your role&hellip;</option>' +
+      ROLES.map(r => '<option value="' + esc(r) + '">' + esc(r) + '</option>').join('');
+    roleSel.value = state.attendeeType || '';
 
-    // Overall stars
-    document.getElementById('overallStars').innerHTML = (() => {
+    // Overall 1-10 scale
+    document.getElementById('overallScale').innerHTML = (() => {
       let h = '';
-      for (let n = 1; n <= 5; n++) {
-        const on = n <= state.overallRating;
-        h += '<button type="button" class="sv-star' + (on ? ' sv-star--on' : '') + '" data-overall="' + n + '" aria-label="' + n + ' star' + (n > 1 ? 's' : '') + '" style="font-size:1.8rem">&#9733;</button>';
+      for (let n = 1; n <= 10; n++) {
+        const on = n === state.overallRating;
+        h += '<button type="button" class="sv-scale__btn' + (on ? ' sv-scale__btn--active' : '') + '" data-overall="' + n + '">' + n + '</button>';
       }
       return h;
     })();
@@ -191,6 +201,9 @@
 
     // Free text
     document.getElementById('svSurprise').value = state.surprise || '';
+    document.getElementById('svTopics').value = state.topicsWanted || '';
+    document.getElementById('svOnboarding').value = state.onboarding || '';
+    document.getElementById('svFormat').value = state.formatFeedback || '';
     document.getElementById('svChanges').value = state.changes || '';
     document.getElementById('svComments').value = state.comments || '';
 
@@ -220,8 +233,9 @@
       persist(); render();
       return;
     }
-    if (star && star.dataset.overall) {
-      state.overallRating = parseInt(star.dataset.overall, 10);
+    const scale = e.target.closest('.sv-scale__btn');
+    if (scale) {
+      state.overallRating = parseInt(scale.dataset.overall, 10);
       persist(); render();
       return;
     }
@@ -234,11 +248,14 @@
       return;
     }
     const pill = e.target.closest('.sv-pill');
-    if (pill) {
-      if (pill.dataset.location) state.nextLocation = pill.dataset.location;
-      else state.attendeeType = pill.dataset.attendee;
+    if (pill && pill.dataset.location) {
+      state.nextLocation = pill.dataset.location;
       persist(); render();
     }
+  });
+
+  document.getElementById('roleSelect').addEventListener('change', (e) => {
+    state.attendeeType = e.target.value; persist();
   });
 
   ['mvs1', 'mvs2', 'mvs3'].forEach(id => {
@@ -246,7 +263,8 @@
       state[id] = e.target.value; persist();
     });
   });
-  [['svSurprise', 'surprise'], ['svChanges', 'changes'], ['svComments', 'comments']].forEach(([id, key]) => {
+  [['svSurprise', 'surprise'], ['svTopics', 'topicsWanted'], ['svOnboarding', 'onboarding'],
+   ['svFormat', 'formatFeedback'], ['svChanges', 'changes'], ['svComments', 'comments']].forEach(([id, key]) => {
     document.getElementById(id).addEventListener('input', (e) => {
       state[key] = e.target.value; persist();
     });
@@ -255,8 +273,8 @@
   /* ── submit ───────────────────────────────────────── */
   function buildAnswers() {
     const answers = {};
-    answers['Attendee type'] = state.attendeeType || '';
-    answers['How valuable was GLC (1-5)'] = state.overallRating ? String(state.overallRating) : '';
+    answers['Role'] = state.attendeeType || '';
+    answers['How valuable was GLC (1-10)'] = state.overallRating ? String(state.overallRating) : '';
     dayItems().forEach(it => {
       answers[it.day + ' — ' + it.title] = state.na[it.key] ? 'N/A' : (state.ratings[it.key] ? String(state.ratings[it.key]) : '');
     });
@@ -272,6 +290,9 @@
       answers['Logistics — ' + l.title] = state.na[l.key] ? 'N/A' : (state.ratings[l.key] ? String(state.ratings[l.key]) : '');
     });
     answers['Preferred location next year'] = state.nextLocation || '';
+    answers['Format feedback (tracks + days together)'] = state.formatFeedback || '';
+    answers['Interest in longer new-CEO onboarding'] = state.onboarding || '';
+    answers['Topics to cover next time'] = state.topicsWanted || '';
     answers['Surprise / light-bulb moment'] = state.surprise || '';
     answers['What to change'] = state.changes || '';
     answers['General comments'] = state.comments || '';
@@ -293,7 +314,8 @@
 
     const answers = buildAnswers();
     const hasContent = state.overallRating || state.attendeeType || state.nextLocation ||
-      Object.keys(state.ratings).length || state.surprise || state.changes || state.comments;
+      Object.keys(state.ratings).length || state.topicsWanted || state.onboarding ||
+      state.formatFeedback || state.surprise || state.changes || state.comments;
     if (!hasContent) { showMsg('error', 'Please answer at least one question.'); return; }
 
     const btn = document.getElementById('surveySubmitBtn');
