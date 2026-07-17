@@ -887,9 +887,7 @@ export default async (req, context) => {
       return json({ error: "Response too large." }, 400);
     }
 
-    // TESTING PHASE: multiple submissions allowed. Set to true before go-live
-    // to re-enable the one-response-per-person rule.
-    const SURVEY_ONE_PER_PERSON = false;
+    const SURVEY_ONE_PER_PERSON = true;
 
     const subStore = getStore("survey-submitted");
     let submitted = [];
