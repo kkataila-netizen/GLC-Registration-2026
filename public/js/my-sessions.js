@@ -77,11 +77,10 @@
   const DAYS = ['Tuesday, July 14', 'Wednesday, July 15', 'Thursday, July 16', 'Friday, July 17'];
   const DAY_DATES = ['2026-07-14', '2026-07-15', '2026-07-16', '2026-07-17'];
 
-  // Past days auto-hide based on the conference clock (Toronto time).
-  // en-CA formatting yields YYYY-MM-DD, so plain string compare works.
-  function isPastDay(i) {
-    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date());
-    return DAY_DATES[i] < today;
+  // Conference is over: show the full agenda as it looked before Day 0,
+  // rather than hiding days that have passed.
+  function isPastDay() {
+    return false;
   }
 
   const AGENDA = [
