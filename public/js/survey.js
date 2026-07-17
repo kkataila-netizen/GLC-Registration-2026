@@ -70,7 +70,10 @@
     'Tenured Banyan CEO', 'OL', 'ELP', 'Finance', 'M&A', 'BD', 'HR / Legal / Other'
   ];
 
-  const DRAFT_KEY = 'glc2026_survey_v1';
+  // v2: question list changed in the 2026-07-17 design sync — old positional
+  // draft keys would land on the wrong sessions, so v1 drafts are discarded.
+  const DRAFT_KEY = 'glc2026_survey_v2';
+  try { localStorage.removeItem('glc2026_survey_v1'); } catch { /* ignore */ }
 
   /* ── state ─────────────────────────────────────────── */
   let state = {
