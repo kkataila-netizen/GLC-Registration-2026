@@ -44,7 +44,7 @@
     /* 1-10 overall scale */
     .sv-scale { display: flex; gap: 6px; max-width: 520px; }
     .sv-scale__btn {
-      flex: 1 1 0; min-width: 34px; height: 44px;
+      flex: 1 1 0; min-width: 0; height: 44px; padding: 0;
       display: flex; align-items: center; justify-content: center;
       font-weight: 600; font-size: 0.9375rem; font-family: inherit;
       color: #414141; background: #fff; border: 1px solid #cfcfc8;
@@ -54,6 +54,10 @@
     .sv-scale__labels {
       display: flex; justify-content: space-between; max-width: 520px;
       font-size: 0.72rem; color: #9a9a96; margin-top: 6px;
+    }
+    @media (max-width: 480px) {
+      .sv-scale { gap: 3px; }
+      .sv-scale__btn { height: 38px; font-size: 0.8125rem; border-radius: 3px; }
     }
 
     /* Star rows */
