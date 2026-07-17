@@ -106,14 +106,6 @@
       '</div>' + scoreHtml(st) + '</div>';
   }
 
-  function quotesHtml(responses, field) {
-    const items = responses
-      .map(r => ((r.answers || {})[field] || '').trim())
-      .filter(Boolean);
-    if (!items.length) return '<div class="sv-empty">No responses yet.</div>';
-    return items.map(q => '<div class="sv-quote">' + esc(q) + '</div>').join('');
-  }
-
   function render(responses) {
     // Response count
     document.getElementById('responseCount').innerHTML =
@@ -205,13 +197,8 @@
       '<span class="sv-pill-stat">' + esc(label) + ': <strong>' + count + '</strong></span>'
     ).join('');
 
-    // Free text
-    document.getElementById('quotesSurprise').innerHTML = quotesHtml(responses, 'Surprise / light-bulb moment');
-    document.getElementById('quotesTopics').innerHTML = quotesHtml(responses, 'Topics to cover next time');
-    document.getElementById('quotesOnboarding').innerHTML = quotesHtml(responses, 'Interest in longer new-CEO onboarding');
-    document.getElementById('quotesFormat').innerHTML = quotesHtml(responses, 'Format feedback (tracks + days together)');
-    document.getElementById('quotesChanges').innerHTML = quotesHtml(responses, 'What to change');
-    document.getElementById('quotesComments').innerHTML = quotesHtml(responses, 'General comments');
+    // Free-text answers are intentionally not rendered here — they are
+    // available only via the Survey Export (CSV/JSON) on the Admin page.
   }
 
   /* ── load + poll ───────────────────────────────────── */
