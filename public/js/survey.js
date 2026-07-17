@@ -187,15 +187,7 @@
     // Logistics (no N/A)
     document.getElementById('logisticsRows').innerHTML = logisticItems().map(l => rowHtml(l, false)).join('');
 
-    // Top-3 selects
-    const opts = dayItems().map(it =>
-      '<option value="' + esc(it.key) + '">' + esc(it.day + ' · ' + it.title) + '</option>'
-    ).join('');
-    [['mvs1', '1st'], ['mvs2', '2nd'], ['mvs3', '3rd']].forEach(([id, rank]) => {
-      const sel = document.getElementById(id);
-      sel.innerHTML = '<option value="">' + rank + ' choice…</option>' + opts;
-      sel.value = state[id] || '';
-    });
+    renderTop3();
 
     // Preferred location pills
     document.getElementById('locationPills').innerHTML = LOCATIONS.map(label =>
@@ -214,6 +206,21 @@
     updateGate();
   }
 
+  // Top-3 selects — a session already picked in one dropdown is disabled
+  // in the other two, so the three picks are always different sessions.
+  function renderTop3() {
+    const all = dayItems();
+    [['mvs1', '1st'], ['mvs2', '2nd'], ['mvs3', '3rd']].forEach(([id, rank]) => {
+      const sel = document.getElementById(id);
+      const others = ['mvs1', 'mvs2', 'mvs3'].filter(x => x !== id).map(x => state[x]).filter(Boolean);
+      sel.innerHTML = '<option value="">' + rank + ' choice…</option>' + all.map(it =>
+        '<option value="' + esc(it.key) + '"' + (others.includes(it.key) ? ' disabled' : '') + '>' +
+        esc(it.day + ' · ' + it.title) + '</option>'
+      ).join('');
+      sel.value = state[id] || '';
+    });
+  }
+
   /* ── submit gate ────────────────────────────────────
      Required: role, overall 1-10, every day-session row (rating or N/A),
      all three top-3 picks, every logistics row, preferred region.
@@ -230,8 +237,9 @@
       });
       if (n) missing.push(n + ' session rating' + (n > 1 ? 's' : '') + ' on ' + d.label + ' (use N/A for any you didn’t attend)');
     });
-    const picks = [state.mvs1, state.mvs2, state.mvs3].filter(Boolean).length;
-    if (picks < 3) missing.push((3 - picks) + ' more top-3 session pick' + (3 - picks > 1 ? 's' : ''));
+    const chosen = [state.mvs1, state.mvs2, state.mvs3].filter(Boolean);
+    if (chosen.length < 3) missing.push((3 - chosen.length) + ' more top-3 session pick' + (3 - chosen.length > 1 ? 's' : ''));
+    else if (new Set(chosen).size !== 3) missing.push('three different top-3 sessions (a session is picked twice)');
     let ln = 0;
     logisticItems().forEach(l => { if (!state.ratings[l.key] && !state.na[l.key]) ln++; });
     if (ln) missing.push(ln + ' logistics rating' + (ln > 1 ? 's' : ''));
@@ -294,7 +302,11 @@
 
   ['mvs1', 'mvs2', 'mvs3'].forEach(id => {
     document.getElementById(id).addEventListener('change', (e) => {
-      state[id] = e.target.value; persist(); updateGate();
+      state[id] = e.target.value;
+      // safety net (e.g. a stale draft): never keep a duplicate pick
+      const others = ['mvs1', 'mvs2', 'mvs3'].filter(x => x !== id).map(x => state[x]);
+      if (state[id] && others.includes(state[id])) state[id] = '';
+      persist(); renderTop3(); updateGate();
     });
   });
   [['svSurprise', 'surprise'], ['svTopics', 'topicsWanted'], ['svOnboarding', 'onboarding'],
