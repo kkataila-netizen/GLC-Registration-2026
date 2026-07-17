@@ -18,7 +18,6 @@
       ['Track 1: Driving OpCo Performance — The OL Playbook', '9:00 – 12:00 · David / Darren', 'OL Track'],
       ['Track 2: ELP Track Sessions', '9:00 – 12:00 · Ryan', 'ELP Track'],
       ['Track 3: Becoming an AI-Native HQ', '9:00 – 12:00 · Kaz & Kristian', 'AI-Native HQ Track'],
-      ['Setting the Stage: Driving Performance with the BOS', '1:00 – 1:15 p.m. · David', 'New CEO Session'],
       ['Know Your Numbers: Four Metrics That Matter', '1:30 – 2:15 p.m. · Darren', 'New CEO Session'],
       ['Get Traction: The EOS Method to Focus & Scale', '2:30 – 3:45 p.m. · Tristan', 'New CEO Session'],
       ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session'],
@@ -70,11 +69,12 @@
     'Tenured Banyan CEO', 'OL', 'ELP', 'Finance', 'M&A', 'BD', 'HR / Legal / Other'
   ];
 
-  // v3: go-live — all drafts saved during the testing phase are discarded.
-  const DRAFT_KEY = 'glc2026_survey_v3';
+  // v4: question list changed post-launch (session removed, region multi-select,
+  // surprise question dropped) — older positional drafts are discarded.
+  const DRAFT_KEY = 'glc2026_survey_v4';
   try {
-    localStorage.removeItem('glc2026_survey_v1');
-    localStorage.removeItem('glc2026_survey_v2');
+    ['glc2026_survey_v1', 'glc2026_survey_v2', 'glc2026_survey_v3']
+      .forEach(k => localStorage.removeItem(k));
   } catch { /* ignore */ }
 
   /* ── state ─────────────────────────────────────────── */
@@ -83,9 +83,9 @@
     ratings: {}, na: {},
     overallRating: 0,
     mvs1: '', mvs2: '', mvs3: '',
-    nextLocation: '',
+    nextLocation: [],
     topicsWanted: '', onboarding: '', formatFeedback: '',
-    surprise: '', changes: '', comments: ''
+    changes: '', comments: ''
   };
 
   function loadDraft() {
@@ -191,13 +191,12 @@
 
     renderTop3();
 
-    // Preferred location pills
+    // Preferred location pills (multi-select)
     document.getElementById('locationPills').innerHTML = LOCATIONS.map(label =>
-      '<button type="button" class="sv-pill' + (state.nextLocation === label ? ' sv-pill--active' : '') + '" data-location="' + esc(label) + '">' + esc(label) + '</button>'
+      '<button type="button" class="sv-pill' + (state.nextLocation.includes(label) ? ' sv-pill--active' : '') + '" data-location="' + esc(label) + '">' + esc(label) + '</button>'
     ).join('');
 
     // Free text
-    document.getElementById('svSurprise').value = state.surprise || '';
     document.getElementById('svTopics').value = state.topicsWanted || '';
     document.getElementById('svOnboarding').value = state.onboarding || '';
     document.getElementById('svFormat').value = state.formatFeedback || '';
@@ -245,7 +244,7 @@
     let ln = 0;
     logisticItems().forEach(l => { if (!state.ratings[l.key] && !state.na[l.key]) ln++; });
     if (ln) missing.push(ln + ' logistics rating' + (ln > 1 ? 's' : ''));
-    if (!state.nextLocation) missing.push('your preferred region for next year');
+    if (!state.nextLocation.length) missing.push('at least one preferred region for next year');
     return missing;
   }
 
@@ -293,7 +292,12 @@
     }
     const pill = e.target.closest('.sv-pill');
     if (pill && pill.dataset.location) {
-      state.nextLocation = pill.dataset.location;
+      const label = pill.dataset.location;
+      if (state.nextLocation.includes(label)) {
+        state.nextLocation = state.nextLocation.filter(l => l !== label);
+      } else {
+        state.nextLocation.push(label);
+      }
       persist(); render();
     }
   });
@@ -311,7 +315,7 @@
       persist(); renderTop3(); updateGate();
     });
   });
-  [['svSurprise', 'surprise'], ['svTopics', 'topicsWanted'], ['svOnboarding', 'onboarding'],
+  [['svTopics', 'topicsWanted'], ['svOnboarding', 'onboarding'],
    ['svFormat', 'formatFeedback'], ['svChanges', 'changes'], ['svComments', 'comments']].forEach(([id, key]) => {
     document.getElementById(id).addEventListener('input', (e) => {
       state[key] = e.target.value; persist();
@@ -337,11 +341,10 @@
     logisticItems().forEach(l => {
       answers['Logistics — ' + l.title] = state.na[l.key] ? 'N/A' : (state.ratings[l.key] ? String(state.ratings[l.key]) : '');
     });
-    answers['Preferred location next year'] = state.nextLocation || '';
+    answers['Preferred location next year'] = state.nextLocation.join('; ');
     answers['Format feedback (tracks + days together)'] = state.formatFeedback || '';
     answers['Interest in longer new-CEO onboarding'] = state.onboarding || '';
     answers['Topics to cover next time'] = state.topicsWanted || '';
-    answers['Surprise / light-bulb moment'] = state.surprise || '';
     answers['What to change'] = state.changes || '';
     answers['General comments'] = state.comments || '';
     return answers;

@@ -15,7 +15,6 @@
       ['Track 1: Driving OpCo Performance — The OL Playbook', '9:00 – 12:00 · David / Darren', 'OL Track'],
       ['Track 2: ELP Track Sessions', '9:00 – 12:00 · Ryan', 'ELP Track'],
       ['Track 3: Becoming an AI-Native HQ', '9:00 – 12:00 · Kaz & Kristian', 'AI-Native HQ Track'],
-      ['Setting the Stage: Driving Performance with the BOS', '1:00 – 1:15 p.m. · David', 'New CEO Session'],
       ['Know Your Numbers: Four Metrics That Matter', '1:30 – 2:15 p.m. · Darren', 'New CEO Session'],
       ['Get Traction: The EOS Method to Focus & Scale', '2:30 – 3:45 p.m. · Tristan', 'New CEO Session'],
       ['Grow the Top Line: Four Levers to Grow Revenue', '4:00 – 5:15 p.m. · Reed & Luke', 'New CEO Session'],
@@ -186,12 +185,14 @@
     document.getElementById('logisticsRows').innerHTML =
       LOGISTICS.map(l => rowHtml(l, '', stat(responses, 'Logistics — ' + l), null)).join('');
 
-    // Preferred region counts
+    // Preferred region counts (multi-select: values joined with '; ')
     const locCounts = {};
     LOCATIONS.forEach(l => { locCounts[l] = 0; });
     responses.forEach(r => {
-      const v = (r.answers || {})['Preferred location next year'];
-      if (locCounts[v] !== undefined) locCounts[v]++;
+      const v = (r.answers || {})['Preferred location next year'] || '';
+      v.split('; ').forEach(part => {
+        if (locCounts[part] !== undefined) locCounts[part]++;
+      });
     });
     document.getElementById('locationStats').innerHTML = Object.entries(locCounts).map(([label, count]) =>
       '<span class="sv-pill-stat">' + esc(label) + ': <strong>' + count + '</strong></span>'
