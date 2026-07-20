@@ -241,6 +241,11 @@
     const chosen = [state.mvs1, state.mvs2, state.mvs3].filter(Boolean);
     if (chosen.length < 3) missing.push((3 - chosen.length) + ' more top-3 session pick' + (3 - chosen.length > 1 ? 's' : ''));
     else if (new Set(chosen).size !== 3) missing.push('three different top-3 sessions (a session is picked twice)');
+    // Social Events & Activities: optional overall, but at least one rating
+    // somewhere in the card (main events or morning activities)
+    if (!eventItems().some(e => state.ratings[e.key])) {
+      missing.push('at least one rating under Social Events & Activities');
+    }
     let ln = 0;
     logisticItems().forEach(l => { if (!state.ratings[l.key] && !state.na[l.key]) ln++; });
     if (ln) missing.push(ln + ' logistics rating' + (ln > 1 ? 's' : ''));
