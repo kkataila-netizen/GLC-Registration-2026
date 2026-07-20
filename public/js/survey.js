@@ -255,7 +255,24 @@
 
   function updateGate() {
     const btn = document.getElementById('surveySubmitBtn');
-    btn.setAttribute('aria-disabled', getMissing().length ? 'true' : 'false');
+    const missing = getMissing();
+    btn.setAttribute('aria-disabled', missing.length ? 'true' : 'false');
+    if (!missing.length) hideGateTip();
+  }
+
+  /* pill box anchored above the submit button: shows on hover/tap while gated */
+  const gateTip = document.getElementById('gateTip');
+  let gateTipTimer = null;
+  function showGateTip() {
+    const missing = getMissing();
+    if (!missing.length) { hideGateTip(); return; }
+    gateTip.textContent = 'Still needed: ' + missing.join(' · ') + '.';
+    gateTip.hidden = false;
+  }
+  function hideGateTip() {
+    clearTimeout(gateTipTimer);
+    gateTipTimer = null;
+    gateTip.hidden = true;
   }
 
   function updateProgress() {
@@ -363,17 +380,22 @@
     msg.scrollIntoView({ block: 'nearest' });
   }
 
-  document.getElementById('surveySubmitBtn').addEventListener('click', async () => {
+  const submitBtn = document.getElementById('surveySubmitBtn');
+  submitBtn.addEventListener('mouseenter', () => { if (getMissing().length) showGateTip(); });
+  submitBtn.addEventListener('mouseleave', () => { if (!gateTipTimer) hideGateTip(); });
+  submitBtn.addEventListener('focus', () => { if (getMissing().length) showGateTip(); });
+  submitBtn.addEventListener('blur', hideGateTip);
+
+  submitBtn.addEventListener('click', async () => {
     msg.hidden = true;
-    msg.classList.remove('sv-gate');
     const token = getUserToken();
     if (!token) { showMsg('error', 'Please log in before submitting the survey.'); return; }
 
     const missing = getMissing();
     if (missing.length) {
-      showMsg('error', 'Almost there — still needed: ' + missing.join(' · ') + '.');
-      msg.className = 'message sv-gate';
-      msg.scrollIntoView({ block: 'nearest' });
+      showGateTip();
+      clearTimeout(gateTipTimer);
+      gateTipTimer = setTimeout(hideGateTip, 8000);
       return;
     }
 

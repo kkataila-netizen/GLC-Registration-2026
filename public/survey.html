@@ -128,9 +128,18 @@
 
     /* Submit gate */
     #surveySubmitBtn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
-    #surveyMessage.sv-gate {
-      border-radius: 14px; background: #fff7ed; border: 1px solid #f0b429;
-      color: #7c4a03; padding: 0.7rem 1.1rem; font-size: 0.875rem; line-height: 1.5;
+    .sv-gatetip {
+      position: absolute; right: 1rem; bottom: calc(100% + 10px);
+      max-width: min(440px, calc(100vw - 2rem));
+      background: #fff7ed; border: 1px solid #f0b429; color: #7c4a03;
+      border-radius: 14px; padding: 0.65rem 1rem;
+      font-size: 0.8125rem; line-height: 1.5;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12); z-index: 50;
+    }
+    .sv-gatetip[hidden] { display: none; }
+    .sv-gatetip::after {
+      content: ''; position: absolute; top: 100%; right: 2.2rem;
+      border: 7px solid transparent; border-top-color: #f0b429;
     }
 
     .sv-thanks { text-align: center; padding: 2.5rem 1rem; }
@@ -236,6 +245,7 @@
       <div id="surveyMessage" class="message" hidden></div>
 
       <div class="sv-footer">
+        <div id="gateTip" class="sv-gatetip" hidden></div>
         <div class="sv-progress">
           <div class="sv-progress__label"><span id="progressLabel">0 of 0 items rated</span> &middot; <span id="progressPct">0%</span></div>
           <div class="sv-progress__bar"><div class="sv-progress__fill" id="progressFill" style="width:0%"></div></div>
